@@ -1,0 +1,26 @@
+name: INSACERMO BNSL Fixed Cohort Surface
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fixed-cohort-surface:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run frozen fixed-cohort surface
+        run: python analysis/bnsl_fixed_cohort_surface.py
+      - name: Upload fixed-cohort artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_BNSL2016_FIXED_COHORT_SURFACE_V1
+          path: analysis/results_bnsl_fixed_v1/
+          if-no-files-found: error
