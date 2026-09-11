@@ -1,0 +1,61 @@
+{
+  "name": "INSACERMO_CSPMINIZINCOBJ2016_BLIND_PLANNER_PREREG_V1",
+  "date": "2026-09-11",
+  "status": "FROZEN_BEFORE_ALGORITHM_RUNS_OPENED",
+  "purpose": "Fifth-domain pre-specified real-data structural replication of the INSACERMO sequential planner.",
+  "scenario_selection": {
+    "rule": "Continue alphabetically through coseal/aslib_data after CSP-MZN-2013, choosing the first scenario satisfying runtime performance, at least three algorithms, and at least ten deterministic features. CSP-Minizinc-Obj-2016 is the next eligible scenario.",
+    "outcome_data_used_for_selection": false
+  },
+  "dataset": {
+    "repository": "coseal/aslib_data",
+    "scenario": "CSP-Minizinc-Obj-2016",
+    "performance_file": "CSP-Minizinc-Obj-2016/algorithm_runs.arff",
+    "feature_file": "CSP-Minizinc-Obj-2016/feature_values.arff",
+    "cutoff_seconds": 1200,
+    "outcome_file_opened_before_freeze": false,
+    "metadata_inspected_before_freeze": ["repository root directory names", "CSP-Minizinc-Obj-2016/description.txt"],
+    "description_git_blob_sha": "ed6f180f139ef5448c9906c657a6a26874f3b33c"
+  },
+  "actions": {
+    "base_capabilities": ["Choco-free", "Chuffed-free"],
+    "repair_adds": "Concrete-free",
+    "reserved_unopened_algorithms": ["G12FD-free", "Gecode-free", "HaifaCSP-free", "JaCoP-fd", "LCG-Glucose-UC-free", "LCG-Glucose-free", "MZN/Cbc-free", "MZN/CPLEX-free", "MZN/Gurobi-free", "MZN/SCIP-free", "MinisatID-free", "Mistral-free", "OR-Tools-free", "OscaR/CBLS-free", "Picat-CP-fd", "Picat-SAT-free", "SICStus-Prolog-fd", "Yuck-free", "iZplus-free"],
+    "selection_rule": "Use the first two algorithms in description.txt metadata order as the base set and the third as the single REPAIR candidate. All others are reserved and unused in the primary test."
+  },
+  "good_action": {
+    "definition": "An algorithm is Good for an instance iff runstatus is ok and runtime is strictly below the official 1200-second cutoff.",
+    "objective": "safe solvability under the runtime contract. Objective quality is explicitly ignored in the primary Good predicate and may not be used post hoc to redefine success."
+  },
+  "cohort": {
+    "definition": "Fixed base-actionable cohort: all complete instances for which at least one of the two base algorithms is Good.",
+    "reason": "Keeps the test conditional on worlds already actionable under the original capability set."
+  },
+  "probe_library": {
+    "selection_rule": "First 10 deterministic features listed in description.txt, fixed before reading outcomes.",
+    "features": ["c_avg_deg_cons", "c_avg_dom_cons", "c_avg_domdeg_cons", "c_bounds_d", "c_bounds_r", "c_bounds_z", "c_cv_deg_cons", "c_cv_dom_cons", "c_cv_domdeg_cons", "c_domain"],
+    "coarsening": "For each numeric feature, quartile bins computed on the fixed cohort using feature values only. Duplicate quantile cuts are collapsed. Missing values form an explicit MISSING category. No outcome labels, runtime values, or objective values are used to choose cuts.",
+    "probe_cost": 1
+  },
+  "repair_cost": 1,
+  "safe_representation": "For every realized observation cell induced by the selected probes, there exists at least one common Good action in the current capability set for every instance in that cell.",
+  "planner": {
+    "states": "(selected probe subset, repair flag)",
+    "moves": ["PROBE", "REPAIR"],
+    "total_cost": "number of selected probes + repair_flag",
+    "search": "Exhaustive over all 2^10 probe subsets under base and repaired capability sets.",
+    "optimal_frontier": "All safe states of globally minimum total structural cost; ties are retained."
+  },
+  "primary_endpoints": ["minimum probe count required for safety under base capabilities", "minimum probe count required after frozen REPAIR", "minimum total structural cost", "whether capability expansion strictly reduces minimum information requirement", "whether a mixed PROBE+REPAIR route is necessary"],
+  "secondary_endpoints": ["partition entropy at minimum-probe safe states", "number of observation cells", "size of optimal terminal frontier", "PRESERVE single-probe deletion stress"],
+  "frozen_interpretation_rules": {
+    "positive_capability_information_replication": "Minimum probes after REPAIR is strictly smaller than minimum probes under base capabilities.",
+    "strong_positive": "Base is unreachable with all 10 frozen probes but repaired is reachable with a finite subset.",
+    "mixed_route_replication": "No base probe-only state is safe, REPAIR alone is unsafe, and at least one repaired state with one or more probes is safe.",
+    "null": "REPAIR does not reduce minimum probes and does not create a previously unreachable safe representation.",
+    "negative": "REPAIR increases the minimum probe requirement or minimum structural cost; report without revising the protocol.",
+    "unreachable": "No safe state exists under either capability regime inside the frozen 10-probe search space; report REFUSE/UNREACHABLE without changing protocol."
+  },
+  "preserve_rule": "Deleting a probe from a safe terminal is legal only if the resulting coarser representation remains safe under the declared future capability state; otherwise count as PRESERVE-rejected.",
+  "analysis_boundary": "Deterministic finite empirical planner test. No causal, population, stochastic, continuous-state, objective-optimality, or infinite-horizon claim. Protocol frozen before algorithm_runs.arff is opened."
+}
