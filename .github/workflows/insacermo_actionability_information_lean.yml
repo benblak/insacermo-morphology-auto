@@ -38,4 +38,4 @@ jobs:
           lint: false
           use-mathlib-cache: true
           leanchecker: true
-          leanchecker-args: 'InsacermoActionabilityInformation.HigherOrderObstructions'
+          leanchecker-args: 'InsacermoActionabilityInformation.HypergraphActionability'
