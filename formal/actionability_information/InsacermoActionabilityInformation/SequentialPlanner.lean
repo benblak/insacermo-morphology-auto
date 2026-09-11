@@ -110,6 +110,7 @@ theorem optimalCost_exists_of_reachable
     (hreach : ReachableSafe Safe Legal x) :
     ∃ n, CanReachAtCost Safe Legal x n ∧
       ∀ m, CanReachAtCost Safe Legal x m → n ≤ m := by
+  classical
   have hex : ∃ n, CanReachAtCost Safe Legal x n := by
     rcases hreach with ⟨p, hp⟩
     exact ⟨planCost p, p, hp, rfl⟩
@@ -181,7 +182,8 @@ theorem planner_router_complete
   by_cases hsafe : Safe x
   · exact Or.inl hsafe
   · by_cases hreach : ReachableSafe Safe Legal x
-    · exact Or.inr (Or.inr ⟨hunsafe := hsafe, hreach, optimalFrontier_nonempty_of_unsafe_reachable hsafe hreach⟩)
+    · exact Or.inr (Or.inr ⟨hsafe, hreach,
+        optimalFrontier_nonempty_of_unsafe_reachable hsafe hreach⟩)
     · exact Or.inr (Or.inl ⟨hsafe, hreach⟩)
 
 /-- The three top-level router regimes are pairwise exclusive in the expected
