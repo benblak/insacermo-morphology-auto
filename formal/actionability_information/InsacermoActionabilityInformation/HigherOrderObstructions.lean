@@ -7,7 +7,7 @@ def HasCommonActionOn {S A : Type*} [DecidableEq S]
     (Good : S → A → Prop) (C : Set A) (F : Finset S) : Prop :=
   ∃ a, a ∈ C ∧ ∀ s, s ∈ F → Good s a
 
-/-- A finite common-action obstruction: the worlds in `F` admit no single
+/-- A finite common-action obstruction: the worlds in `F` have no single
 currently available action that is good for all of them. -/
 def CommonActionObstruction {S A : Type*} [DecidableEq S]
     (Good : S → A → Prop) (C : Set A) (F : Finset S) : Prop :=
