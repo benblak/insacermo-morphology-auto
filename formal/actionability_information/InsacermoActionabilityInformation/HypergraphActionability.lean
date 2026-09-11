@@ -49,17 +49,23 @@ theorem safeRep_iff_no_finite_fiber_obstruction
       refine ⟨hFne, ?_⟩
       intro hcommon
       rcases hcommon with ⟨a, haC, hall⟩
-      apply hnone
-      refine ⟨a, ?_, haC⟩
-      intro s hsB hsy
-      apply hall s
-      simp [F, hsB, hsy]
+      have haFiber : a ∈ FiberCommonActions Good B h y := by
+        intro s hsB hsy
+        apply hall s
+        simp [F, hsB, hsy]
+      have haInter : a ∈ FiberCommonActions Good B h y ∩ C := ⟨haFiber, haC⟩
+      rw [hnone] at haInter
+      exact haInter
     apply hno
     refine ⟨F, y, hFobs, ?_, ?_⟩
     · intro s hsF
-      simpa [F] using hsF
+      have hs : s ∈ B ∧ h s = y := by
+        simpa [F] using hsF
+      exact hs.1
     · intro s hsF
-      simpa [F] using hsF
+      have hs : s ∈ B ∧ h s = y := by
+        simpa [F] using hsF
+      exact hs.2
 
 /-- Every finite obstruction contains a minimal obstruction. -/
 theorem obstruction_contains_minimal
@@ -68,20 +74,23 @@ theorem obstruction_contains_minimal
     (hobs : CommonActionObstruction Good C F) :
     ∃ M : Finset S, M ⊆ F ∧ MinimalCommonActionObstruction Good C M := by
   classical
-  revert hobs
-  refine Finset.strongInduction F ?_
-  intro F ih hobs
-  by_cases hmin : MinimalCommonActionObstruction Good C F
-  · exact ⟨F, Finset.Subset.rfl, hmin⟩
-  · have hnotall :
-        ¬ ∀ G : Finset S, G ⊂ F → G.Nonempty → HasCommonActionOn Good C G := by
-      intro hall
-      exact hmin ⟨hobs, hall⟩
-    push_neg at hnotall
-    rcases hnotall with ⟨G, hGF, hGne, hGbad⟩
-    have hGobs : CommonActionObstruction Good C G := ⟨hGne, hGbad⟩
-    rcases ih G hGF hGobs with ⟨M, hMG, hMmin⟩
-    exact ⟨M, Finset.Subset.trans hMG hGF.1, hMmin⟩
+  exact Finset.strongInduction
+    (p := fun F : Finset S =>
+      CommonActionObstruction Good C F →
+        ∃ M : Finset S, M ⊆ F ∧ MinimalCommonActionObstruction Good C M)
+    (fun F ih hFobs => by
+      by_cases hmin : MinimalCommonActionObstruction Good C F
+      · exact ⟨F, Finset.Subset.rfl, hmin⟩
+      · have hnotall :
+            ¬ ∀ G : Finset S, G ⊂ F → G.Nonempty → HasCommonActionOn Good C G := by
+          intro hall
+          exact hmin ⟨hFobs, hall⟩
+        push_neg at hnotall
+        rcases hnotall with ⟨G, hGF, hGne, hGbad⟩
+        have hGobs : CommonActionObstruction Good C G := ⟨hGne, hGbad⟩
+        rcases ih G hGF hGobs with ⟨M, hMG, hMmin⟩
+        exact ⟨M, Finset.Subset.trans hMG hGF.1, hMmin⟩)
+    F hobs
 
 /-- Existence of an arbitrary finite fiber obstruction is equivalent to
 existence of a minimal one. -/
