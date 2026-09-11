@@ -1,0 +1,44 @@
+{
+  "study_id": "INSACERMO_BNSL2016_FIXED_COHORT_SURFACE_V1",
+  "status": "secondary follow-up; dataset already inspected in prior primary audit",
+  "freeze_scope": "analysis choices below frozen before calculating the fixed-cohort surface",
+  "reference_population": "the 519 instances actionable by base {astar-ec, astar-ed3} at T_ref=7200 s under repetition 1",
+  "source": {
+    "repo": "coseal/aslib_data",
+    "scenario": "BNSL-2016",
+    "algorithm_runs_git_blob_sha": "33adc274ba3bd7d62875a5ee017d9b4b147e6ee8",
+    "cv_git_blob_sha": "b53e47f5d081cfa8901ff652daf40b9c5ecd0a87"
+  },
+  "base_capabilities": [
+    "astar-ec",
+    "astar-ed3"
+  ],
+  "candidate_capabilities": [
+    "astar-comp",
+    "cpbayes",
+    "ilp-141",
+    "ilp-141-nc",
+    "ilp-162",
+    "ilp-162-nc"
+  ],
+  "budgets_seconds": [
+    60,
+    300,
+    900,
+    1800,
+    3600,
+    7200
+  ],
+  "admissible_solver": "runstatus=ok and runtime<=T",
+  "refuse_rule": "REFUSE is admissible iff no solver in the current portfolio is admissible; REFUSE is not admissible when any solver is admissible",
+  "metrics": {
+    "coverage": "fraction of all 519 reference instances with >=1 admissible solver",
+    "H_total_bits": "exact minimum Shannon entropy over all 519 instances with augmented admissible sets: solver set if nonempty, else {REFUSE}",
+    "pair_conflicts_total": "unordered pairs of reference instances whose augmented admissible sets are disjoint",
+    "H_actionable_bits": "exact minimum Shannon entropy conditional on the actionable subset, reported descriptively",
+    "pair_conflicts_actionable": "unordered disjoint-admissibility pairs within the actionable subset, reported descriptively"
+  },
+  "portfolio_enumeration": "all 2^6 candidate subsets for each T",
+  "capability_budget_frontier": "for each T and K=0..6, among subsets with <=K additions: maximize coverage; then minimize H_total_bits; then minimize pair_conflicts_total; then fewer added capabilities; then lexicographic tie-break",
+  "guardrail": "This is not an independent blind replication. It is a frozen secondary structural follow-up on already-inspected BNSL-2016 data. No budget or portfolio will be dropped after seeing outcomes."
+}

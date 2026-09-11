@@ -1,0 +1,24 @@
+name: INSACERMO BNSL Blind Audit
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run frozen BNSL capability-information audit
+        run: python analysis/bnsl_capability_information_audit.py
+      - name: Upload audit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_BNSL2016_BLIND_COST_AWARE_AUDIT_V1
+          path: analysis/results_bnsl_v1/
+          if-no-files-found: error
