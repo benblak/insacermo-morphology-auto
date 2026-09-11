@@ -2,9 +2,13 @@ import InsacermoActionabilityInformation.CapabilityComplementarity
 
 namespace InsacermoActionabilityInformation
 
-/-- Binary coarse-safety indicator for the square witness. -/
-def SquareCoarseGain (C : Set SquareAction) : Nat :=
-  if SafeRep SquareGood Set.univ C SquareCoarseObs then 1 else 0
+/-- Binary coarse-safety indicator for the square witness.
+This is intentionally noncomputable: `SafeRep` is a proposition, and the
+indicator uses classical proposition decidability only to package the already
+proved safe/unsafe facts into a numeric gain functional. -/
+noncomputable def SquareCoarseGain (C : Set SquareAction) : Nat := by
+  classical
+  exact if SafeRep SquareGood Set.univ C SquareCoarseObs then 1 else 0
 
 /-- The base capability set has no coarse-safety gain. -/
 theorem squareGain_base_zero : SquareCoarseGain SquareBaseCaps = 0 := by
