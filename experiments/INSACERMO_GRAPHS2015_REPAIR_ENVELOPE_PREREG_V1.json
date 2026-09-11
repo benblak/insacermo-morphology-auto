@@ -1,0 +1,68 @@
+{
+  "name": "INSACERMO_GRAPHS2015_REPAIR_ENVELOPE_PREREG_V1",
+  "date": "2026-09-11",
+  "status": "FROZEN_BEFORE_ALGORITHM_RUNS_OPENED",
+  "purpose": "Outcome-blind regime-targeted test of the missing REPAIR-only / ACT-immediate regimes in the INSACERMO sequential planner.",
+  "design_note": "This is deliberately a capability-envelope stress test rather than a direct single-algorithm REPAIR replication. The REPAIR move unlocks the entire remaining deterministic solver portfolio as one declared capability intervention. Its cost therefore denotes one portfolio-unlock intervention and is not claimed to be physically or economically equivalent to the single-solver REPAIR cost used in prior tests.",
+  "scenario_selection": {
+    "rule": "Continue from GLUHACK-2018 through coseal/aslib_data, skip derivative scenarios whose directory name ends in '-ALGO' because they add algorithm-side features to an existing outcome task rather than provide a new base outcome scenario, then choose the first base scenario with runtime performance, at least three deterministic algorithms, and at least ten deterministic instance features. GRAPHS-2015 is the first eligible base scenario under this rule.",
+    "outcome_data_used_for_selection": false,
+    "metadata_only_checks": ["repository directory names", "GLUHACK-2018-ALGO/description.txt", "GRAPHS-2015/description.txt"]
+  },
+  "dataset": {
+    "repository": "coseal/aslib_data",
+    "scenario": "GRAPHS-2015",
+    "performance_file": "GRAPHS-2015/algorithm_runs.arff",
+    "feature_file": "GRAPHS-2015/feature_values.arff",
+    "cutoff_seconds": 100000000.0,
+    "outcome_file_opened_before_freeze": false,
+    "description_git_blob_sha": "ee98eec74659ed5fe6e354e48b34f4ba9e26c52a"
+  },
+  "actions": {
+    "base_capabilities": ["lad", "supplementallad"],
+    "repair_adds_bundle": ["vf2", "glasgow1", "glasgow2", "glasgow3", "glasgow4"],
+    "selection_rule": "Use the first two algorithms in description.txt metadata order as the base capability set. REPAIR unlocks all remaining deterministic algorithms in the same metadata list as one portfolio capability intervention. No outcome information is used to choose or rank algorithms."
+  },
+  "good_action": {
+    "definition": "An algorithm is Good for an instance iff runstatus is ok and its recorded runtime is strictly below the official scenario cutoff.",
+    "objective": "safe solvability under the official runtime contract"
+  },
+  "cohort": {
+    "definition": "Fixed base-actionable cohort: all complete instances for which at least one base algorithm is Good.",
+    "reason": "The question is whether a capability expansion can reduce or eliminate information requirements on worlds already actionable before the expansion."
+  },
+  "probe_library": {
+    "selection_rule": "Use the first 10 deterministic instance features listed in description.txt, frozen before outcomes.",
+    "features": ["cheap.pattern.time", "cheap.pattern.vertices", "cheap.pattern.edges", "cheap.pattern.loops", "cheap.pattern.meandeg", "cheap.pattern.maxdeg", "cheap.pattern.degisfixed", "cheap.pattern.density", "cheap.target.time", "cheap.target.vertices"],
+    "coarsening": "Numeric quartile bins on the fixed cohort using feature values only; duplicate cuts collapsed; missing values form an explicit MISSING category; categorical values retained.",
+    "probe_cost": 1
+  },
+  "repair_cost": 1,
+  "safe_representation": "For every realized observation cell induced by the selected probes, there exists at least one common Good action in the current capability set for every instance in that cell.",
+  "planner": {
+    "states": "(selected probe subset, repair_bundle_flag)",
+    "moves": ["PROBE", "REPAIR_BUNDLE"],
+    "total_cost": "number of selected probes + repair_bundle_flag",
+    "search": "Exhaustive over all 2^10 probe subsets under base and repaired capability sets.",
+    "optimal_frontier": "All globally minimum-cost safe states with ties retained."
+  },
+  "primary_endpoints": [
+    "ACT-immediate: base with zero probes is safe",
+    "REPAIR-only: base with zero probes is unsafe but repaired capability bundle with zero probes is safe",
+    "minimum probes under base",
+    "minimum probes after portfolio REPAIR",
+    "minimum total structural cost",
+    "route regime among ACT, PROBE, REPAIR, PROBE+REPAIR, REFUSE"
+  ],
+  "secondary_endpoints": ["partition entropy", "number of observation cells", "optimal frontier size", "PRESERVE single-probe deletion stress", "identity of any common zero-probe Good actions after outcomes are opened as descriptive mechanism only"],
+  "frozen_interpretation_rules": {
+    "act_immediate": "Base/no-probe state is safe.",
+    "repair_only": "Base/no-probe state is unsafe, repaired/no-probe state is safe, and minimum structural cost is 1 via REPAIR_BUNDLE.",
+    "probe_only": "A minimum-cost safe state exists without REPAIR and requires at least one probe.",
+    "probe_repair": "No base probe-only state is safe, repaired/no-probe is unsafe, and at least one repaired state with one or more probes is safe.",
+    "refuse": "No safe state exists under either base or repaired capability sets within the frozen 10-probe search space.",
+    "information_reduction": "Minimum repaired probe count is strictly lower than minimum base probe count, including base unreachable and repaired reachable."
+  },
+  "preserve_rule": "Deleting a probe from a safe terminal is legal only if the resulting coarser representation remains safe under the same declared capability state.",
+  "analysis_boundary": "Deterministic finite empirical planner test. The portfolio REPAIR is a structural capability-envelope intervention, not a claim about deployment cost equivalence. No causal, population, stochastic, continuous-state, or infinite-horizon claim."
+}
