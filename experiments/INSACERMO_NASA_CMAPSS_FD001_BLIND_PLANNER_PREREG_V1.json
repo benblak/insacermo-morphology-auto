@@ -1,0 +1,78 @@
+{
+  "name": "INSACERMO_NASA_CMAPSS_FD001_BLIND_PLANNER_PREREG_V1",
+  "date": "2026-09-11",
+  "status": "FROZEN_BEFORE_FD001_TEST_RUL_OPENED",
+  "purpose": "First pre-specified INSACERMO planner test outside the ASlib solver-selection meta-domain, using NASA C-MAPSS aerospace predictive-maintenance data.",
+  "source_metadata": {
+    "publisher": "NASA Open Data Portal",
+    "dataset": "CMAPSS Jet Engine Simulated Data",
+    "resource": "CMAPSSData.zip",
+    "official_download": "https://data.nasa.gov/docs/legacy/CMAPSSData.zip",
+    "selected_subset": "FD001 test fleet",
+    "selection_rule": "Use FD001 because it is the first listed C-MAPSS subset in NASA metadata and has one operating condition and one fault mode. Selection is based only on NASA metadata, before opening test RUL values.",
+    "metadata_known_before_freeze": {
+      "test_trajectories": 100,
+      "operating_conditions": 1,
+      "fault_modes": 1,
+      "columns_per_cycle": 26,
+      "true_test_RUL_vector_exists": true
+    },
+    "outcome_values_opened_before_freeze": false
+  },
+  "instance_definition": "One instance is one FD001 test engine at its last observed cycle. Only that final-cycle pre-decision state is used for the primary planner.",
+  "outcome": {
+    "name": "true_remaining_useful_life_cycles",
+    "source_file": "RUL_FD001.txt",
+    "role": "Used only after preregistration to assign Good maintenance actions; never used to choose probes or thresholds."
+  },
+  "maintenance_contract": {
+    "status": "hypothetical structural stress-test contract, not an aviation standard or operational recommendation",
+    "actions": {
+      "CONTINUE": "Good iff RUL >= 30 cycles",
+      "PLAN_SERVICE": "Good iff 10 <= RUL < 30 cycles",
+      "IMMEDIATE_SERVICE": "Good iff RUL < 10 cycles"
+    },
+    "thresholds_cycles": [10, 30],
+    "threshold_selection": "Fixed round thresholds chosen prospectively for a three-zone structural test; not estimated from FD001 outcomes."
+  },
+  "capabilities": {
+    "base": ["CONTINUE", "IMMEDIATE_SERVICE"],
+    "repair_adds": "PLAN_SERVICE",
+    "interpretation": "REPAIR adds the missing intermediate maintenance capability. Base may therefore be capability-incomplete for worlds whose true RUL lies in the planning window."
+  },
+  "probe_library": {
+    "selection_rule": "Use the first 10 pre-decision variables after unit_id and cycle in the official C-MAPSS column order: operational settings 1-3 followed by sensors 1-7.",
+    "features": ["setting_1", "setting_2", "setting_3", "sensor_1", "sensor_2", "sensor_3", "sensor_4", "sensor_5", "sensor_6", "sensor_7"],
+    "coarsening": "Numeric quartile bins computed from the 100 final-cycle feature values only; duplicate cuts collapsed; no RUL values used to define bins.",
+    "probe_cost": 1
+  },
+  "repair_cost": 1,
+  "population": "All 100 FD001 test engines with complete final-cycle rows and a corresponding true RUL value. No base-actionable filtering is applied because capability incompleteness is itself part of the primary test.",
+  "safe_representation": "Every realized observation cell induced by selected probes must admit at least one common Good action from the current capability set for every engine in that cell.",
+  "planner": {
+    "states": "(selected probe subset, repair flag)",
+    "moves": ["PROBE", "REPAIR"],
+    "total_cost": "number of selected probes + repair_flag",
+    "search": "Exhaustive over 2^10 probe subsets under base and repaired capability sets.",
+    "optimal_frontier": "All globally minimum-cost safe states; ties retained."
+  },
+  "primary_endpoints": [
+    "ACT-immediate under base",
+    "minimum probes under base",
+    "minimum probes after REPAIR",
+    "minimum total structural cost",
+    "route regime among ACT, PROBE, REPAIR, PROBE+REPAIR, REFUSE",
+    "whether REPAIR converts capability-unreachable worlds into a reachable safe representation"
+  ],
+  "secondary_endpoints": ["partition entropy", "number of cells", "optimal frontier size", "PRESERVE single-probe deletion stress", "counts of engines in each frozen RUL action zone"],
+  "frozen_route_rules": {
+    "ACT": "Base with zero probes is safe.",
+    "PROBE": "A minimum-cost safe terminal exists without REPAIR and uses at least one probe.",
+    "REPAIR": "Base zero-probe is unsafe and REPAIR with zero probes is safe and globally minimum cost.",
+    "PROBE+REPAIR": "Every minimum-cost safe terminal uses REPAIR and at least one probe.",
+    "REFUSE": "No safe state exists in either capability regime within the frozen 10-probe search space.",
+    "MULTI_ROUTE_FRONTIER": "Distinct minimum-cost safe terminals realize more than one route type."
+  },
+  "preserve_rule": "Deleting one probe from an optimal safe terminal is legal only if the resulting coarser representation remains safe under the same capability state.",
+  "analysis_boundary": "Finite deterministic structural planner test on NASA-simulated aerospace prognostic data. This is not a causal maintenance-policy validation, not an aviation safety recommendation, and not a claim about stochastic or continuous-control optimality."
+}
