@@ -65,25 +65,21 @@ theorem squareFine_safe_base :
   subst y
   cases s with
   | w0 =>
-      refine ⟨a1, ?_, ?_⟩
-      · simp [SquareBaseCaps]
-      · intro t _htB hEq
-        cases t <;> simp [SquareFineObs] at hEq ⊢
+      refine ⟨a1, by simp [SquareBaseCaps], ?_⟩
+      intro t _htB hEq
+      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
   | w1 =>
-      refine ⟨a2, ?_, ?_⟩
-      · simp [SquareBaseCaps]
-      · intro t _htB hEq
-        cases t <;> simp [SquareFineObs] at hEq ⊢
+      refine ⟨a2, by simp [SquareBaseCaps], ?_⟩
+      intro t _htB hEq
+      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
   | w2 =>
-      refine ⟨a2, ?_, ?_⟩
-      · simp [SquareBaseCaps]
-      · intro t _htB hEq
-        cases t <;> simp [SquareFineObs] at hEq ⊢
+      refine ⟨a2, by simp [SquareBaseCaps], ?_⟩
+      intro t _htB hEq
+      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
   | w3 =>
-      refine ⟨a1, ?_, ?_⟩
-      · simp [SquareBaseCaps]
-      · intro t _htB hEq
-        cases t <;> simp [SquareFineObs] at hEq ⊢
+      refine ⟨a1, by simp [SquareBaseCaps], ?_⟩
+      intro t _htB hEq
+      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
 
 /-- The coarse one-bit observation is unsafe under the base capabilities. -/
 theorem squareCoarse_unsafe_base :
@@ -92,7 +88,11 @@ theorem squareCoarse_unsafe_base :
   rcases hsafe false ⟨w0, by simp, rfl⟩ with ⟨a, ha, hall⟩
   have h0 := hall w0 (by simp) rfl
   have h1 := hall w1 (by simp) rfl
-  cases a <;> simp [SquareBaseCaps, SquareGood] at ha h0 h1
+  cases a with
+  | a0 => exact (by simpa [SquareBaseCaps] using ha)
+  | a1 => exact (by simpa [SquareGood] using h1)
+  | a2 => exact (by simpa [SquareGood] using h0)
+  | a3 => exact (by simpa [SquareBaseCaps] using ha)
 
 /-- Adding a0 alone does not buy the coarse observation: the upper fiber still
 requires a3, which remains unavailable. -/
@@ -102,7 +102,11 @@ theorem squareCoarse_unsafe_add0 :
   rcases hsafe true ⟨w2, by simp, rfl⟩ with ⟨a, ha, hall⟩
   have h2 := hall w2 (by simp) rfl
   have h3 := hall w3 (by simp) rfl
-  cases a <;> simp [SquareCapsAdd0, SquareGood] at ha h2 h3
+  cases a with
+  | a0 => exact (by simpa [SquareGood] using h2)
+  | a1 => exact (by simpa [SquareGood] using h2)
+  | a2 => exact (by simpa [SquareGood] using h3)
+  | a3 => exact (by simpa [SquareCapsAdd0] using ha)
 
 /-- Adding a3 alone does not buy the coarse observation: the lower fiber still
 requires a0, which remains unavailable. -/
@@ -112,7 +116,11 @@ theorem squareCoarse_unsafe_add3 :
   rcases hsafe false ⟨w0, by simp, rfl⟩ with ⟨a, ha, hall⟩
   have h0 := hall w0 (by simp) rfl
   have h1 := hall w1 (by simp) rfl
-  cases a <;> simp [SquareCapsAdd3, SquareGood] at ha h0 h1
+  cases a with
+  | a0 => exact (by simpa [SquareCapsAdd3] using ha)
+  | a1 => exact (by simpa [SquareGood] using h1)
+  | a2 => exact (by simpa [SquareGood] using h0)
+  | a3 => exact (by simpa [SquareGood] using h0)
 
 /-- Jointly adding a0 and a3 makes the one-bit observation safe: use a0 on the
 lower fiber and a3 on the upper fiber. -/
