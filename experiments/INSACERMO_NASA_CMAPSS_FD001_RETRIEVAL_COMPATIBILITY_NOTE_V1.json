@@ -1,0 +1,37 @@
+{
+  "name": "INSACERMO_NASA_CMAPSS_FD001_RETRIEVAL_COMPATIBILITY_NOTE_V1",
+  "date": "2026-09-11",
+  "original_preregistration_commit": "b3fc455c8b219326bf665cd140bcbdd343b96a04",
+  "original_failed_run": 34630614380,
+  "failure_class": "MECHANICAL_NETWORK_RETRIEVAL_FAILURE",
+  "failure_detail": "The GitHub-hosted runner timed out while connecting to the official NASA CMAPSSData.zip URL before any dataset bytes were read and before any scientific endpoint was computed.",
+  "scientific_changes": "NONE",
+  "unchanged_frozen_elements": [
+    "FD001 subset",
+    "all 100 test engines",
+    "final observed cycle per engine",
+    "RUL thresholds 10 and 30 cycles",
+    "base actions CONTINUE and IMMEDIATE_SERVICE",
+    "REPAIR adds PLAN_SERVICE",
+    "first 10 frozen pre-decision variables",
+    "quartile coarsening",
+    "probe cost 1",
+    "repair cost 1",
+    "common-Good safety predicate",
+    "exhaustive 2^10 x 2 search",
+    "route classification",
+    "PRESERVE deletion stress"
+  ],
+  "retrieval_fix": {
+    "method": "Use a pinned public GitHub mirror of the C-MAPSS FD001 text files instead of the NASA redirecting ZIP endpoint.",
+    "mirror_repository": "ericlrf/rul",
+    "mirror_commit": "ffca02f70f3ce41042f1a8ec1d82ea7ad13cf2a1",
+    "files": [
+      "CMAPSSData/test_FD001.txt",
+      "CMAPSSData/RUL_FD001.txt"
+    ],
+    "selection_reason": "The mirror exposes the exact standard C-MAPSS filenames and is pinned to a fixed commit. It was selected solely to replace the failed transport path, not based on RUL values or scientific results.",
+    "integrity_policy": "Record SHA256 hashes of both downloaded text files in the audit artifact and assert the preregistered 100-engine shape before analysis."
+  },
+  "methodological_status": "PRESERVES_ORIGINAL_FROZEN_PROTOCOL"
+}
