@@ -59,7 +59,7 @@ theorem safeRep_information_mono
     SafeRep Good B C fine := by
   exact safeRep_of_refines_of_capabilitySubset hsafe href (Set.Subset.rfl)
 
-/-- A two-world witness showing that the same baseline obstruction can be
+/- A two-world witness showing that the same baseline obstruction can be
 repaired either by more information (PROBE direction) or by more capability
 (REPAIR direction). -/
 namespace ProbeRepairWitness
