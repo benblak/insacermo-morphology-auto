@@ -43,12 +43,12 @@ def main():
     base=pre['actions']['base_capabilities']; repair=pre['actions']['repair_adds']; feats=pre['probe_library']['features']; cutoff=float(pre['dataset']['cutoff_seconds'])
     ap,fp,dp=dl('algorithm_runs.arff'),dl('feature_values.arff'),dl('description.txt')
     aa,ar=parse_arff(ap); cols=[x[0] for x in aa]
-    required=['instance_id','repetition','algorithm','runtime','runstatus']
+    required=['instance_id','repetition','algorithm','time','runstatus']
     ci={c:i for i,c in enumerate(cols)}
     if any(c not in ci for c in required): raise RuntimeError(f'unexpected algorithm schema {cols}')
     wanted=set(base+[repair]); rec=[]
     for r in ar:
-        inst=s(r[ci['instance_id']]); rep=int(float(s(r[ci['repetition']]))); alg=s(r[ci['algorithm']]); rt=float(s(r[ci['runtime']])); st=s(r[ci['runstatus']])
+        inst=s(r[ci['instance_id']]); rep=int(float(s(r[ci['repetition']]))); alg=s(r[ci['algorithm']]); rt=float(s(r[ci['time']])); st=s(r[ci['runstatus']])
         if alg in wanted: rec.append((inst,rep,alg,rt,st))
     counts=defaultdict(int)
     for inst,rep,alg,rt,st in rec: counts[(inst,alg)]+=1
