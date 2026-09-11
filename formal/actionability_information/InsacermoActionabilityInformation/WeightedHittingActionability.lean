@@ -51,7 +51,7 @@ theorem safeRep_selectedObs_iff_hitsIncompatiblePairs
 `cost i` can be the bit-cost of the corresponding feature-resolution option. -/
 def SelectionCost {I : Type*} [DecidableEq I]
     (cost : I → Nat) (H : Finset I) : Nat :=
-  ∑ i in H, cost i
+  H.sum cost
 
 /-- There exists an admissible selected representation that is safe within a
 specified budget. `Valid` can encode arbitrary side constraints, including
