@@ -50,6 +50,30 @@ def SquareCoarseObs : SquareWorld → Bool
   | w2 => true
   | w3 => true
 
+private theorem a0_not_base : a0 ∉ SquareBaseCaps := by
+  intro h
+  change a0 = a1 ∨ a0 = a2 at h
+  rcases h with h | h <;> cases h
+
+private theorem a3_not_base : a3 ∉ SquareBaseCaps := by
+  intro h
+  change a3 = a1 ∨ a3 = a2 at h
+  rcases h with h | h <;> cases h
+
+private theorem a3_not_add0 : a3 ∉ SquareCapsAdd0 := by
+  intro h
+  change a3 = a0 ∨ a3 = a1 ∨ a3 = a2 at h
+  rcases h with h | h
+  · cases h
+  · rcases h with h | h <;> cases h
+
+private theorem a0_not_add3 : a0 ∉ SquareCapsAdd3 := by
+  intro h
+  change a0 = a1 ∨ a0 = a2 ∨ a0 = a3 at h
+  rcases h with h | h
+  · cases h
+  · rcases h with h | h <;> cases h
+
 /-- The fine observation refines the one-bit coarse observation. -/
 theorem squareFine_refines_coarse :
     Refines SquareFineObs SquareCoarseObs := by
@@ -65,62 +89,74 @@ theorem squareFine_safe_base :
   subst y
   cases s with
   | w0 =>
-      refine ⟨a1, by simp [SquareBaseCaps], ?_⟩
-      intro t _htB hEq
-      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
+      refine ⟨a1, ?_, ?_⟩
+      · exact Or.inl rfl
+      · intro t _htB hEq
+        change t = w0 at hEq
+        subst t
+        exact True.intro
   | w1 =>
-      refine ⟨a2, by simp [SquareBaseCaps], ?_⟩
-      intro t _htB hEq
-      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
+      refine ⟨a2, ?_, ?_⟩
+      · exact Or.inr rfl
+      · intro t _htB hEq
+        change t = w1 at hEq
+        subst t
+        exact True.intro
   | w2 =>
-      refine ⟨a2, by simp [SquareBaseCaps], ?_⟩
-      intro t _htB hEq
-      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
+      refine ⟨a2, ?_, ?_⟩
+      · exact Or.inr rfl
+      · intro t _htB hEq
+        change t = w2 at hEq
+        subst t
+        exact True.intro
   | w3 =>
-      refine ⟨a1, by simp [SquareBaseCaps], ?_⟩
-      intro t _htB hEq
-      cases t <;> simp [SquareFineObs, SquareGood] at hEq ⊢
+      refine ⟨a1, ?_, ?_⟩
+      · exact Or.inl rfl
+      · intro t _htB hEq
+        change t = w3 at hEq
+        subst t
+        exact True.intro
 
 /-- The coarse one-bit observation is unsafe under the base capabilities. -/
 theorem squareCoarse_unsafe_base :
     ¬ SafeRep SquareGood Set.univ SquareBaseCaps SquareCoarseObs := by
   intro hsafe
-  rcases hsafe false ⟨w0, by simp, rfl⟩ with ⟨a, ha, hall⟩
-  have h0 := hall w0 (by simp) rfl
-  have h1 := hall w1 (by simp) rfl
+  rcases hsafe false ⟨w0, Set.mem_univ w0, rfl⟩ with ⟨a, ha, hall⟩
+  have h0 := hall w0 (Set.mem_univ w0) rfl
+  have h1 := hall w1 (Set.mem_univ w1) rfl
   cases a with
-  | a0 => exact (by simpa [SquareBaseCaps] using ha)
-  | a1 => exact (by simpa [SquareGood] using h1)
-  | a2 => exact (by simpa [SquareGood] using h0)
-  | a3 => exact (by simpa [SquareBaseCaps] using ha)
+  | a0 => exact a0_not_base ha
+  | a1 => exact h1
+  | a2 => exact h0
+  | a3 => exact a3_not_base ha
 
 /-- Adding a0 alone does not buy the coarse observation: the upper fiber still
 requires a3, which remains unavailable. -/
 theorem squareCoarse_unsafe_add0 :
     ¬ SafeRep SquareGood Set.univ SquareCapsAdd0 SquareCoarseObs := by
   intro hsafe
-  rcases hsafe true ⟨w2, by simp, rfl⟩ with ⟨a, ha, hall⟩
-  have h2 := hall w2 (by simp) rfl
-  have h3 := hall w3 (by simp) rfl
+  rcases hsafe true ⟨w2, Set.mem_univ w2, rfl⟩ with ⟨a, ha, hall⟩
+  have h2 := hall w2 (Set.mem_univ w2) rfl
+  have h3 := hall w3 (Set.mem_univ w3) rfl
   cases a with
-  | a0 => exact (by simpa [SquareGood] using h2)
-  | a1 => exact (by simpa [SquareGood] using h2)
-  | a2 => exact (by simpa [SquareGood] using h3)
-  | a3 => exact (by simpa [SquareCapsAdd0] using ha)
+  | a0 => exact h2
+  | a1 => exact h2
+  | a2 => exact h3
+  | a3 => exact a3_not_add0 ha
 
 /-- Adding a3 alone does not buy the coarse observation: the lower fiber still
 requires a0, which remains unavailable. -/
 theorem squareCoarse_unsafe_add3 :
     ¬ SafeRep SquareGood Set.univ SquareCapsAdd3 SquareCoarseObs := by
   intro hsafe
-  rcases hsafe false ⟨w0, by simp, rfl⟩ with ⟨a, ha, hall⟩
-  have h0 := hall w0 (by simp) rfl
-  have h1 := hall w1 (by simp) rfl
+  rcases hsafe false ⟨w0, Set.mem_univ w0, rfl⟩ with ⟨a, ha, hall⟩
+  have h0 := hall w0 (Set.mem_univ w0) rfl
+  have h1 := hall w1 (Set.mem_univ w1) rfl
   cases a with
-  | a0 => exact (by simpa [SquareCapsAdd3] using ha)
-  | a1 => exact (by simpa [SquareGood] using h1)
-  | a2 => exact (by simpa [SquareGood] using h0)
-  | a3 => exact (by simpa [SquareGood] using h0)
+  | a0 => exact a0_not_add3 ha
+  | a1 => exact h1
+  | a2 => exact h0
+  | a3 => exact h0
 
 /-- Jointly adding a0 and a3 makes the one-bit observation safe: use a0 on the
 lower fiber and a3 on the upper fiber. -/
@@ -129,13 +165,21 @@ theorem squareCoarse_safe_both :
   intro y hy
   cases y with
   | false =>
-      refine ⟨a0, by simp [SquareCapsBoth], ?_⟩
+      refine ⟨a0, Set.mem_univ a0, ?_⟩
       intro s _hsB hobs
-      cases s <;> simp [SquareCoarseObs, SquareGood] at hobs ⊢
+      cases s with
+      | w0 => exact True.intro
+      | w1 => exact True.intro
+      | w2 => cases hobs
+      | w3 => cases hobs
   | true =>
-      refine ⟨a3, by simp [SquareCapsBoth], ?_⟩
+      refine ⟨a3, Set.mem_univ a3, ?_⟩
       intro s _hsB hobs
-      cases s <;> simp [SquareCoarseObs, SquareGood] at hobs ⊢
+      cases s with
+      | w0 => cases hobs
+      | w1 => cases hobs
+      | w2 => exact True.intro
+      | w3 => exact True.intro
 
 /-- Explicit complementarity witness: neither repair alone permits the
 one-bit forgetting step, while the pair of repairs does.
