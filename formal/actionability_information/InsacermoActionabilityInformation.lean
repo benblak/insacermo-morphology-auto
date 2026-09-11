@@ -1,3 +1,4 @@
 import InsacermoActionabilityInformation.Decomposition
 import InsacermoActionabilityInformation.BiMonotone
 import InsacermoActionabilityInformation.ObstructionCertificates
+import InsacermoActionabilityInformation.ContractFactorization
