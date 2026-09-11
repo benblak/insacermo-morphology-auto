@@ -94,6 +94,8 @@ theorem totalDecisionEntropy_mono_of_actionEntropy
     totalDecisionEntropy q p' ≤ totalDecisionEntropy q p := by
   rw [totalDecisionEntropy_eq_binEntropy_add q p' hp']
   rw [totalDecisionEntropy_eq_binEntropy_add q p hp]
-  exact add_le_add_left (mul_le_mul_of_nonneg_left hact hq) _
+  have hmul : q * actionEntropy p' ≤ q * actionEntropy p :=
+    mul_le_mul_of_nonneg_left hact hq
+  linarith
 
 end InsacermoActionabilityInformation
