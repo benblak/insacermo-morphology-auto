@@ -1,5 +1,4 @@
 import Mathlib.Analysis.SpecialFunctions.BinaryEntropy
-import Mathlib.Algebra.BigOperators.Basic
 
 open scoped BigOperators
 
