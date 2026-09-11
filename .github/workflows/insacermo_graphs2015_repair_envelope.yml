@@ -1,0 +1,38 @@
+name: INSACERMO GRAPHS-2015 Repair Envelope
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/INSACERMO_GRAPHS2015_REPAIR_ENVELOPE_PREREG_V1.json'
+      - 'experiments/run_graphs2015_repair_envelope_v1.py'
+      - '.github/workflows/insacermo_graphs2015_repair_envelope.yml'
+
+jobs:
+  execute-frozen-protocol:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install analysis dependencies
+        run: python -m pip install --disable-pip-version-check pandas numpy
+      - name: Verify frozen preregistration
+        run: |
+          python - <<'PY'
+          import json
+          p='experiments/INSACERMO_GRAPHS2015_REPAIR_ENVELOPE_PREREG_V1.json'
+          d=json.load(open(p))
+          assert d['status']=='FROZEN_BEFORE_ALGORITHM_RUNS_OPENED'
+          print('Frozen preregistration:', d['name'])
+          PY
+      - name: Execute frozen repair-envelope planner
+        run: python experiments/run_graphs2015_repair_envelope_v1.py
+      - name: Show regime verdict
+        run: cat experiments/graphs2015_repair_envelope_v1_output/REPORT.md
+      - name: Upload complete audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_GRAPHS2015_REPAIR_ENVELOPE_V1
+          path: experiments/graphs2015_repair_envelope_v1_output/
+          if-no-files-found: error
