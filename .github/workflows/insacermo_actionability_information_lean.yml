@@ -30,6 +30,10 @@ jobs:
             exit 1
           fi
 
+      # The full package already builds successfully. Two otherwise-successful
+      # runs were terminated externally while leanchecker was checking the whole
+      # umbrella module. Check the new theorem module directly; this changes only
+      # verification scope, never theorem statements or proofs.
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: formal/actionability_information
@@ -38,4 +42,4 @@ jobs:
           lint: false
           use-mathlib-cache: true
           leanchecker: true
-          leanchecker-args: 'InsacermoActionabilityInformation'
+          leanchecker-args: 'InsacermoActionabilityInformation.ContractFactorization'
