@@ -1,0 +1,62 @@
+{
+  "name": "INSACERMO_CSPMINIZINCTIME2016_BLIND_PLANNER_PREREG_V1",
+  "date": "2026-09-11",
+  "status": "FROZEN_BEFORE_ALGORITHM_RUNS_OPENED",
+  "purpose": "Sixth-domain pre-specified real-data structural replication of the INSACERMO sequential planner.",
+  "scenario_selection": {
+    "rule": "Continue alphabetically through coseal/aslib_data after CSP-Minizinc-Obj-2016, choosing the first scenario with runtime performance, at least three algorithms, and at least ten deterministic features. CSP-Minizinc-Time-2016 is the next eligible scenario.",
+    "outcome_data_used_for_selection": false
+  },
+  "dataset": {
+    "repository": "coseal/aslib_data",
+    "scenario": "CSP-Minizinc-Time-2016",
+    "performance_file": "CSP-Minizinc-Time-2016/algorithm_runs.arff",
+    "feature_file": "CSP-Minizinc-Time-2016/feature_values.arff",
+    "cutoff_seconds": 1200,
+    "outcome_file_opened_before_freeze": false,
+    "metadata_inspected_before_freeze": ["repository root directory names", "CSP-Minizinc-Time-2016/description.txt"],
+    "description_git_blob_sha": "c4131c095682fe776d21fd05f001e96de66ffd1c"
+  },
+  "actions": {
+    "base_capabilities": ["Choco-free", "Chuffed-free"],
+    "repair_adds": "Concrete-free",
+    "reserved_unopened_algorithms": ["G12FD-free", "Gecode-free", "HaifaCSP-free", "JaCoP-fd", "LCG-Glucose-UC-free", "LCG-Glucose-free", "MZN/Cbc-free", "MZN/CPLEX-free", "MZN/Gurobi-free", "MZN/SCIP-free", "MinisatID-free", "Mistral-free", "OR-Tools-free", "Picat-CP-fd", "Picat-SAT-free", "SICStus-Prolog-fd", "iZplus-free"],
+    "selection_rule": "Use the first two algorithms in description.txt metadata order as the base set and the third as the single REPAIR candidate. All others remain reserved and unused in the primary test."
+  },
+  "good_action": {
+    "definition": "An algorithm is Good for an instance iff runstatus is ok and runtime is strictly below the official 1200-second cutoff.",
+    "objective": "safe solvability under the runtime contract"
+  },
+  "cohort": {
+    "definition": "Fixed base-actionable cohort: all complete instances for which at least one of the two base algorithms is Good."
+  },
+  "probe_library": {
+    "selection_rule": "First 10 deterministic features listed in description.txt, fixed before reading outcomes.",
+    "features": ["c_avg_deg_cons", "c_avg_dom_cons", "c_avg_domdeg_cons", "c_bounds_d", "c_bounds_r", "c_bounds_z", "c_cv_deg_cons", "c_cv_dom_cons", "c_cv_domdeg_cons", "c_domain"],
+    "coarsening": "Numeric quartile bins on the fixed cohort using feature values only; duplicate cuts collapsed; missing values are an explicit MISSING category; no outcome labels or runtime values choose cuts.",
+    "probe_cost": 1
+  },
+  "repair_cost": 1,
+  "safe_representation": "Every realized observation cell induced by selected probes must admit at least one common Good action from the current capability set for every instance in that cell.",
+  "executor_schema_rule": "Read the runtime measure from a column named runtime when present, otherwise from time when present. This is a parser compatibility rule only and cannot change outcomes or the Good predicate.",
+  "planner": {
+    "states": "(selected probe subset, repair flag)",
+    "moves": ["PROBE", "REPAIR"],
+    "total_cost": "number of selected probes + repair_flag",
+    "search": "Exhaustive over all 2^10 probe subsets under base and repaired capability sets.",
+    "optimal_frontier": "All globally minimum-cost safe states; ties retained."
+  },
+  "primary_endpoints": ["minimum probes under base", "minimum probes after REPAIR", "minimum total structural cost", "strict capability-induced information reduction", "route regime among ACT, PROBE, REPAIR, PROBE+REPAIR, REFUSE"],
+  "secondary_endpoints": ["partition entropy", "number of cells", "optimal frontier size", "PRESERVE single-probe deletion stress"],
+  "frozen_interpretation_rules": {
+    "positive": "Minimum probes after REPAIR is strictly smaller than under base.",
+    "strong_positive": "Base is unreachable with all 10 probes but repaired is reachable with a finite subset.",
+    "probe_regime": "A minimum-cost safe terminal exists without REPAIR and requires at least one probe.",
+    "repair_only_regime": "REPAIR with zero probes is safe while base with zero probes is unsafe, and no lower-cost base safe state exists.",
+    "mixed_regime": "No probe-only state is safe, REPAIR alone is unsafe, and at least one repaired state with probes is safe.",
+    "null": "REPAIR does not reduce the minimum probe requirement and does not create a new reachable safe representation.",
+    "unreachable": "No safe state exists under either capability regime inside the frozen search space."
+  },
+  "preserve_rule": "Deleting a probe from a safe terminal is legal only if the resulting coarser representation remains safe under the declared future capability state.",
+  "analysis_boundary": "Deterministic finite empirical planner test; no causal, population, stochastic, continuous-state, or infinite-horizon claim."
+}
