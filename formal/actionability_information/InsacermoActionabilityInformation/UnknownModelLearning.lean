@@ -32,7 +32,7 @@ abbrev ModelLikelihood (Theta A O : Type*) [Fintype O] :=
   A → Theta → FiniteLaw O
 
 /-- Exact predictive evidence probability under model uncertainty. -/
-def modelEvidence
+abbrev modelEvidence
     {Theta A O : Type*} [Fintype Theta] [DecidableEq Theta] [Fintype O]
     (L : ModelLikelihood Theta A O)
     (b : FiniteLaw Theta) (a : A) (o : O) : ℚ :=
@@ -55,7 +55,10 @@ theorem modelPosterior_mass_formula
     (modelPosterior L b a o hpos).mass theta =
       b.mass theta * (L a theta).mass o / modelEvidence L b a o := by
   classical
-  unfold modelPosterior modelEvidence bayesUpdate posteriorWeight
+  unfold modelPosterior bayesUpdate posteriorWeight
+  change predictMass (staticModelKernel (Theta := Theta) (A := A)) b a theta *
+      (L a theta).mass o / modelEvidence L b a o =
+    b.mass theta * (L a theta).mass o / modelEvidence L b a o
   rw [predictMass_staticModel_eq_prior]
 
 /-- Posterior expected loss of taking action `a` under model belief `b`. -/
