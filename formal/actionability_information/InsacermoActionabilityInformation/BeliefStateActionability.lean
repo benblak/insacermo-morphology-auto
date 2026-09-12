@@ -85,8 +85,8 @@ theorem beliefSafeRep_iff_hypergraphSafe
   exact safeRep_iff_hypergraphSafe
 
 /-- If two histories collapse to the same belief while disagreeing on the
-history-level contract for some action, no belief-level contract can be exactly
-factorizing at both histories for that action. -/
+history-level contract for some action, no belief-level contract can factor
+exactly through that belief map. -/
 theorem sameBelief_contractDisagreement_blocks_sufficiency
     {History Belief A : Type*}
     {beta : History → Belief}
@@ -97,20 +97,16 @@ theorem sameBelief_contractDisagreement_blocks_sufficiency
     (hgap : GoodHistory h1 a ↔ ¬ GoodHistory h2 a) :
     ¬ BeliefSufficient beta GoodHistory GoodBelief := by
   intro hsuff
-  have e1 := hsuff h1 a
-  have e2 := hsuff h2 a
-  have gb1 : GoodBelief (beta h1) a := e1.mp (by
-    by_cases h1g : GoodHistory h1 a
-    · exact h1g
-    · have : GoodHistory h2 a := by
-        have hn2 : ¬ ¬ GoodHistory h2 a := by
-          intro hn2
-          exact h1g ((hgap).mpr hn2)
-        exact Classical.byContradiction (fun hn => hn2 hn)
-      exact False.elim (h1g ((hgap).mpr (by exact fun h2g => False.elim (h1g ((hgap).mpr (by exact fun _ => False.elim (h1g ((hgap).mpr (by exact fun _ => False.elim (h1g (by exact h1g))))))))))) )
-  have gb2 : GoodBelief (beta h2) a := by simpa [halias] using gb1
-  have gh2 : GoodHistory h2 a := e2.mpr gb2
-  have ngh2 : ¬ GoodHistory h2 a := (hgap).mp (e1.mpr (by simpa [halias] using gb2))
-  exact ngh2 gh2
+  by_cases h1good : GoodHistory h1 a
+  · have gb1 : GoodBelief (beta h1) a := (hsuff h1 a).mp h1good
+    have gb2 : GoodBelief (beta h2) a := by simpa [halias] using gb1
+    have h2good : GoodHistory h2 a := (hsuff h2 a).mpr gb2
+    exact (hgap.mp h1good) h2good
+  · have h2good : GoodHistory h2 a := by
+      by_contra h2bad
+      exact h1good (hgap.mpr h2bad)
+    have gb2 : GoodBelief (beta h2) a := (hsuff h2 a).mp h2good
+    have gb1 : GoodBelief (beta h1) a := by simpa [halias] using gb2
+    exact h1good ((hsuff h1 a).mpr gb1)
 
 end InsacermoActionabilityInformation
