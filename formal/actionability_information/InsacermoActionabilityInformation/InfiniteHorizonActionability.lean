@@ -26,21 +26,26 @@ theorem expectedNext_uniform_close
       expectedNext P x a V - expectedNext P x a W =
         Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * (V y - W y)) := by
     simp [expectedNext, Finset.sum_sub_distrib, mul_sub]
-  rw [hdiff]
-  calc
-    |Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * (V y - W y))| ≤
-        Finset.univ.sum (fun y => |((P x a).mass y : ℝ) * (V y - W y)|) := by
-          exact abs_sum_le_sum_abs _ _
-    _ = Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * |V y - W y|) := by
-          apply Finset.sum_congr rfl
-          intro y hy
-          rw [abs_mul, abs_of_nonneg (hmass_nonneg y)]
-    _ ≤ Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * delta) := by
-          apply Finset.sum_le_sum
-          intro y hy
-          exact mul_le_mul_of_nonneg_left (hdelta y) (hmass_nonneg y)
-    _ = delta := by
-          rw [← Finset.sum_mul, hmass_one, one_mul]
+  apply abs_le.mpr
+  constructor
+  · rw [hdiff]
+    calc
+      -delta = Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * (-delta)) := by
+        rw [← Finset.sum_mul, hmass_one, one_mul]
+      _ ≤ Finset.univ.sum
+          (fun y => ((P x a).mass y : ℝ) * (V y - W y)) := by
+        apply Finset.sum_le_sum
+        intro y hy
+        exact mul_le_mul_of_nonneg_left (abs_le.mp (hdelta y)).1 (hmass_nonneg y)
+  · rw [hdiff]
+    calc
+      Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * (V y - W y)) ≤
+          Finset.univ.sum (fun y => ((P x a).mass y : ℝ) * delta) := by
+        apply Finset.sum_le_sum
+        intro y hy
+        exact mul_le_mul_of_nonneg_left (abs_le.mp (hdelta y)).2 (hmass_nonneg y)
+      _ = delta := by
+        rw [← Finset.sum_mul, hmass_one, one_mul]
 
 /-- Discounted one-step Q-value on a finite closed decision-state graph. -/
 noncomputable def infiniteQ
@@ -113,8 +118,8 @@ theorem realActionMin_uniform_close
   have hrle : realActionMin R b ≤ R b aq := realActionMin_le R b aq
   have hcar := (abs_le.mp (hclose ar)).2
   have hcaq := (abs_le.mp (hclose aq)).1
-  rw [haq] at hcaq hrle
-  rw [har] at hcar hqle
+  rw [haq] at hcaq
+  rw [har] at hcar
   apply abs_le.mpr
   constructor <;> linarith
 
@@ -199,14 +204,19 @@ theorem infiniteBellman_fixedPoint_unique
   have hcontract :=
     infiniteBellman_uniform_close P stageCost gamma d hgamma0 V W hpoint x0
   rw [hV x0, hW x0, hx0] at hcontract
+  have hcontract' : d ≤ gamma * d := by
+    simpa [d] using hcontract
   have hd0 : 0 ≤ d := by
+    change 0 ≤ finiteSupDistance V W
     rw [← hx0]
     exact abs_nonneg _
   have hd : d = 0 := by
-    nlinarith
+    nlinarith [hcontract']
+  have hdist0 : finiteSupDistance V W = 0 := by
+    simpa [d] using hd
   funext x
   have hx := abs_sub_le_finiteSupDistance V W x
-  rw [hd] at hx
+  rw [hdist0] at hx
   have habs : |V x - W x| = 0 := le_antisymm hx (abs_nonneg _)
   exact sub_eq_zero.mp (abs_eq_zero.mp habs)
 
