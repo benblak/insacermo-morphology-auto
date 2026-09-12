@@ -53,7 +53,7 @@ theorem policySafeRep_bimonotone
 
 /-- Finite hypergraph characterization survives verbatim for compiled dynamic
 policies.  No claim is made here that arbitrary POMDP/history-dependent models
-admit a lossless compilation to `GoodPolicy`; this theorem states the exact
+support a lossless compilation to `GoodPolicy`; this theorem states the exact
 boundary once such a contract is available. -/
 theorem policySafeRep_iff_hypergraphSafe
     {S Π Y : Type*} [Fintype S] [DecidableEq S]
