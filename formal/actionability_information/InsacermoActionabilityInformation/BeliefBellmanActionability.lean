@@ -80,7 +80,7 @@ theorem exists_action_eq_finiteActionMin
     unfold finiteActionMin
     exact Finset.min'_mem _ _
   rcases Finset.mem_image.mp hmem with ⟨a, ha, hEq⟩
-  exact ⟨a, hEq.symm⟩
+  exact ⟨a, hEq⟩
 
 /-- The finite-action minimum is below every candidate action value. -/
 theorem finiteActionMin_le
@@ -211,6 +211,7 @@ theorem bellmanSafeRep_identity_univ
   rcases exists_bellmanOptimalAction T Z fallback stageCost terminalCost n b0 with ⟨a, ha⟩
   refine ⟨a, by simp, ?_⟩
   intro b' hb'B hb'eq
-  simpa using hb'eq ▸ ha
+  change b' = b0 at hb'eq
+  simpa [hb'eq] using ha
 
 end InsacermoActionabilityInformation
