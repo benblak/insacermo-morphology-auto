@@ -29,7 +29,7 @@ theorem infiniteBellman_lipschitzWith
     simpa [Real.dist_eq] using (dist_le_pi_dist V W y)
   have h := infiniteBellman_uniform_close P stageCost gamma (dist V W)
     hgamma0 V W hpoint x
-  simpa [Real.dist_eq, discountNNReal] using h
+  simpa [Real.dist_eq] using h
 
 /-- For `0 <= gamma < 1`, the finite-state discounted Bellman operator is a
 contracting self-map in mathlib's Banach fixed-point sense. -/
@@ -120,7 +120,8 @@ theorem canonicalInfiniteBellmanSafeRep_identity_univ
     (B : Set X) :
     CanonicalInfiniteBellmanSafeRep P stageCost gamma hgamma0 hgamma1
       B Set.univ id := by
-  simpa [CanonicalInfiniteBellmanSafeRep, CanonicalInfiniteBellmanGood] using
+  simpa [CanonicalInfiniteBellmanSafeRep, CanonicalInfiniteBellmanGood,
+    InfiniteBellmanSafeRep] using
     (infiniteBellmanSafeRep_identity_univ P stageCost gamma
       (infiniteBellmanFixedPoint P stageCost gamma hgamma0 hgamma1) B)
 
