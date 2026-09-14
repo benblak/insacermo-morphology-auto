@@ -297,7 +297,7 @@ theorem minimal_unbalancedClosedWalk_isCycle
     lt_of_le_of_lt (SimpleGraph.Walk.length_le_of_isSubwalk hqsub) htail_lt
   have hqbal : SG.walkParity q = false := by
     cases hpar : SG.walkParity q with
-    | false => exact hpar
+    | false => rfl
     | true =>
         exfalso
         exact (hmin q hq_lt) (by simpa [IsUnbalancedClosedWalk] using hpar)
