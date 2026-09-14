@@ -232,6 +232,118 @@ theorem not_satisfiable_iff_exists_unbalanced_closed_walk :
   · rintro ⟨u, p, hp⟩
     exact SG.unbalancedClosedWalk_blocks_satisfiability hp
 
+/-- An unbalanced closed walk in a simple graph has length at least three. -/
+theorem three_le_length_of_unbalancedClosedWalk
+    {u : V} {p : SG.graph.Walk u u}
+    (hp : SG.IsUnbalancedClosedWalk p) :
+    3 ≤ p.length := by
+  cases p with
+  | nil =>
+      simp [IsUnbalancedClosedWalk] at hp
+  | cons h q =>
+      cases q with
+      | nil =>
+          simp at h
+      | cons h' r =>
+          cases r with
+          | nil =>
+              simp [IsUnbalancedClosedWalk, Sym2.eq_swap] at hp
+          | cons h'' r' =>
+              simp
+
+/-- Removing a nontrivial balanced closed subwalk from the tail of a closed
+walk preserves its parity and strictly shortens it. -/
+theorem remove_balanced_closed_subwalk_of_tail
+    {u : V} (p : SG.graph.Walk u u) (hpnon : ¬ p.Nil)
+    {w : V} (q : SG.graph.Walk w w)
+    (hqsub : q.IsSubwalk p.tail) (hqnon : ¬ q.Nil)
+    (hqbal : SG.walkParity q = false) :
+    ∃ r : SG.graph.Walk u u,
+      r.length < p.length ∧ SG.walkParity r = SG.walkParity p := by
+  rcases hqsub with ⟨ru, rv, hdec⟩
+  let a : SG.graph.Walk u w := ru.cons (p.adj_snd hpnon)
+  let r : SG.graph.Walk u u := a.append rv
+  have hpdec : p = (a.append q).append rv := by
+    rw [← p.cons_tail_eq hpnon, hdec]
+    simp [a, SimpleGraph.Walk.append_assoc]
+  refine ⟨r, ?_, ?_⟩
+  · have hqpos : 0 < q.length := SimpleGraph.Walk.not_nil_iff_lt_length.mp hqnon
+    have hlen := congrArg (fun z => z.length) hpdec
+    simp [r, a] at hlen ⊢
+    omega
+  · simp [r, hpdec, hqbal, Bool.xor_assoc]
+
+/-- A length-minimal unbalanced closed walk cannot contain a removable closed
+subwalk, hence it is a graph-theoretic cycle. -/
+theorem minimal_unbalancedClosedWalk_isCycle
+    {u : V} (p : SG.graph.Walk u u)
+    (hp : SG.IsUnbalancedClosedWalk p)
+    (hmin : ∀ {v : V} (q : SG.graph.Walk v v),
+      q.length < p.length → ¬ SG.IsUnbalancedClosedWalk q) :
+    p.IsCycle := by
+  have hthree : 3 ≤ p.length := SG.three_le_length_of_unbalancedClosedWalk hp
+  have hpnon : ¬ p.Nil := by
+    rw [SimpleGraph.Walk.not_nil_iff_lt_length]
+    omega
+  rw [SimpleGraph.Walk.isCycle_iff_isPath_tail_and_le_length]
+  refine ⟨?_, hthree⟩
+  rw [SimpleGraph.Walk.isPath_iff_isSubwalk_imp_nil]
+  intro w q hqsub
+  by_contra hqnon
+  have htail_lt : p.tail.length < p.length := by
+    rw [← p.length_tail_add_one hpnon]
+    omega
+  have hq_lt : q.length < p.length :=
+    lt_of_le_of_lt (SimpleGraph.Walk.length_le_of_isSubwalk hqsub) htail_lt
+  have hqbal : SG.walkParity q = false := by
+    cases hpar : SG.walkParity q with
+    | false => exact hpar
+    | true =>
+        exfalso
+        exact (hmin q hq_lt) (by simpa [IsUnbalancedClosedWalk] using hpar)
+  obtain ⟨r, hrlt, hrpar⟩ :=
+    SG.remove_balanced_closed_subwalk_of_tail p hpnon q hqsub hqnon hqbal
+  have hrun : SG.IsUnbalancedClosedWalk r := by
+    unfold IsUnbalancedClosedWalk
+    rw [hrpar, hp]
+  exact (hmin r hrlt) hrun
+
+/-- Every unbalanced closed walk contains an unbalanced cycle.  The proof
+chooses a shortest odd closed walk and applies the preceding minimality lemma. -/
+theorem unbalancedClosedWalk_contains_unbalancedCycle
+    {u : V} (p : SG.graph.Walk u u)
+    (hp : SG.IsUnbalancedClosedWalk p) :
+    ∃ v : V, ∃ q : SG.graph.Walk v v, SG.IsUnbalancedCycle q := by
+  classical
+  let P : ℕ → Prop := fun n =>
+    ∃ v : V, ∃ q : SG.graph.Walk v v,
+      q.length = n ∧ SG.IsUnbalancedClosedWalk q
+  have hP : ∃ n, P n := ⟨p.length, u, p, rfl, hp⟩
+  let n := Nat.find hP
+  have hn : P n := Nat.find_spec hP
+  rcases hn with ⟨v, q, hqlen, hqun⟩
+  have hmin : ∀ {w : V} (r : SG.graph.Walk w w),
+      r.length < q.length → ¬ SG.IsUnbalancedClosedWalk r := by
+    intro w r hlt hrun
+    have hPr : P r.length := ⟨w, r, rfl, hrun⟩
+    have hnle : n ≤ r.length := Nat.find_min' hP hPr
+    rw [hqlen] at hlt
+    omega
+  refine ⟨v, q, ?_⟩
+  exact ⟨SG.minimal_unbalancedClosedWalk_isCycle q hqun hmin, hqun⟩
+
+/-- Exact cycle characterization: inconsistency is equivalent to the existence
+of an unbalanced cycle. -/
+theorem not_satisfiable_iff_exists_unbalanced_cycle :
+    ¬ SG.Satisfiable ↔
+      ∃ u : V, ∃ p : SG.graph.Walk u u, SG.IsUnbalancedCycle p := by
+  constructor
+  · intro hunsat
+    rcases (SG.not_satisfiable_iff_exists_unbalanced_closed_walk.mp hunsat) with ⟨u, p, hp⟩
+    exact SG.unbalancedClosedWalk_contains_unbalancedCycle p hp
+  · rintro ⟨u, p, hp⟩
+    exact SG.unbalancedCycle_blocks_satisfiability hp
+
 end SignedGraph
 
 end InsacermoActionabilityInformation
