@@ -214,6 +214,24 @@ theorem satisfiable_iff_all_closed_walks_balanced :
   · exact fun hsat => SG.satisfiable_implies_all_closed_walks_balanced hsat
   · exact SG.all_closed_walks_balanced_implies_satisfiable
 
+/-- Exact existential UNSAT certificate: a signed graph is inconsistent if and
+only if some closed walk has odd signed parity. -/
+theorem not_satisfiable_iff_exists_unbalanced_closed_walk :
+    ¬ SG.Satisfiable ↔
+      ∃ u : V, ∃ p : SG.graph.Walk u u, SG.IsUnbalancedClosedWalk p := by
+  constructor
+  · intro hunsat
+    have hnot : ¬ (∀ {u : V} (p : SG.graph.Walk u u), SG.walkParity p = false) := by
+      intro hclosed
+      exact hunsat (SG.all_closed_walks_balanced_implies_satisfiable hclosed)
+    push Not at hnot
+    rcases hnot with ⟨u, p, hp⟩
+    refine ⟨u, p, ?_⟩
+    unfold IsUnbalancedClosedWalk
+    cases h : SG.walkParity p <;> simp_all
+  · rintro ⟨u, p, hp⟩
+    exact SG.unbalancedClosedWalk_blocks_satisfiability hp
+
 end SignedGraph
 
 end InsacermoActionabilityInformation
