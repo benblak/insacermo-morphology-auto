@@ -48,7 +48,7 @@ theorem walkParity_append {u v w : V}
   induction p with
   | nil => simp
   | cons h p ih =>
-      simp [ih, Bool.xor_assoc]
+      simp [ih]
 
 @[simp]
 theorem walkParity_copy {u v u' v' : V} (p : SG.graph.Walk u v)
@@ -65,7 +65,7 @@ theorem walkParity_reverse {u v : V} (p : SG.graph.Walk u v) :
   | nil => simp
   | @cons u v w h p ih =>
       rw [SimpleGraph.Walk.reverse_cons, SG.walkParity_append]
-      simp [ih, Bool.xor_comm]
+      simp [ih, Bool.xor_comm, Sym2.eq_swap]
 
 /-- Fundamental telescoping lemma.  If every edge of a walk belongs to a
 selected satisfiable sub-contract, then the XOR between endpoint labels is
