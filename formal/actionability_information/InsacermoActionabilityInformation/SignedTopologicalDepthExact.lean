@@ -81,8 +81,11 @@ an unbalanced cycle. -/
 theorem exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost :
     (∃ n, SG.HasUnsatSubcontractAtMost n) ↔
       ∃ n, SG.HasUnbalancedCycleAtMost n := by
-  constructor <;> rintro ⟨n, hn⟩ <;>
+  constructor
+  · rintro ⟨n, hn⟩
     exact ⟨n, (SG.hasUnsatSubcontractAtMost_iff_hasUnbalancedCycleAtMost n).mp hn⟩
+  · rintro ⟨n, hn⟩
+    exact ⟨n, (SG.hasUnsatSubcontractAtMost_iff_hasUnbalancedCycleAtMost n).mpr hn⟩
 
 /-- When an obstruction exists, the least UNSAT subcontract cardinality is
 exactly the least unbalanced-cycle length.  This is the formal finite version
