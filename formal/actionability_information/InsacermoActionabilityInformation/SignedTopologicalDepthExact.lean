@@ -94,6 +94,7 @@ theorem topologicalDepth_eq_unbalancedGirth
     (hU : ∃ n, SG.HasUnsatSubcontractAtMost n) :
     Nat.find hU =
       Nat.find ((SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU) := by
+  classical
   let hC := (SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU
   apply le_antisymm
   · have hspecC : SG.HasUnbalancedCycleAtMost (Nat.find hC) := Nat.find_spec hC
