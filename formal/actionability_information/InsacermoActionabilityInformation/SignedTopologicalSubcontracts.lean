@@ -80,16 +80,16 @@ theorem selected_unsat_iff_exists_unbalanced_cycle (F : Set (Sym2 V)) :
       intro hsat
       exact hunsat ((SG.restrictEdges_satisfiable_iff F).mp hsat)
     rcases ((SG.restrictEdges F).not_satisfiable_iff_exists_unbalanced_cycle.mp hrestricted) with
-      ⟨u, q, hq⟩
+      ⟨u, q, hqcycle, hqun⟩
     have hle : (SG.restrictEdges F).graph ≤ SG.graph := SG.restrictEdges_graph_le F
     have hedges : ∀ e, e ∈ q.edges → e ∈ SG.graph.edgeSet := by
       intro e he
       exact SimpleGraph.edgeSet_mono hle (q.edges_subset_edgeSet he)
     let p : SG.graph.Walk u u := q.transfer SG.graph hedges
     refine ⟨u, p, ?_, ?_⟩
-    · refine ⟨hq.1.transfer hedges, ?_⟩
-      unfold IsUnbalancedClosedWalk at hq ⊢
-      simpa [p, SG.walkParity_transfer_restrictEdges q hedges] using hq.2
+    · refine ⟨hqcycle.transfer hedges, ?_⟩
+      unfold IsUnbalancedClosedWalk at hqun ⊢
+      simpa [p, SG.walkParity_transfer_restrictEdges q hedges] using hqun
     · intro e he
       have heq : e ∈ q.edges := by
         simpa [p] using he
