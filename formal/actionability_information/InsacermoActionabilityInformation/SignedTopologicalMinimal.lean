@@ -27,6 +27,7 @@ previously satisfied constraint is disturbed. -/
 theorem pathEdgeFinset_satisfiable {u v : V} (p : SG.graph.Walk u v)
     (hp : p.IsPath) :
     ∃ x : V → Bool, SG.SatisfiesOn (SG.cycleEdgeFinset p : Set (Sym2 V)) x := by
+  classical
   induction p with
   | nil =>
       refine ⟨fun _ => false, ?_⟩
@@ -46,18 +47,11 @@ theorem pathEdgeFinset_satisfiable {u v : V} (p : SG.graph.Walk u v)
         (SG.mem_cycleEdgeFinset _ _).mp hmem
       simp only [SimpleGraph.Walk.edges_cons, List.mem_cons] at hlist
       rcases hlist with hhead | htail
-      · rw [Sym2.mk_eq_mk_iff] at hhead
-        rcases hhead with hsame | hswap
-        · have ha : a = u := congrArg Prod.fst hsame
-          have hb : b = v := congrArg Prod.snd hsame
-          subst a
-          subst b
-          simp [y, huv.ne, Bool.xor_assoc]
-        · have ha : a = v := congrArg Prod.fst hswap
-          have hb : b = u := congrArg Prod.snd hswap
-          subst a
-          subst b
-          simp [y, huv.ne, Bool.xor_assoc, Bool.xor_comm]
+      · have hpair : (a = u ∧ b = v) ∨ (a = v ∧ b = u) := by
+          simpa only [Sym2.eq, Sym2.rel_iff', Prod.mk.injEq, Prod.swap_prod_mk] using hhead
+        rcases hpair with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+        · simp [y, huv.ne, huv.ne.symm, Bool.xor_assoc]
+        · simp [y, huv.ne, huv.ne.symm, Bool.xor_assoc, Bool.xor_comm, Sym2.eq_swap]
       · have hau : a ≠ u := by
           intro hau
           subst a
@@ -68,8 +62,11 @@ theorem pathEdgeFinset_satisfiable {u v : V} (p : SG.graph.Walk u v)
           exact hpdata.2 (p.snd_mem_support_of_mem_edges htail)
         have htailmem : s(a, b) ∈ SG.cycleEdgeFinset p :=
           (SG.mem_cycleEdgeFinset p s(a, b)).2 htail
-        have hsat := hx hab htailmem
-        simpa [y, hau, hbu] using hsat
+        have hsat : Bool.xor (x a) (x b) = SG.sign s(a, b) := hx hab htailmem
+        have hya : y a = x a := by simp [y, hau]
+        have hyb : y b = x b := by simp [y, hbu]
+        rw [hya, hyb]
+        exact hsat
 
 /-- A finite selected subcontract is inclusion-minimal UNSAT when it is
 unsatisfiable but every strict selected subfamily is satisfiable. -/
