@@ -44,12 +44,17 @@ theorem obstructionRankAtMost_iff_all_unbalancedCycles_length_le
       (SG.isMinimalUnsat_iff_abstract).mp hminSigned
     have hcard := hrank (SG.cycleEdgeFinset p) hminAbstract
     have hnodup : p.edges.Nodup := hp.1.isTrail.edges_nodup
+    have hedgeFinset : p.edges.toFinset = SG.cycleEdgeFinset p := by
+      ext e
+      simp
+    have hedgeCard : p.edges.toFinset.card = (SG.cycleEdgeFinset p).card :=
+      congrArg Finset.card hedgeFinset
     calc
       p.length = p.edges.length := by symm; exact p.length_edges
       _ = p.edges.toFinset.card := by
         symm
         exact List.toFinset_card_of_nodup hnodup
-      _ = (SG.cycleEdgeFinset p).card := by rfl
+      _ = (SG.cycleEdgeFinset p).card := hedgeCard
       _ ≤ k := hcard
   · intro hcycles F hminAbstract
     have hminSigned : SG.IsMinimalUnsat F :=
@@ -59,8 +64,13 @@ theorem obstructionRankAtMost_iff_all_unbalancedCycles_length_le
     have hlen : p.length ≤ k := hcycles p hp
     rw [← hEq]
     have hnodup : p.edges.Nodup := hp.1.isTrail.edges_nodup
+    have hedgeFinset : p.edges.toFinset = SG.cycleEdgeFinset p := by
+      ext e
+      simp
+    have hedgeCard : (SG.cycleEdgeFinset p).card = p.edges.toFinset.card := by
+      exact congrArg Finset.card hedgeFinset.symm
     calc
-      (SG.cycleEdgeFinset p).card = p.edges.toFinset.card := by rfl
+      (SG.cycleEdgeFinset p).card = p.edges.toFinset.card := hedgeCard
       _ = p.edges.length := List.toFinset_card_of_nodup hnodup
       _ = p.length := p.length_edges
       _ ≤ k := hlen
