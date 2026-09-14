@@ -87,15 +87,30 @@ theorem exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost :
   · rintro ⟨n, hn⟩
     exact ⟨n, (SG.hasUnsatSubcontractAtMost_iff_hasUnbalancedCycleAtMost n).mpr hn⟩
 
+/-- Exact INSACERMO topological actionability depth: the least cardinality of
+an unsatisfiable finite selected subcontract. -/
+noncomputable def topologicalDepth
+    (hU : ∃ n, SG.HasUnsatSubcontractAtMost n) : ℕ := by
+  classical
+  exact Nat.find hU
+
+/-- Exact unbalanced girth: the least length of an unbalanced cycle. -/
+noncomputable def unbalancedGirth
+    (hC : ∃ n, SG.HasUnbalancedCycleAtMost n) : ℕ := by
+  classical
+  exact Nat.find hC
+
 /-- When an obstruction exists, the least UNSAT subcontract cardinality is
-exactly the least unbalanced-cycle length.  This is the formal finite version
-of `κ_top = g_-`. -/
+exactly the least unbalanced-cycle length.  This is the formal finite theorem
+`κ_top = g_-`. -/
 theorem topologicalDepth_eq_unbalancedGirth
     (hU : ∃ n, SG.HasUnsatSubcontractAtMost n) :
-    Nat.find hU =
-      Nat.find ((SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU) := by
+    SG.topologicalDepth hU =
+      SG.unbalancedGirth
+        ((SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU) := by
   classical
   let hC := (SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU
+  unfold topologicalDepth unbalancedGirth
   apply le_antisymm
   · have hspecC : SG.HasUnbalancedCycleAtMost (Nat.find hC) := Nat.find_spec hC
     have hspecU : SG.HasUnsatSubcontractAtMost (Nat.find hC) :=
