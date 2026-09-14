@@ -1,4 +1,4 @@
-import Mathlib.Combinatorics.SimpleGraph.Paths
+import Mathlib.Combinatorics.SimpleGraph.Connectivity.Connected
 
 namespace InsacermoActionabilityInformation
 
@@ -40,6 +40,32 @@ theorem walkParity_cons {u v w : V} (h : SG.graph.Adj u v)
     SG.walkParity (SimpleGraph.Walk.cons h p) =
       Bool.xor (SG.sign s(u, v)) (SG.walkParity p) := by
   simp [walkParity]
+
+@[simp]
+theorem walkParity_append {u v w : V}
+    (p : SG.graph.Walk u v) (q : SG.graph.Walk v w) :
+    SG.walkParity (p.append q) = Bool.xor (SG.walkParity p) (SG.walkParity q) := by
+  induction p with
+  | nil => simp
+  | cons h p ih =>
+      simp [ih, Bool.xor_assoc]
+
+@[simp]
+theorem walkParity_copy {u v u' v' : V} (p : SG.graph.Walk u v)
+    (hu : u = u') (hv : v = v') :
+    SG.walkParity (p.copy hu hv) = SG.walkParity p := by
+  subst u'
+  subst v'
+  rfl
+
+@[simp]
+theorem walkParity_reverse {u v : V} (p : SG.graph.Walk u v) :
+    SG.walkParity p.reverse = SG.walkParity p := by
+  induction p with
+  | nil => simp
+  | @cons u v w h p ih =>
+      rw [SimpleGraph.Walk.reverse_cons, SG.walkParity_append]
+      simp [ih, Bool.xor_comm]
 
 /-- Fundamental telescoping lemma.  If every edge of a walk belongs to a
 selected satisfiable sub-contract, then the XOR between endpoint labels is
@@ -130,6 +156,63 @@ theorem satisfiable_implies_no_unbalanced_cycle
   have hfalse := SG.satisfiable_implies_all_closed_walks_balanced hsat p
   rw [hp.2] at hfalse
   simp at hfalse
+
+/-- A canonical representative of the connected component containing `v`.
+This is used only to construct one satisfying assignment from balanced closed
+walks; no graph-theoretic claim depends on which representative `Quot.out`
+chooses. -/
+noncomputable def componentRoot (v : V) : V :=
+  Quot.out (SG.graph.connectedComponentMk v)
+
+/-- The canonical component representative is reachable from the vertex. -/
+theorem componentRoot_reachable (v : V) :
+    SG.graph.Reachable (SG.componentRoot v) v := by
+  apply SimpleGraph.ConnectedComponent.exact
+  change SG.graph.connectedComponentMk (Quot.out (SG.graph.connectedComponentMk v)) =
+    SG.graph.connectedComponentMk v
+  exact Quot.out_eq _
+
+/-- Adjacent vertices have the same canonical component representative. -/
+theorem componentRoot_eq_of_adj {u v : V} (h : SG.graph.Adj u v) :
+    SG.componentRoot u = SG.componentRoot v := by
+  unfold componentRoot
+  rw [SimpleGraph.ConnectedComponent.sound h.reachable]
+
+/-- A chosen walk from the canonical representative of `v` to `v`. -/
+noncomputable def componentPath (v : V) :
+    SG.graph.Walk (SG.componentRoot v) v :=
+  (SG.componentRoot_reachable v).some
+
+/-- Converse kernel.  If every closed walk has even signed parity, the signed
+graph admits a global satisfying Boolean assignment.  The assignment at `v`
+is the parity of any fixed path from a representative of its connected
+component to `v`; balanced closed walks make this path parity consistent across
+edges. -/
+theorem all_closed_walks_balanced_implies_satisfiable
+    (hclosed : ∀ {u : V} (p : SG.graph.Walk u u), SG.walkParity p = false) :
+    SG.Satisfiable := by
+  refine ⟨fun v => SG.walkParity (SG.componentPath v), ?_⟩
+  intro u v huv _
+  let pu : SG.graph.Walk (SG.componentRoot u) u := SG.componentPath u
+  let pv : SG.graph.Walk (SG.componentRoot v) v := SG.componentPath v
+  have hroot : SG.componentRoot u = SG.componentRoot v := SG.componentRoot_eq_of_adj huv
+  let pv' : SG.graph.Walk (SG.componentRoot u) v := pv.copy hroot.symm rfl
+  let c : SG.graph.Walk (SG.componentRoot u) (SG.componentRoot u) :=
+    (pu.concat huv).append pv'.reverse
+  have hc : SG.walkParity c = false := hclosed c
+  change Bool.xor (SG.walkParity pu) (SG.walkParity pv) = SG.sign s(u, v)
+  cases hpu : SG.walkParity pu <;>
+    cases hpv : SG.walkParity pv <;>
+    cases hs : SG.sign s(u, v) <;>
+    simp [c, pv', SimpleGraph.Walk.concat_eq_append, hpu, hpv, hs] at hc ⊢
+
+/-- Exact closed-walk characterization of satisfiability. -/
+theorem satisfiable_iff_all_closed_walks_balanced :
+    SG.Satisfiable ↔
+      ∀ {u : V} (p : SG.graph.Walk u u), SG.walkParity p = false := by
+  constructor
+  · exact fun hsat => SG.satisfiable_implies_all_closed_walks_balanced hsat
+  · exact SG.all_closed_walks_balanced_implies_satisfiable
 
 end SignedGraph
 
