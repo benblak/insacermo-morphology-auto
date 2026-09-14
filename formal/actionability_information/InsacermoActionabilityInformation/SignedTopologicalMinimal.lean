@@ -108,8 +108,8 @@ theorem minimalUnsat_eq_unbalancedCycleEdges
 
 /-- A strict selected subfamily of the edge set of a simple cycle is
 satisfiable.  Choose a missing edge, rotate the cycle to one endpoint, and
-open the cycle on whichever end contains that edge.  The remaining walk is a
-simple path, hence satisfiable by `pathEdgeFinset_satisfiable`. -/
+open the cycle at that edge.  If the edge is the final edge in the chosen
+orientation, reverse the cycle first. -/
 theorem strictSubset_cycleEdgeFinset_satisfiable
     {u : V} {p : SG.graph.Walk u u} (hp : p.IsCycle)
     {G : Finset (Sym2 V)} (hG : G ⊂ SG.cycleEdgeFinset p) :
@@ -131,66 +131,71 @@ theorem strictSubset_cycleEdgeFinset_satisfiable
   have ha : a ∈ p.support := p.fst_mem_support_of_mem_edges heP
   let r : SG.graph.Walk a a := p.rotate a ha
   have hr : r.IsCycle := by
-    simpa [r] using hp.rotate a ha
+    simpa [r] using hp.rotate ha
   have heR : s(a, b) ∈ r.edges := by
-    have := (p.rotate_edges a ha).mem_iff.mpr heP
-    simpa [r] using this
+    have hrot := (p.rotate_edges a ha).mem_iff.mpr heP
+    simpa [r] using hrot
   have edge_of_G_mem_r : ∀ e' ∈ G, e' ∈ r.edges := by
     intro e' he'
     have he'C : e' ∈ SG.cycleEdgeFinset p := hproper.1 he'
     have he'P : e' ∈ p.edges := (SG.mem_cycleEdgeFinset p _).mp he'C
-    have := (p.rotate_edges a ha).mem_iff.mpr he'P
-    simpa [r] using this
-  by_cases hhead : s(a, r.snd) = s(a, b)
-  · rcases SG.pathEdgeFinset_satisfiable r.tail hr.isPath_tail with ⟨x, hx⟩
+    have hrot := (p.rotate_edges a ha).mem_iff.mpr he'P
+    simpa [r] using hrot
+  have sat_of_head :
+      ∀ (q : SG.graph.Walk a a), q.IsCycle →
+        (∀ e' ∈ G, e' ∈ q.edges) →
+        s(a, q.snd) = s(a, b) →
+        ∃ x : V → Bool, SG.SatisfiesOn (G : Set (Sym2 V)) x := by
+    intro q hq hqG hqhead
+    rcases SG.pathEdgeFinset_satisfiable q.tail hq.isPath_tail with ⟨x, hx⟩
     refine ⟨x, ?_⟩
     intro c d hcd hcdG
     apply hx hcd
-    apply (SG.mem_cycleEdgeFinset r.tail _).2
-    have hmemr : s(c, d) ∈ r.edges := edge_of_G_mem_r _ hcdG
-    rw [← SimpleGraph.Walk.cons_tail_eq r hr.not_nil,
-      SimpleGraph.Walk.edges_cons, List.mem_cons] at hmemr
-    rcases hmemr with hfirst | htail
+    apply (SG.mem_cycleEdgeFinset q.tail _).2
+    have hmemq : s(c, d) ∈ q.edges := hqG _ hcdG
+    rw [← SimpleGraph.Walk.cons_tail_eq q hq.not_nil,
+      SimpleGraph.Walk.edges_cons, List.mem_cons] at hmemq
+    rcases hmemq with hfirst | htail
     · exfalso
       apply heG
-      rw [← hhead]
-      simpa only [Sym2.eq, Sym2.rel_iff', Prod.mk.injEq, Prod.swap_prod_mk] using hfirst
+      have hcdG' := hcdG
+      rw [hfirst, hqhead] at hcdG'
+      exact hcdG'
     · exact htail
+  by_cases hhead : s(a, r.snd) = s(a, b)
+  · exact sat_of_head r hr edge_of_G_mem_r hhead
   · have heTail : s(a, b) ∈ r.tail.edges := by
+      have heR' := heR
       rw [← SimpleGraph.Walk.cons_tail_eq r hr.not_nil,
-        SimpleGraph.Walk.edges_cons, List.mem_cons] at heR
-      exact heR.resolve_left hhead.symm
+        SimpleGraph.Walk.edges_cons, List.mem_cons] at heR'
+      rcases heR' with hfirst | htail
+      · exact (hhead hfirst.symm).elim
+      · exact htail
     have htailNonNil : ¬ r.tail.Nil := by
-      rw [SimpleGraph.Walk.not_nil_iff_lt_length]
-      have hlen : 3 ≤ r.length := hr.three_le_length
-      simp only [SimpleGraph.Walk.length_tail]
-      omega
-    have hbpen : b = r.tail.penultimate :=
+      intro hnil
+      have hedgeNil : r.tail.edges = [] := SimpleGraph.Walk.edges_eq_nil.mpr hnil
+      rw [hedgeNil] at heTail
+      simp at heTail
+    have hbpenTail : b = r.tail.penultimate :=
       hr.isPath_tail.eq_penultimate_of_mem_edges heTail
-    have hlastTail : s(a, b) = r.tail.edges.getLast
-        (SimpleGraph.Walk.edges_eq_nil.not.mpr htailNonNil) := by
-      rw [hbpen, Sym2.eq_swap]
-      exact r.tail.mk_penultimate_end_eq_getLast_edges htailNonNil
-    have hlastR : s(a, b) = r.edges.getLast
-        (SimpleGraph.Walk.edges_eq_nil.not.mpr hr.not_nil) := by
-      rw [← SimpleGraph.Walk.cons_tail_eq r hr.not_nil,
-        SimpleGraph.Walk.edges_cons]
-      simpa [htailNonNil] using hlastTail
-    rcases SG.pathEdgeFinset_satisfiable r.dropLast hr.isPath_dropLast with ⟨x, hx⟩
-    refine ⟨x, ?_⟩
-    intro c d hcd hcdG
-    apply hx hcd
-    apply (SG.mem_cycleEdgeFinset r.dropLast _).2
-    rw [SimpleGraph.Walk.edges_dropLast]
-    have hmemr : s(c, d) ∈ r.edges := edge_of_G_mem_r _ hcdG
-    apply List.mem_dropLast_of_mem_of_ne_getLast hmemr
-    intro heq
-    apply heG
-    have : s(c, d) = s(a, b) := by
-      calc
-        s(c, d) = r.edges.getLast (SimpleGraph.Walk.edges_eq_nil.not.mpr hr.not_nil) := heq
-        _ = s(a, b) := hlastR.symm
-    simpa [this] using hcdG
+    have hpenTail : r.tail.penultimate = r.penultimate := by
+      change r.tail.getVert (r.tail.length - 1) = r.getVert (r.length - 1)
+      rw [SimpleGraph.Walk.getVert_tail]
+      have hlen : r.tail.length + 1 = r.length :=
+        r.length_tail_add_one hr.not_nil
+      have hpos : 0 < r.tail.length :=
+        SimpleGraph.Walk.not_nil_iff_lt_length.mp htailNonNil
+      congr 1
+      omega
+    have hbpen : b = r.penultimate := hbpenTail.trans hpenTail
+    have hrrev : r.reverse.IsCycle := hr.reverse
+    have edge_of_G_mem_rev : ∀ e' ∈ G, e' ∈ r.reverse.edges := by
+      intro e' he'
+      have hmem := edge_of_G_mem_r e' he'
+      simpa using hmem
+    have hrevHead : s(a, r.reverse.snd) = s(a, b) := by
+      rw [SimpleGraph.Walk.snd_reverse, ← hbpen]
+    exact sat_of_head r.reverse hrrev edge_of_G_mem_rev hrevHead
 
 /-- The edge set of every unbalanced simple cycle is inclusion-minimal UNSAT. -/
 theorem unbalancedCycleEdges_isMinimalUnsat
