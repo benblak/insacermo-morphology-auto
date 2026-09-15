@@ -124,6 +124,63 @@ theorem unboundedObstructions_defeat_every_fixed_safeDestructionAudit
   exact ⟨M, largeMinimalObstruction_gives_locallyAudited_unsafe_constantRep
     hC hmin hk⟩
 
+/-- Depth-`k` auditing is complete for maximal information destruction when
+any finite world family that passes all local common-action checks through
+size `k` may safely be collapsed to one representation value. -/
+def ConstantDestructionAuditComplete
+    (Good : S → A → Prop) (C : Set A) (k : ℕ) : Prop :=
+  ∀ M : Finset S,
+    FiniteContractAudit.PassesLocalAudit
+        (ActionabilityAudit.commonActionSat Good C) k M →
+      SafeRep Good (↑M : Set S) C (fun _ : S => ())
+
+/-- Bounded obstruction rank is sufficient to certify maximal information
+destruction using only depth-`k` local audits. -/
+theorem obstructionRankAtMost_implies_constantDestructionAuditComplete
+    {Good : S → A → Prop} {C : Set A} {k : ℕ}
+    (hC : C.Nonempty)
+    (hrank : ActionabilityAudit.CommonActionObstructionRankAtMost Good C k) :
+    ConstantDestructionAuditComplete Good C k := by
+  intro M hpass
+  have hcomplete :
+      FiniteContractAudit.LocalAuditComplete
+        (ActionabilityAudit.commonActionSat Good C) k :=
+    (ActionabilityAudit.commonActionObstructionRankAtMost_iff_localAuditComplete
+      hC k).mp hrank
+  have hsat : ActionabilityAudit.commonActionSat Good C M :=
+    hcomplete M hpass
+  change HasCommonActionOn Good C M at hsat
+  rcases hsat with ⟨a, haC, hall⟩
+  intro y hyreal
+  refine ⟨a, haC, ?_⟩
+  intro s hsM _hsy
+  exact hall s (by simpa using hsM)
+
+/-- Conversely, if maximal destruction is always safe after depth-`k` local
+audits, then no minimal common-action obstruction can have size above `k`. -/
+theorem constantDestructionAuditComplete_implies_obstructionRankAtMost
+    {Good : S → A → Prop} {C : Set A} {k : ℕ}
+    (hC : C.Nonempty)
+    (hcomplete : ConstantDestructionAuditComplete Good C k) :
+    ActionabilityAudit.CommonActionObstructionRankAtMost Good C k := by
+  intro M hmin
+  by_contra hnotle
+  have hk : k < M.card := Nat.lt_of_not_ge hnotle
+  rcases largeMinimalObstruction_gives_locallyAudited_unsafe_constantRep
+      hC hmin hk with ⟨hpass, hunsafe⟩
+  exact hunsafe (hcomplete M hpass)
+
+/-- Exact Safe Destruction Depth theorem.  Under nonempty capability, the
+common-action obstruction rank is exactly the finite local audit depth needed
+to certify the maximally destructive constant representation. -/
+theorem obstructionRankAtMost_iff_constantDestructionAuditComplete
+    {Good : S → A → Prop} {C : Set A} (hC : C.Nonempty) (k : ℕ) :
+    ActionabilityAudit.CommonActionObstructionRankAtMost Good C k ↔
+      ConstantDestructionAuditComplete Good C k := by
+  constructor
+  · exact obstructionRankAtMost_implies_constantDestructionAuditComplete hC
+  · exact constantDestructionAuditComplete_implies_obstructionRankAtMost hC
+
 end SafeRepAudit
 
 end InsacermoActionabilityInformation
