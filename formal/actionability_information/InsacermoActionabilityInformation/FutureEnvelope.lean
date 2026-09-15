@@ -69,9 +69,10 @@ theorem no_lost_futures_of_refines_of_capabilitySubset
     {C C' : Set A} {fine : S → YFine} {coarse : S → YCoarse}
     (href : Refines fine coarse) (hcap : C ⊆ C') :
     LostFutures Good B C C' coarse fine = ∅ := by
-  ext q
-  simp [LostFutures,
-    envelope_mono_of_refines_of_capabilitySubset (Good := Good) href hcap]
+  apply Set.eq_empty_iff_forall_not_mem.mpr
+  intro q hq
+  change q ∈ Envelope Good B C coarse ∧ q ∉ Envelope Good B C' fine at hq
+  exact hq.2 ((envelope_mono_of_refines_of_capabilitySubset href hcap) hq.1)
 
 /-- A PROBE/REPAIR transition preserves every currently guaranteed required
 future. -/
@@ -147,7 +148,7 @@ after total collapse. -/
 theorem required_largeObstruction_witnesses_falseSafeDestruction
     {Good : Q → S → A → Prop} {Req : Set Q}
     {C : Set A} {k : ℕ} {q : Q} {M : Finset S}
-    (hC : C.Nonempty) (hq : q ∈ Req)
+    (hC : C.Nonempty) (_hq : q ∈ Req)
     (hmin : MinimalCommonActionObstruction (Good q) C M)
     (hk : k < M.card) :
     FiniteContractAudit.PassesLocalAudit
