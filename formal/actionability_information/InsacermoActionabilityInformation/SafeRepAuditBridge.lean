@@ -50,7 +50,9 @@ theorem safeRep_of_obstructionRankAtMost_of_passesFiberAudit
   refine ⟨a, haC, ?_⟩
   intro s hsB hsy
   apply hall s
-  simp [fiberFinset, hsB, hsy]
+  have hsB' : s ∈ B := by
+    simpa using hsB
+  simp [fiberFinset, hsB', hsy]
 
 /-- Safety always implies every finite local fiber audit, at every depth:
 one common action for the whole fiber restricts to every audited subcontract. -/
