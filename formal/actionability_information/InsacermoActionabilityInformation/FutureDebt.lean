@@ -98,8 +98,8 @@ theorem zeroDebt_preserved_of_preservesRequired
   have hqOld : q ∈ Envelope Good B C₀ h₀ := hguar0 hq
   have hLost : q ∈ LostFutures Good B C₀ C₁ h₀ h₁ := ⟨hqOld, hnotNew⟩
   have hInt : q ∈ Req ∩ LostFutures Good B C₀ C₁ h₀ h₁ := ⟨hq, hLost⟩
-  have : q ∈ (∅ : Set Q) := by simpa [hpres] using hInt
-  exact this.elim
+  rw [hpres] at hInt
+  exact hInt.elim
 
 end FutureDebt
 
