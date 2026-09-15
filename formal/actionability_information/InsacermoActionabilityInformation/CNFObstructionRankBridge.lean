@@ -38,7 +38,8 @@ def IsMUS (F : Formula V) : Prop :=
 /-- The standard CNF-MUS notion is literally the abstract finite-contract
 minimal obstruction instantiated by CNF satisfiability. -/
 theorem isMUS_iff_abstract {F : Formula V} :
-    IsMUS F ↔ FiniteContractAudit.IsMinimalUnsat (@Sat V _) F := by
+    IsMUS F ↔
+      FiniteContractAudit.IsMinimalUnsat (Sat : Formula V → Prop) F := by
   rfl
 
 /-- Every unsatisfiable finite CNF contains an inclusion-minimal
@@ -46,8 +47,8 @@ unsatisfiable subformula. -/
 theorem exists_MUS_subset {F : Formula V} (hF : ¬ Sat F) :
     ∃ M : Formula V, M ⊆ F ∧ IsMUS M := by
   classical
-  rcases FiniteContractAudit.exists_minimalUnsat_subset (@Sat V _) hF with
-    ⟨M, hMF, hM⟩
+  rcases FiniteContractAudit.exists_minimalUnsat_subset
+      (Sat : Formula V → Prop) hF with ⟨M, hMF, hM⟩
   exact ⟨M, hMF, (isMUS_iff_abstract).mpr hM⟩
 
 /-- All CNF MUSes have at most `k` clauses. -/
@@ -57,11 +58,11 @@ def MUSRankAtMost (k : ℕ) : Prop :=
 /-- CNF local audit through depth `k`: every selected subformula of at most
 `k` clauses is satisfiable. -/
 def PassesLocalAudit (k : ℕ) (F : Formula V) : Prop :=
-  FiniteContractAudit.PassesLocalAudit (@Sat V _) k F
+  FiniteContractAudit.PassesLocalAudit (Sat : Formula V → Prop) k F
 
 /-- Completeness of `k`-clause local auditing for CNF satisfiability. -/
 def LocalAuditComplete (k : ℕ) : Prop :=
-  FiniteContractAudit.LocalAuditComplete (@Sat V _) k
+  FiniteContractAudit.LocalAuditComplete (Sat : Formula V → Prop) k
 
 /-- Exact CNF specialization of the abstract obstruction theorem:
 checking all subformulas through `k` clauses decides global satisfiability
@@ -69,10 +70,11 @@ iff every MUS has at most `k` clauses. -/
 theorem musRankAtMost_iff_localAuditComplete (k : ℕ) :
     MUSRankAtMost (V := V) k ↔ LocalAuditComplete (V := V) k := by
   classical
-  change FiniteContractAudit.ObstructionRankAtMost (@Sat V _) k ↔
-    FiniteContractAudit.LocalAuditComplete (@Sat V _) k
+  change FiniteContractAudit.ObstructionRankAtMost
+      (Sat : Formula V → Prop) k ↔
+    FiniteContractAudit.LocalAuditComplete (Sat : Formula V → Prop) k
   exact FiniteContractAudit.obstructionRankAtMost_iff_localAuditComplete
-    (@Sat V _) k
+    (Sat : Formula V → Prop) k
 
 /-- Exact No-Local-Auditor witness for CNF: a MUS larger than `k` is globally
 UNSAT while every subformula of size at most `k` is SAT. -/
@@ -81,10 +83,11 @@ theorem large_MUS_is_localAudit_blindSpot
     (hMUS : IsMUS M) (hk : k < M.card) :
     PassesLocalAudit (V := V) k M ∧ ¬ Sat M := by
   classical
-  have hAbstract : FiniteContractAudit.IsMinimalUnsat (@Sat V _) M :=
+  have hAbstract :
+      FiniteContractAudit.IsMinimalUnsat (Sat : Formula V → Prop) M :=
     (isMUS_iff_abstract).mp hMUS
   exact FiniteContractAudit.minimalUnsat_large_is_localAudit_blindSpot
-    (@Sat V _) hAbstract hk
+    (Sat : Formula V → Prop) hAbstract hk
 
 /-- If CNF MUS size is unbounded, no fixed clause depth can make local
 satisfiability auditing complete. -/
