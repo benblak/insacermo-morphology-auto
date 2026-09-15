@@ -32,7 +32,7 @@ theorem reach_debt_subset
     ∀ {s t}, Reach Step s t → t.debt ⊆ s.debt := by
   intro s t hreach
   induction hreach with
-  | refl s => exact Set.Subset.rfl
+  | refl => exact Set.Subset.rfl
   | tail hreach hstep ih =>
       exact Set.Subset.trans (hmono _ _ hstep) ih
 
@@ -70,7 +70,7 @@ theorem solution_closed_under_safe_continuation
     Reach Step start finish ∧ Goal finish := by
   constructor
   · induction hmf with
-    | refl _ => exact hsm
+    | refl => exact hsm
     | tail hreach hstep ih => exact Reach.tail ih hstep
   · exact zeroDebt_absorbing hmono hgoal hmf
 
