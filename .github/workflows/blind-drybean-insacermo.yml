@@ -1,0 +1,13 @@
+name: INSACERMO Blind Dry Bean Real Data
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_drybean_insacermo_v1.py'
+      - '.github/workflows/blind-drybean-insacermo.yml'
+jobs:
+  blind-drybean:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run fixed blind protocol
+        run: python3 experiments/blind_drybean_insacermo_v1.py
