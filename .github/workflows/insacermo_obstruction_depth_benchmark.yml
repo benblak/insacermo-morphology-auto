@@ -1,0 +1,38 @@
+name: INSACERMO Obstruction Depth Benchmark
+
+on:
+  pull_request:
+    paths:
+      - 'empirical/obstruction_depth_benchmark/**'
+      - '.github/workflows/insacermo_obstruction_depth_benchmark.yml'
+  workflow_dispatch:
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install benchmark dependency
+        run: python -m pip install -r empirical/obstruction_depth_benchmark/requirements.txt
+      - name: Recompute benchmark and check invariants
+        run: |
+          rm -rf /tmp/insacermo-obstruction-depth-results
+          python empirical/obstruction_depth_benchmark/benchmark.py \
+            --out /tmp/insacermo-obstruction-depth-results \
+            --check
+      - name: Verify committed outputs have not drifted
+        run: |
+          for f in \
+            summary.json \
+            obstruction_distribution.csv \
+            max_witness_cnf_clauses.csv \
+            zachary_karate_edges.csv \
+            florentine_families_edges.csv \
+            davis_southern_women_edges.csv; do
+            diff -u \
+              "empirical/obstruction_depth_benchmark/results/$f" \
+              "/tmp/insacermo-obstruction-depth-results/$f"
+          done
