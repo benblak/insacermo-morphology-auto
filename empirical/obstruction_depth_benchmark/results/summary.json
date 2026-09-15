@@ -1,0 +1,100 @@
+{
+  "benchmark": "INSACERMO Obstruction Depth Benchmark V0.1",
+  "contract": "for every selected undirected edge {u,v}, require x_u != x_v",
+  "datasets": {
+    "davis_southern_women": {
+      "bipartite": true,
+      "canonical_edge_sha256": "43ac43dd4435203d0219dabf52813f991ea29123b636f4066dda3222b28a9a98",
+      "certification_depth_edges": null,
+      "cnf_local_audit_blindspot_depth": null,
+      "detection_depth_edges": null,
+      "edges": 89,
+      "max_obstruction_witness": null,
+      "max_witness_cnf_clauses": 0,
+      "max_witness_cnf_mus_audit": null,
+      "min_obstruction_witness": null,
+      "nodes": 32,
+      "odd_cycle_obstructions": 0,
+      "total_simple_cycles_enumerated": 0
+    },
+    "florentine_families": {
+      "bipartite": false,
+      "canonical_edge_sha256": "f6fdd3ea273f8be98217089e149f18deb0b4277857666c4df5bc86c928662805",
+      "certification_depth_edges": 9,
+      "cnf_local_audit_blindspot_depth": 17,
+      "detection_depth_edges": 3,
+      "edges": 20,
+      "max_obstruction_witness": [
+        "Albizzi",
+        "Guadagni",
+        "Bischeri",
+        "Peruzzi",
+        "Castellani",
+        "Strozzi",
+        "Ridolfi",
+        "Tornabuoni",
+        "Medici"
+      ],
+      "max_witness_cnf_clauses": 18,
+      "max_witness_cnf_mus_audit": {
+        "full_sat": false,
+        "is_mus": true,
+        "single_clause_deletions": 18,
+        "single_clause_deletions_sat": 18
+      },
+      "min_obstruction_witness": [
+        "Bischeri",
+        "Peruzzi",
+        "Strozzi"
+      ],
+      "nodes": 15,
+      "odd_cycle_obstructions": 20,
+      "total_simple_cycles_enumerated": 39
+    },
+    "zachary_karate": {
+      "bipartite": false,
+      "canonical_edge_sha256": "63fd5c5b1770d295c23d76e096a6672f4e695205a95b23ea0039fa519375223f",
+      "certification_depth_edges": 19,
+      "cnf_local_audit_blindspot_depth": 37,
+      "detection_depth_edges": 3,
+      "edges": 78,
+      "max_obstruction_witness": [
+        "0",
+        "1",
+        "13",
+        "3",
+        "7",
+        "2",
+        "28",
+        "31",
+        "25",
+        "24",
+        "27",
+        "23",
+        "29",
+        "26",
+        "33",
+        "14",
+        "32",
+        "30",
+        "8"
+      ],
+      "max_witness_cnf_clauses": 38,
+      "max_witness_cnf_mus_audit": {
+        "full_sat": false,
+        "is_mus": true,
+        "single_clause_deletions": 38,
+        "single_clause_deletions_sat": 38
+      },
+      "min_obstruction_witness": [
+        "0",
+        "1",
+        "13"
+      ],
+      "nodes": 34,
+      "odd_cycle_obstructions": 365521,
+      "total_simple_cycles_enumerated": 731026
+    }
+  },
+  "networkx_version": "3.6.1"
+}
