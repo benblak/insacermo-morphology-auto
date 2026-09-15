@@ -1,0 +1,15 @@
+name: INSACERMO Blind Diamonds Near Identity
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_diamonds_near_identity_insacermo_v1.py'
+      - '.github/workflows/insacermo_blind_diamonds_near_identity.yml'
+
+jobs:
+  blind-diamonds-near-identity:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run fixed blind protocol
+        run: python3 experiments/blind_diamonds_near_identity_insacermo_v1.py
