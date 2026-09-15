@@ -125,7 +125,7 @@ def audit_mus(clauses: list[Clause]) -> dict:
 
 def write_csv(path: Path, fieldnames: list[str], rows: list[dict]):
     with path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fieldnames)
+        w = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         w.writeheader()
         w.writerows(rows)
 
