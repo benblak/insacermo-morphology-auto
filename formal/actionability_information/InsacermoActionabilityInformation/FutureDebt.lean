@@ -25,9 +25,12 @@ theorem debt_eq_empty_iff_guarantees
     have : q ∈ (∅ : Set Q) := by simpa [hzero] using hmem
     exact this.elim
   · intro hguar
-    apply Set.eq_empty_iff_forall_not_mem.mpr
-    intro q hq
-    exact hq.2 (hguar hq.1)
+    ext q
+    constructor
+    · intro hq
+      exact False.elim (hq.2 (hguar hq.1))
+    · intro hq
+      simp at hq
 
 /-- PROBE and/or REPAIR cannot increase future debt. -/
 theorem debt_antitone_of_refines_of_capabilitySubset
