@@ -1,0 +1,14 @@
+dataset,obstruction_size_edges,count
+zachary_karate,3,45
+zachary_karate,5,374
+zachary_karate,7,2746
+zachary_karate,9,17625
+zachary_karate,11,59890
+zachary_karate,13,120823
+zachary_karate,15,125021
+zachary_karate,17,37264
+zachary_karate,19,1733
+florentine_families,3,3
+florentine_families,5,3
+florentine_families,7,10
+florentine_families,9,4
