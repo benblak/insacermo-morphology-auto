@@ -1,0 +1,15 @@
+name: INSACERMO Blind Heating Adversarial Real Data
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_heating_adversarial_insacermo_v1.py'
+      - '.github/workflows/insacermo_blind_heating_adversarial_v1.yml'
+
+jobs:
+  blind-heating-adversarial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run fixed adversarial blind protocol
+        run: python3 experiments/blind_heating_adversarial_insacermo_v1.py
