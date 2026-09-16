@@ -1,0 +1,15 @@
+name: INSACERMO Blind OpenFlights Temporal Real Data
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_openflights_temporal_insacermo_v1.py'
+      - '.github/workflows/blind-openflights-temporal-v1.yml'
+
+jobs:
+  blind-openflights-temporal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run fixed blind temporal protocol
+        run: python3 experiments/blind_openflights_temporal_insacermo_v1.py
