@@ -21,6 +21,16 @@ def DepthAtMost : DepthValue → ℕ → Prop
   | .finite d, H => d ≤ H
   | .infinite, _ => False
 
+instance depthAtMostDecidable (d : DepthValue) (H : ℕ) :
+    Decidable (DepthAtMost d H) := by
+  cases d with
+  | finite n =>
+      change Decidable (n ≤ H)
+      infer_instance
+  | infinite =>
+      change Decidable False
+      infer_instance
+
 /-- Natural order on extended depths, with every finite depth below infinity. -/
 def DepthLe : DepthValue → DepthValue → Prop
   | .finite d, .finite e => d ≤ e
