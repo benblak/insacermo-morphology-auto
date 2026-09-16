@@ -34,8 +34,9 @@ irreversible. -/
 noncomputable def Spectrum
     {Q X : Type*} [DecidableEq Q]
     (Avail : X → Set Q) (Step : X → X → Prop)
-    (x : X) (F : Finset Q) : DepthValue :=
-  if hfinite : HasFiniteJointRecoveryDepth Avail Step x F then
+    (x : X) (F : Finset Q) : DepthValue := by
+  classical
+  exact if hfinite : HasFiniteJointRecoveryDepth Avail Step x F then
     .finite (JointRecoveryDepth Avail Step x F hfinite)
   else
     .infinite
