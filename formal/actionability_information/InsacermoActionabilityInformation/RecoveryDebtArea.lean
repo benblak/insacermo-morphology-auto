@@ -7,9 +7,10 @@ namespace RecoveryDebtArea
 
 open TemporalRecoverabilityEnvelope
 open RecoveryDepthIrreversibility
+open scoped BigOperators
 
 /-- Finite debt count induced by an arbitrary natural-valued recovery-depth
-function.  A future contributes at horizon `H` exactly while `H < d q`. -/
+function. A future contributes at horizon `H` exactly while `H < d q`. -/
 def DebtCountAt {Q : Type*} [DecidableEq Q]
     (Req : Finset Q) (d : Q → ℕ) (H : ℕ) : ℕ :=
   (Req.filter (fun q => H < d q)).card
@@ -57,7 +58,7 @@ def WeightedDebtAt {Q : Type*} [DecidableEq Q]
     (Req : Finset Q) (w : Q → ℝ) (d : Q → ℕ) (H : ℕ) : ℝ :=
   ∑ q in Req.filter (fun q => H < d q), w q
 
-/-- Weighted layer-cake identity.  The left side is the total weighted recovery
+/-- Weighted layer-cake identity. The left side is the total weighted recovery
 burden; the right side is the area under weighted temporal debt. -/
 theorem totalWeightedDepth_eq_weightedDebtArea
     {Q : Type*} [DecidableEq Q]
@@ -121,7 +122,7 @@ theorem not_recoverable_iff_horizon_lt_depth
   have hdepth :
       RecoveryDepthOnReq Req Avail Step x hfinite q =
         RecoveryDepth Avail Step x q hf := by
-    simp [RecoveryDepthOnReq, hq, hf]
+    simp [RecoveryDepthOnReq, hq]
   rw [hdepth]
   constructor
   · intro hnot
@@ -142,8 +143,9 @@ def CoreDebtCountAt
     {Q X : Type*} [DecidableEq Q]
     (Req : Finset Q)
     (Avail : X → Set Q) (Step : X → X → Prop)
-    (x : X) (H : ℕ) : ℕ :=
-  (Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x)).card
+    (x : X) (H : ℕ) : ℕ := by
+  classical
+  exact (Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x)).card
 
 /-- The abstract debt count generated from minimum recovery depths is exactly
 the finite Core-V1 temporal-debt count. -/
@@ -159,14 +161,9 @@ theorem debtCountAt_eq_coreDebtCountAt
   unfold DebtCountAt CoreDebtCountAt
   congr 1
   ext q
-  simp only [Finset.mem_filter]
-  constructor
-  · intro h
-    exact ⟨h.1,
-      (not_recoverable_iff_horizon_lt_depth hfinite h.1).mpr h.2⟩
-  · intro h
-    exact ⟨h.1,
-      (not_recoverable_iff_horizon_lt_depth hfinite h.1).mp h.2⟩
+  by_cases hq : q ∈ Req
+  · simp [hq, not_recoverable_iff_horizon_lt_depth hfinite hq]
+  · simp [hq]
 
 /-- Main Core-V1 recovery-area theorem: once all required futures have finite
 recovery depth bounded by `B`, the sum of their minimum recovery depths is
@@ -181,6 +178,7 @@ theorem totalRecoveryDepth_eq_temporalDebtArea
       RecoveryDepthOnReq Req Avail Step x hfinite q ≤ B) :
     (∑ q in Req, RecoveryDepthOnReq Req Avail Step x hfinite q) =
       ∑ H in Finset.range B, CoreDebtCountAt Req Avail Step x H := by
+  classical
   rw [totalDepth_eq_debtArea Req
     (RecoveryDepthOnReq Req Avail Step x hfinite) B hB]
   apply Finset.sum_congr rfl
@@ -192,8 +190,9 @@ def CoreWeightedDebtAt
     {Q X : Type*} [DecidableEq Q]
     (Req : Finset Q) (w : Q → ℝ)
     (Avail : X → Set Q) (Step : X → X → Prop)
-    (x : X) (H : ℕ) : ℝ :=
-  ∑ q in Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x), w q
+    (x : X) (H : ℕ) : ℝ := by
+  classical
+  exact ∑ q in Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x), w q
 
 /-- Weighted version of the Core-V1 recovery-area theorem. -/
 theorem totalWeightedRecoveryDepth_eq_temporalDebtArea
@@ -206,21 +205,20 @@ theorem totalWeightedRecoveryDepth_eq_temporalDebtArea
       RecoveryDepthOnReq Req Avail Step x hfinite q ≤ B) :
     (∑ q in Req, RecoveryDepthOnReq Req Avail Step x hfinite q • w q) =
       ∑ H in Finset.range B, CoreWeightedDebtAt Req w Avail Step x H := by
+  classical
   rw [totalWeightedDepth_eq_weightedDebtArea Req w
     (RecoveryDepthOnReq Req Avail Step x hfinite) B hB]
   apply Finset.sum_congr rfl
   intro H hH
   unfold WeightedDebtAt CoreWeightedDebtAt
-  congr 1
-  ext q
-  simp only [Finset.mem_filter]
-  constructor
-  · intro h
-    exact ⟨h.1,
-      (not_recoverable_iff_horizon_lt_depth hfinite h.1).mpr h.2⟩
-  · intro h
-    exact ⟨h.1,
-      (not_recoverable_iff_horizon_lt_depth hfinite h.1).mp h.2⟩
+  have hfilter :
+      Req.filter (fun q => H < RecoveryDepthOnReq Req Avail Step x hfinite q) =
+        Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x) := by
+    ext q
+    by_cases hq : q ∈ Req
+    · simp [hq, not_recoverable_iff_horizon_lt_depth hfinite hq]
+    · simp [hq]
+  rw [hfilter]
 
 end RecoveryDebtArea
 
