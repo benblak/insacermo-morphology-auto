@@ -157,7 +157,6 @@ theorem firstJointRecoveryAt_jointRecoveryDepth
   constructor
   · exact jointRecoveryDepth_spec hfinite
   · intro h hh
-    unfold JointRecoveryDepth
     exact Nat.find_min hfinite hh
 
 /-- A temporal minimal obstruction has only two eventual fates: either it is
