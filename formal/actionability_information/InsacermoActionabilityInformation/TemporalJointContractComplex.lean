@@ -145,7 +145,7 @@ theorem jointRecoverable_implies_individual
   intro q hq
   have hsingle :
       JointRecoverable Avail Step H x ({q} : Set Q) := by
-    apply jointRecoverable_downward hjoint
+    apply jointRecoverable_downward H x hjoint
     intro z hz
     have hzq : z = q := by simpa using hz
     subst z
@@ -172,7 +172,7 @@ def TemporalContractComplex
   feasible R := JointRecoverable Avail Step H x (↑R : Set Q)
   downward := by
     intro R T hR hTR
-    apply jointRecoverable_downward hR
+    apply jointRecoverable_downward H x hR
     intro q hq
     exact hTR hq
 
@@ -217,7 +217,9 @@ theorem feasible_implies_safeWithin
     {H : ℕ} {x : X} {R : Finset Q}
     (hR : (TemporalContractComplex Avail Step H x).feasible R) :
     SafeWithin (↑R : Set Q) Avail Step H x := by
-  exact jointRecoverable_implies_safeWithin hR
+  exact jointRecoverable_implies_safeWithin
+    (Avail := Avail) (Step := Step) (H := H) (x := x)
+    (R := (↑R : Set Q)) hR
 
 end TemporalJointContractComplex
 
