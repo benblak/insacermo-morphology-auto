@@ -113,7 +113,7 @@ noncomputable def WeightedCatalogueReadiness
     (Ω : Finset (Finset Q)) (w : Finset Q → ℝ)
     (K : ContractComplex Q) : ℝ := by
   classical
-  exact ∑ R in Ω, if K.feasible R then w R else 0
+  exact ∑ R ∈ Ω, if K.feasible R then w R else 0
 
 /-- Weighted mass of catalogue futures that were feasible before a
 transformation and are infeasible after it. -/
@@ -122,7 +122,7 @@ noncomputable def WeightedCatalogueDamage
     (Ω : Finset (Finset Q)) (w : Finset Q → ℝ)
     (before after : ContractComplex Q) : ℝ := by
   classical
-  exact ∑ R in Ω,
+  exact ∑ R ∈ Ω,
     if before.feasible R ∧ ¬ after.feasible R then w R else 0
 
 /-- On a catalogue, a pure-loss transformation means that every bundle feasible
