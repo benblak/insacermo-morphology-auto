@@ -261,7 +261,14 @@ theorem temporalWeightedJointReadiness_eq_spectrum_sublevel_mass
   unfold TemporalWeightedJointReadiness WeightedCatalogueReadiness
   apply Finset.sum_congr rfl
   intro R hR
-  rw [depthAtMost_spectrum_iff_feasible]
+  by_cases hfeas : (TemporalContractComplex Avail Step H x).feasible R
+  · have hdepth : DepthAtMost (Spectrum Avail Step x R) H :=
+      (depthAtMost_spectrum_iff_feasible).2 hfeas
+    simp [hfeas, hdepth]
+  · have hdepth : ¬ DepthAtMost (Spectrum Avail Step x R) H := by
+      intro hd
+      exact hfeas ((depthAtMost_spectrum_iff_feasible).1 hd)
+    simp [hfeas, hdepth]
 
 /-- Temporal damage is exactly weighted mass crossing the horizon threshold:
 recoverable before by H, but not recoverable after by H. -/
@@ -281,8 +288,27 @@ theorem temporalWeightedJointDamage_eq_spectrum_threshold_crossing
   unfold TemporalWeightedJointDamage WeightedCatalogueDamage
   apply Finset.sum_congr rfl
   intro R hR
-  rw [depthAtMost_spectrum_iff_feasible,
-      depthAtMost_spectrum_iff_feasible]
+  by_cases hbefore :
+      (TemporalContractComplex AvailBefore StepBefore H x).feasible R
+  · have hbeforeDepth :
+        DepthAtMost (Spectrum AvailBefore StepBefore x R) H :=
+      (depthAtMost_spectrum_iff_feasible).2 hbefore
+    by_cases hafter :
+        (TemporalContractComplex AvailAfter StepAfter H y).feasible R
+    · have hafterDepth :
+          DepthAtMost (Spectrum AvailAfter StepAfter y R) H :=
+        (depthAtMost_spectrum_iff_feasible).2 hafter
+      simp [hbefore, hafter, hbeforeDepth, hafterDepth]
+    · have hafterDepth :
+          ¬ DepthAtMost (Spectrum AvailAfter StepAfter y R) H := by
+        intro hd
+        exact hafter ((depthAtMost_spectrum_iff_feasible).1 hd)
+      simp [hbefore, hafter, hbeforeDepth, hafterDepth]
+  · have hbeforeDepth :
+        ¬ DepthAtMost (Spectrum AvailBefore StepBefore x R) H := by
+      intro hd
+      exact hbefore ((depthAtMost_spectrum_iff_feasible).1 hd)
+    simp [hbefore, hbeforeDepth]
 
 end FutureDepthSpectrum
 
