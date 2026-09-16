@@ -22,12 +22,12 @@ theorem totalDepth_eq_debtArea
     {Q : Type*} [DecidableEq Q]
     (Req : Finset Q) (d : Q → ℕ) (B : ℕ)
     (hB : ∀ q ∈ Req, d q ≤ B) :
-    (∑ q in Req, d q) =
-      ∑ H in Finset.range B, DebtCountAt Req d H := by
+    (∑ q ∈ Req, d q) =
+      ∑ H ∈ Finset.range B, DebtCountAt Req d H := by
   classical
   calc
-    (∑ q in Req, d q) =
-        ∑ q in Req, ∑ H in Finset.range B, if H < d q then 1 else 0 := by
+    (∑ q ∈ Req, d q) =
+        ∑ q ∈ Req, ∑ H ∈ Finset.range B, if H < d q then 1 else 0 := by
       apply Finset.sum_congr rfl
       intro q hq
       have hfilter :
@@ -42,10 +42,10 @@ theorem totalDepth_eq_debtArea
       rw [← Finset.sum_filter]
       rw [hfilter]
       simp
-    _ = ∑ H in Finset.range B,
-          ∑ q in Req, if H < d q then 1 else 0 := by
+    _ = ∑ H ∈ Finset.range B,
+          ∑ q ∈ Req, if H < d q then 1 else 0 := by
       rw [Finset.sum_comm]
-    _ = ∑ H in Finset.range B, DebtCountAt Req d H := by
+    _ = ∑ H ∈ Finset.range B, DebtCountAt Req d H := by
       apply Finset.sum_congr rfl
       intro H hH
       unfold DebtCountAt
@@ -56,7 +56,7 @@ theorem totalDepth_eq_debtArea
 function. -/
 def WeightedDebtAt {Q : Type*} [DecidableEq Q]
     (Req : Finset Q) (w : Q → ℝ) (d : Q → ℕ) (H : ℕ) : ℝ :=
-  ∑ q in Req.filter (fun q => H < d q), w q
+  ∑ q ∈ Req.filter (fun q => H < d q), w q
 
 /-- Weighted layer-cake identity. The left side is the total weighted recovery
 burden; the right side is the area under weighted temporal debt. -/
@@ -64,13 +64,13 @@ theorem totalWeightedDepth_eq_weightedDebtArea
     {Q : Type*} [DecidableEq Q]
     (Req : Finset Q) (w : Q → ℝ) (d : Q → ℕ) (B : ℕ)
     (hB : ∀ q ∈ Req, d q ≤ B) :
-    (∑ q in Req, d q • w q) =
-      ∑ H in Finset.range B, WeightedDebtAt Req w d H := by
+    (∑ q ∈ Req, d q • w q) =
+      ∑ H ∈ Finset.range B, WeightedDebtAt Req w d H := by
   classical
   calc
-    (∑ q in Req, d q • w q) =
-        ∑ q in Req,
-          ∑ H in Finset.range B, if H < d q then w q else 0 := by
+    (∑ q ∈ Req, d q • w q) =
+        ∑ q ∈ Req,
+          ∑ H ∈ Finset.range B, if H < d q then w q else 0 := by
       apply Finset.sum_congr rfl
       intro q hq
       have hfilter :
@@ -85,10 +85,10 @@ theorem totalWeightedDepth_eq_weightedDebtArea
       rw [← Finset.sum_filter]
       rw [hfilter]
       simp
-    _ = ∑ H in Finset.range B,
-          ∑ q in Req, if H < d q then w q else 0 := by
+    _ = ∑ H ∈ Finset.range B,
+          ∑ q ∈ Req, if H < d q then w q else 0 := by
       rw [Finset.sum_comm]
-    _ = ∑ H in Finset.range B, WeightedDebtAt Req w d H := by
+    _ = ∑ H ∈ Finset.range B, WeightedDebtAt Req w d H := by
       apply Finset.sum_congr rfl
       intro H hH
       unfold WeightedDebtAt
@@ -139,7 +139,7 @@ theorem not_recoverable_iff_horizon_lt_depth
 
 /-- Core-V1 debt count at horizon `H`, restricted to a finite declared future
 set. -/
-def CoreDebtCountAt
+noncomputable def CoreDebtCountAt
     {Q X : Type*} [DecidableEq Q]
     (Req : Finset Q)
     (Avail : X → Set Q) (Step : X → X → Prop)
@@ -176,8 +176,8 @@ theorem totalRecoveryDepth_eq_temporalDebtArea
     (B : ℕ)
     (hB : ∀ q ∈ Req,
       RecoveryDepthOnReq Req Avail Step x hfinite q ≤ B) :
-    (∑ q in Req, RecoveryDepthOnReq Req Avail Step x hfinite q) =
-      ∑ H in Finset.range B, CoreDebtCountAt Req Avail Step x H := by
+    (∑ q ∈ Req, RecoveryDepthOnReq Req Avail Step x hfinite q) =
+      ∑ H ∈ Finset.range B, CoreDebtCountAt Req Avail Step x H := by
   classical
   rw [totalDepth_eq_debtArea Req
     (RecoveryDepthOnReq Req Avail Step x hfinite) B hB]
@@ -186,13 +186,13 @@ theorem totalRecoveryDepth_eq_temporalDebtArea
   exact debtCountAt_eq_coreDebtCountAt hfinite H
 
 /-- Weighted Core-V1 debt at horizon `H` over a finite future contract. -/
-def CoreWeightedDebtAt
+noncomputable def CoreWeightedDebtAt
     {Q X : Type*} [DecidableEq Q]
     (Req : Finset Q) (w : Q → ℝ)
     (Avail : X → Set Q) (Step : X → X → Prop)
     (x : X) (H : ℕ) : ℝ := by
   classical
-  exact ∑ q in Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x), w q
+  exact ∑ q ∈ Req.filter (fun q => q ∉ RecoverableEnvelope Avail Step H x), w q
 
 /-- Weighted version of the Core-V1 recovery-area theorem. -/
 theorem totalWeightedRecoveryDepth_eq_temporalDebtArea
@@ -203,8 +203,8 @@ theorem totalWeightedRecoveryDepth_eq_temporalDebtArea
     (B : ℕ)
     (hB : ∀ q ∈ Req,
       RecoveryDepthOnReq Req Avail Step x hfinite q ≤ B) :
-    (∑ q in Req, RecoveryDepthOnReq Req Avail Step x hfinite q • w q) =
-      ∑ H in Finset.range B, CoreWeightedDebtAt Req w Avail Step x H := by
+    (∑ q ∈ Req, RecoveryDepthOnReq Req Avail Step x hfinite q • w q) =
+      ∑ H ∈ Finset.range B, CoreWeightedDebtAt Req w Avail Step x H := by
   classical
   rw [totalWeightedDepth_eq_weightedDebtArea Req w
     (RecoveryDepthOnReq Req Avail Step x hfinite) B hB]
