@@ -131,15 +131,20 @@ def DamageAtMost {α : Type*} [DecidableEq α]
 
 /-- Point-mass valuation of a set.  This is the deterministic Dirac probe used
 to recover set inclusion from universal probabilistic comparisons. -/
-def PointMass {Q : Type*} (q : Q) (K : Set Q) : ℕ :=
-  if q ∈ K then 1 else 0
+noncomputable def PointMass {Q : Type*} (q : Q) (K : Set Q) : ℕ := by
+  classical
+  exact if q ∈ K then 1 else 0
 
 /-- Point-mass order at one future is exactly implication of membership. -/
 theorem pointMass_le_iff
     {Q : Type*} {q : Q} {K L : Set Q} :
     PointMass q K ≤ PointMass q L ↔ (q ∈ K → q ∈ L) := by
-  by_cases hK : q ∈ K <;> by_cases hL : q ∈ L <;>
-    simp [PointMass, hK, hL]
+  classical
+  by_cases hK : q ∈ K
+  · by_cases hL : q ∈ L
+    · simp [PointMass, hK, hL]
+    · simp [PointMass, hK, hL]
+  · simp [PointMass, hK]
 
 /-- The deterministic inclusion order is exactly the order respected by every
 Dirac future.  Hence probability does not replace the old INSACERMO order: it
@@ -157,8 +162,9 @@ theorem all_pointMass_order_iff_subset
 as an unnormalised finite future law; normalisation is deliberately kept out
 of the structural kernel. -/
 noncomputable def WeightedMass {Q : Type*} [Fintype Q]
-    (w : Q → ℝ) (K : Set Q) : ℝ :=
-  ∑ q, if q ∈ K then w q else 0
+    (w : Q → ℝ) (K : Set Q) : ℝ := by
+  classical
+  exact ∑ q, if q ∈ K then w q else 0
 
 /-- Inclusion of future families monotonically increases every nonnegative
 finite weighted survival mass. -/
@@ -176,7 +182,7 @@ theorem weightedMass_mono
   · have hL : q ∈ L := hsub hK
     simp [hK, hL]
   · by_cases hL : q ∈ L
-    · simp [hK, hL, hw q]
+    · simpa [hK, hL] using hw q
     · simp [hK, hL]
 
 /-- Weighted future readiness at horizon `H`, obtained by valuing the existing
