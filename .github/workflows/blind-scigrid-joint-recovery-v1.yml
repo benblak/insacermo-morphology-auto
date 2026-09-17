@@ -1,0 +1,20 @@
+name: INSACERMO Blind SciGRID Joint Recovery V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_scigrid_joint_recovery_v1.py'
+      - '.github/workflows/blind-scigrid-joint-recovery-v1.yml'
+
+jobs:
+  blind-scigrid-joint-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned scientific stack
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install 'pypsa==1.3.0' 'numpy>=2.0,<3' 'pandas>=2.2,<3'
+      - name: Run fixed-before-result SciGRID protocol
+        run: python3 experiments/blind_scigrid_joint_recovery_v1.py
