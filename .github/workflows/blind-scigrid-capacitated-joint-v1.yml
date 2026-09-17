@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'experiments/blind_scigrid_capacitated_joint_v1.py'
+      - 'experiments/run_blind_scigrid_capacitated_joint_v1_compat.py'
       - '.github/workflows/blind-scigrid-capacitated-joint-v1.yml'
 
 jobs:
@@ -17,4 +18,4 @@ jobs:
           python3 -m pip install --upgrade pip
           python3 -m pip install 'pypsa==1.3.0' 'scipy>=1.16' 'networkx>=3.0'
       - name: Run fixed-before-result capacitated joint protocol
-        run: python3 experiments/blind_scigrid_capacitated_joint_v1.py
+        run: PYTHONPATH=experiments python3 experiments/run_blind_scigrid_capacitated_joint_v1_compat.py
