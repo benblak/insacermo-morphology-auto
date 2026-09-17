@@ -1,0 +1,28 @@
+name: INSACERMO Blind C. elegans Neural Repertoire V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_celegans_neural_repertoire_v1.py'
+      - '.github/workflows/blind-celegans-neural-repertoire-v1.yml'
+
+jobs:
+  blind-celegans-neural-repertoire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install scientific stack
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install 'numpy>=2.0,<3' 'scipy>=1.14,<2'
+      - name: Download pinned OpenWorm Varshney connectome data
+        run: |
+          curl -fL --retry 3 'https://raw.githubusercontent.com/openworm/VarshneyEtAl2011/3c684013b636d356b133a9bda09fbe27b79b7cbb/ConnOrdered_040903.mat' -o /tmp/ConnOrdered_040903.mat
+          curl -fL --retry 3 'https://raw.githubusercontent.com/openworm/VarshneyEtAl2011/3c684013b636d356b133a9bda09fbe27b79b7cbb/NeuronTypeOrdered_040903.mat' -o /tmp/NeuronTypeOrdered_040903.mat
+          sha256sum /tmp/ConnOrdered_040903.mat /tmp/NeuronTypeOrdered_040903.mat
+      - name: Run fixed-before-result neural repertoire protocol
+        env:
+          INSACERMO_CELEGANS_CONN: /tmp/ConnOrdered_040903.mat
+          INSACERMO_CELEGANS_TYPES: /tmp/NeuronTypeOrdered_040903.mat
+        run: python3 experiments/blind_celegans_neural_repertoire_v1.py
