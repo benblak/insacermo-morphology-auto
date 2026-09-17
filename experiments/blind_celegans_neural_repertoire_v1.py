@@ -2,6 +2,7 @@ import itertools, os, hashlib
 from collections import Counter, deque
 import numpy as np
 from scipy.io import loadmat
+from scipy import sparse
 
 CONN=os.environ.get('INSACERMO_CELEGANS_CONN','/tmp/ConnOrdered_040903.mat')
 TYPES=os.environ.get('INSACERMO_CELEGANS_TYPES','/tmp/NeuronTypeOrdered_040903.mat')
@@ -25,7 +26,8 @@ def s(x):
 def load_data():
     c=loadmat(CONN,squeeze_me=True,struct_as_record=False)
     t=loadmat(TYPES,squeeze_me=True,struct_as_record=False)
-    A=np.asarray(c['A_init_t_ordered'],dtype=float)
+    Araw=c['A_init_t_ordered']
+    A=Araw.toarray().astype(float) if sparse.issparse(Araw) else np.asarray(Araw,dtype=float)
     labels=[s(x) for x in np.ravel(c['Neuron_ordered'])]
     classes=[s(x) for x in np.ravel(t['NeuronType_ordered'])]
     if A.shape[0]!=A.shape[1] or len(labels)!=A.shape[0] or len(classes)!=A.shape[0]:
