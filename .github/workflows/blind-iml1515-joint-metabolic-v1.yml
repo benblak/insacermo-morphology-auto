@@ -1,0 +1,20 @@
+name: INSACERMO Blind iML1515 Joint Metabolic V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_iml1515_joint_metabolic_v1.py'
+      - '.github/workflows/blind-iml1515-joint-metabolic-v1.yml'
+
+jobs:
+  blind-iml1515-joint-metabolic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install scientific stack
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install 'cobra==0.30.0' 'swiglpk>=5.0'
+      - name: Run fixed-before-result metabolic protocol
+        run: python3 experiments/blind_iml1515_joint_metabolic_v1.py
