@@ -7,7 +7,22 @@ namespace UnknownFutureRisk
 open FutureRobustness
 open FutureDepthSpectrum
 open EventualFutureGeometry
+open FutureTransformationCalculus
 open UnknownFutureRobustness
+
+/-- Threshold availability is monotone in the finite horizon. -/
+theorem depthAtMost_mono_horizon
+    {d : DepthValue} {H : ℕ}
+    (h : DepthAtMost d H) :
+    DepthAtMost d (H + 1) := by
+  cases d with
+  | finite n =>
+      change n ≤ H at h
+      change n ≤ H + 1
+      exact Nat.le_trans h (Nat.le_succ H)
+  | infinite =>
+      change False at h
+      contradiction
 
 /-- Unnormalised total mass assigned to a declared family Γ of possible future
 bundles.  Normalisation is intentionally not required by the structural kernel. -/
