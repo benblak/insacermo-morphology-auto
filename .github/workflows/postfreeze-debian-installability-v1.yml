@@ -13,6 +13,6 @@ jobs:
       - name: Install dose-debcheck
         run: |
           sudo apt-get update
-          sudo apt-get install -y dose-extra
+          sudo apt-get install -y dose-distcheck
       - name: Run blind post-freeze Debian installability validation
         run: python3 experiments/postfreeze_debian_installability_v1.py
