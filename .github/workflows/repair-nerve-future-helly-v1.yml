@@ -12,8 +12,26 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify repair-nerve bridge
         run: python3 experiments/repair_nerve_future_helly_v1.py
-      - name: Build Lean bridge
-        working-directory: formal/actionability_information
+      - name: Bootstrap Lean and Lake manifest
+        shell: bash
         run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
           lake update
-          lake build
+      - name: Reject proof placeholders
+        shell: bash
+        run: |
+          if grep -R -nE '\\b(sorry|admit)\\b' \
+            formal/actionability_information/InsacermoActionabilityInformation.lean \
+            formal/actionability_information/InsacermoActionabilityInformation/RepairPlanDuality.lean; then
+            echo 'Proof placeholder found.'
+            exit 1
+          fi
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/actionability_information
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
