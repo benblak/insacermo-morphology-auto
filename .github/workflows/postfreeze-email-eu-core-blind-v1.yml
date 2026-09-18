@@ -1,0 +1,14 @@
+name: INSACERMO Post-Freeze Email-Eu-core Blind V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  email-eu-core-blind:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run blind confirmatory Email-Eu-core validation
+        run: python3 experiments/postfreeze_email_eu_core_blind_v1.py
