@@ -163,7 +163,7 @@ theorem deadlineRepair_implies_eventualRepair
     (by
       cases hs : Spectrum Avail Step (applyRepair r x) F with
       | finite d =>
-          exact ⟨d, hs⟩
+          exact ⟨d, rfl⟩
       | infinite =>
           rw [hs] at hdepth
           simp [DepthAtMost] at hdepth)
