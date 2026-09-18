@@ -157,33 +157,36 @@ bundle_of = {v: k for k, v in contract_name.items()}
 
 def repo_for(restored):
     removed = set(PERTURB) - set(restored)
-    parts = []
+    real_parts = []
     for fields, raw in stanzas:
         if fields["Package"] not in removed:
-            parts.append(raw.rstrip() + "\n")
+            real_parts.append(raw.rstrip() + "\n")
+    tag = "none" if not restored else "_".join(sorted(restored))
+    bg_path = ROOT / ("background_" + tag + ".Packages")
+    bg_path.write_text("\n".join(real_parts) + "\n", encoding="utf-8")
+
+    contract_parts = []
     for bundle in bundles:
         name = contract_name[bundle]
-        parts.append(
+        contract_parts.append(
             f"Package: {name}\n"
             f"Version: 1\n"
             f"Architecture: amd64\n"
             f"Depends: {', '.join(bundle)}\n"
             f"Description: INSACERMO synthetic future contract {'+'.join(bundle)}\n"
         )
-    path = ROOT / ("repo_" + ("none" if not restored else "_".join(sorted(restored))) + ".Packages")
-    path.write_text("\n".join(parts) + "\n", encoding="utf-8")
-    return path
+    fg_path = ROOT / ("contracts_" + tag + ".Packages")
+    fg_path.write_text("\n".join(contract_parts) + "\n", encoding="utf-8")
+    return bg_path, fg_path
 
 def exact_success_set(restored):
-    repo = repo_for(restored)
-    requested = ",".join(contract_name[b] for b in bundles)
+    background, foreground = repo_for(restored)
     cmd = [
         "dose-debcheck",
-        "--quiet",
         "--deb-native-arch=amd64",
         "--failures",
-        "--checkonly", requested,
-        str(repo),
+        "--bg=" + str(background),
+        str(foreground),
     ]
     p = subprocess.run(cmd, text=True, capture_output=True, timeout=240)
     if p.returncode not in (0, 1):
