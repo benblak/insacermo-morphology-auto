@@ -115,6 +115,11 @@ ranked_damage = sorted(
     eligible_damage,
     key=lambda m: (-dependents[m], m),
 )
+print("DESIGN_DIAGNOSTIC_PARSED_MODULES", len(modules))
+print("DESIGN_DIAGNOSTIC_PARSED_IMPORT_EDGES", sum(len(v) for v in imports.values()))
+print("DESIGN_DIAGNOSTIC_NONZERO_DEPENDENT_MODULES", sum(dependents[m] > 0 for m in module_set))
+print("DESIGN_DIAGNOSTIC_ELIGIBLE_DAMAGE", len(ranked_damage))
+print("DESIGN_DIAGNOSTIC_TOP_COUNTS", " ".join(str(dependents[m]) for m in ranked_damage[:10]))
 assert len(ranked_damage) >= max(DAMAGE_RANKS)
 damages = [ranked_damage[r - 1] for r in DAMAGE_RANKS]
 
