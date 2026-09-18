@@ -1,0 +1,14 @@
+name: INSACERMO Repair Nerve Future Helly V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  repair-nerve:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify repair-nerve bridge
+        run: python3 experiments/repair_nerve_future_helly_v1.py
