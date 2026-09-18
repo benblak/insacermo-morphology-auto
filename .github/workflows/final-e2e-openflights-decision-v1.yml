@@ -1,0 +1,14 @@
+name: INSACERMO Final E2E OpenFlights Decision V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  final-e2e-openflights-decision:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run final end-to-end future-risk decision validation
+        run: python3 experiments/final_e2e_openflights_future_risk_decision_v1.py
