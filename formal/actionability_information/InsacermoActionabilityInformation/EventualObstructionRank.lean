@@ -27,17 +27,24 @@ def EventualObstructionAtCard
     F.card = k ∧
     ¬ (EventualFutureComplex Avail Step x).feasible F
 
+/-- Any eventual obstruction yields at least one obstructed cardinality. -/
+theorem exists_eventualObstructionAtCard
+    {Q X : Type*} [DecidableEq Q]
+    {Avail : X → Set Q} {Step : X → X → Prop}
+    {x : X}
+    (hobs : HasEventualObstruction Avail Step x) :
+    ∃ k, EventualObstructionAtCard Avail Step x k := by
+  rcases hobs with ⟨F, hF⟩
+  exact ⟨F.card, F, rfl, hF⟩
+
 /-- The least cardinality at which an eventual obstruction appears.
 This is defined only when at least one finite eventual obstruction exists. -/
 noncomputable def Rank
     {Q X : Type*} [DecidableEq Q]
     (Avail : X → Set Q) (Step : X → X → Prop)
     (x : X)
-    (hobs : HasEventualObstruction Avail Step x) : ℕ := by
-  classical
-  exact Nat.find (by
-    rcases hobs with ⟨F, hF⟩
-    exact ⟨F.card, F, rfl, hF⟩)
+    (hobs : HasEventualObstruction Avail Step x) : ℕ :=
+  Nat.find (exists_eventualObstructionAtCard hobs)
 
 /-- The empty future bundle is always eventually feasible. -/
 theorem eventualFutureComplex_empty_feasible
@@ -45,10 +52,10 @@ theorem eventualFutureComplex_empty_feasible
     {Avail : X → Set Q} {Step : X → X → Prop}
     {x : X} :
     (EventualFutureComplex Avail Step x).feasible (∅ : Finset Q) := by
-  change HasFiniteJointRecoveryDepth Avail Step x (∅ : Finset Q)
+  show HasFiniteJointRecoveryDepth Avail Step x (∅ : Finset Q)
   refine ⟨0, ?_⟩
-  change JointRecoverable Avail Step 0 x (∅ : Set Q)
-  exact jointRecoverable_empty Avail Step 0 x
+  simpa [TemporalContractComplex] using
+    (jointRecoverable_empty Avail Step 0 x)
 
 /-- The rank is witnessed by an actual eventually impossible bundle. -/
 theorem rank_spec
@@ -59,10 +66,7 @@ theorem rank_spec
     EventualObstructionAtCard Avail Step x
       (Rank Avail Step x hobs) := by
   classical
-  unfold Rank
-  exact Nat.find_spec (by
-    rcases hobs with ⟨F, hF⟩
-    exact ⟨F.card, F, rfl, hF⟩)
+  exact Nat.find_spec (exists_eventualObstructionAtCard hobs)
 
 /-- Any explicit eventual obstruction gives an upper bound on the rank. -/
 theorem rank_le_of_obstruction
@@ -75,8 +79,8 @@ theorem rank_le_of_obstruction
     Rank Avail Step x hobs ≤ F.card := by
   classical
   unfold Rank
-  apply Nat.find_min'
-  exact ⟨F, rfl, hF⟩
+  exact Nat.find_min' (exists_eventualObstructionAtCard hobs)
+    ⟨F, rfl, hF⟩
 
 /-- No eventual obstruction can occur below the rank. -/
 theorem no_obstruction_below_rank
@@ -158,7 +162,12 @@ theorem rank_le_two_of_hiddenJointPair
   let hobs : HasEventualObstruction Avail Step x := ⟨{q, r}, hbad⟩
   refine ⟨hobs, ?_⟩
   have hle := rank_le_of_obstruction hobs hbad
-  exact le_trans hle (by simp)
+  have hcard : ({q, r} : Finset Q).card ≤ 2 := by
+    by_cases hqr : q = r
+    · subst r
+      simp
+    · simp [hqr]
+  exact le_trans hle hcard
 
 end EventualObstructionRank
 
