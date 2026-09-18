@@ -1,0 +1,14 @@
+name: INSACERMO Post-Freeze Cosmology Null Dynamics V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  cosmology-null-dynamics:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run blind cosmology null-dynamics falsification
+        run: python3 experiments/postfreeze_cosmology_null_dynamics_v1.py
