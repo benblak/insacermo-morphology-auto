@@ -1,0 +1,18 @@
+name: INSACERMO Post-Freeze Debian Installability V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  debian-installability:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dose-debcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dose-extra
+      - name: Run blind post-freeze Debian installability validation
+        run: python3 experiments/postfreeze_debian_installability_v1.py
