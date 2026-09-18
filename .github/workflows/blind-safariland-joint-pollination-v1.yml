@@ -1,0 +1,26 @@
+name: INSACERMO Blind Safariland Joint Pollination V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_safariland_joint_pollination_v1.py'
+      - '.github/workflows/blind-safariland-joint-pollination-v1.yml'
+
+jobs:
+  blind-safariland-joint-pollination:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install scientific stack
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install 'numpy>=2.0,<3' 'pyreadr>=0.5,<0.6'
+      - name: Download fixed Safariland dataset
+        run: |
+          curl -fL --retry 3 'https://raw.githubusercontent.com/cran/bipartite/master/data/Safariland.rda' -o /tmp/Safariland.rda
+          sha256sum /tmp/Safariland.rda
+      - name: Run fixed-before-result pollination protocol
+        env:
+          INSACERMO_SAFARILAND_RDA: /tmp/Safariland.rda
+        run: python3 experiments/blind_safariland_joint_pollination_v1.py
