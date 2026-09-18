@@ -1,0 +1,17 @@
+name: INSACERMO Post-Freeze OpenFlights Private Witness V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/postfreeze_openflights_private_witness_v1.py'
+      - 'OPENFLIGHTS_PRIVATE_WITNESS_V1_FROZEN_PROTOCOL_2026-09-19.md'
+      - '.github/workflows/postfreeze-openflights-private-witness-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  openflights-private-witness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run frozen-before-result OpenFlights private-witness audit
+        run: python3 experiments/postfreeze_openflights_private_witness_v1.py
