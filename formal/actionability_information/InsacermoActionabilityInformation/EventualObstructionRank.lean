@@ -43,8 +43,9 @@ noncomputable def Rank
     {Q X : Type*} [DecidableEq Q]
     (Avail : X → Set Q) (Step : X → X → Prop)
     (x : X)
-    (hobs : HasEventualObstruction Avail Step x) : ℕ :=
-  Nat.find (exists_eventualObstructionAtCard hobs)
+    (hobs : HasEventualObstruction Avail Step x) : ℕ := by
+  classical
+  exact Nat.find (exists_eventualObstructionAtCard hobs)
 
 /-- The empty future bundle is always eventually feasible. -/
 theorem eventualFutureComplex_empty_feasible
@@ -66,6 +67,7 @@ theorem rank_spec
     EventualObstructionAtCard Avail Step x
       (Rank Avail Step x hobs) := by
   classical
+  unfold Rank
   exact Nat.find_spec (exists_eventualObstructionAtCard hobs)
 
 /-- Any explicit eventual obstruction gives an upper bound on the rank. -/
