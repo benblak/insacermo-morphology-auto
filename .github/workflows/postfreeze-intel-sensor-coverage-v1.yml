@@ -1,0 +1,14 @@
+name: INSACERMO Post-Freeze Intel Sensor Coverage V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  intel-sensor-coverage:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run post-freeze Intel sensor coverage validation
+        run: python3 experiments/postfreeze_intel_sensor_coverage_v1.py
