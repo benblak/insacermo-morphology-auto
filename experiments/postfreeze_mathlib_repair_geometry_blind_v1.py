@@ -40,7 +40,7 @@ def module_name(path: Path) -> str:
 modules = {module_name(p): p for p in files}
 module_set = set(modules)
 
-import_re = re.compile(r"^\\s*(?:(?:public|private)\\s+)?import\\s+([A-Za-z0-9_'.]+)\\s*$")
+import_re = re.compile(r"^\s*(?:(?:public|private)\s+)?import\s+([A-Za-z0-9_'.]+)\s*$")
 
 def strip_lean_comments(source: str) -> str:
     # Remove nested /- ... -/ comments and -- comments before parsing imports.
@@ -61,10 +61,10 @@ def strip_lean_comments(source: str) -> str:
             i += 1
             continue
         if i + 1 < len(source) and source[i:i+2] == "--":
-            j = source.find("\\n", i)
+            j = source.find("\n", i)
             if j == -1:
                 break
-            out.append("\\n")
+            out.append("\n")
             i = j + 1
             continue
         out.append(source[i])
