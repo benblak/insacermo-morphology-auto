@@ -120,10 +120,8 @@ theorem hiddenJointPair_of_eventualMinimalObstruction_pair
     · intro z hz
       simp at hz ⊢
       exact Or.inl hz
-    · intro heq
-      have hrin : r ∈ ({q} : Finset Q) := by
-        rw [heq]
-        simp
+    · intro hback
+      have hrin : r ∈ ({q} : Finset Q) := hback (by simp)
       simp at hrin
       exact hqr hrin.symm
   have hrsub : ({r} : Finset Q) ⊂ {q, r} := by
@@ -131,10 +129,8 @@ theorem hiddenJointPair_of_eventualMinimalObstruction_pair
     · intro z hz
       simp at hz ⊢
       exact Or.inr hz
-    · intro heq
-      have hqin : q ∈ ({r} : Finset Q) := by
-        rw [heq]
-        simp
+    · intro hback
+      have hqin : q ∈ ({r} : Finset Q) := hback (by simp)
       simp at hqin
       exact hqr hqin
   exact ⟨hmin.2 {q} hqsub, hmin.2 {r} hrsub,
@@ -213,7 +209,7 @@ theorem nonWorsening_preserves_eventual_finiteness
     simpa [hd, DepthAtMost]
   cases hAF : after F with
   | finite e =>
-      exact ⟨e, hAF⟩
+      exact ⟨e, rfl⟩
   | infinite =>
       rw [hAF] at hafterThreshold
       simp [DepthAtMost] at hafterThreshold
@@ -235,7 +231,7 @@ theorem nonImproving_preserves_infinity
       rw [hinf] at hbefore
       simp [DepthAtMost] at hbefore
   | infinite =>
-      exact hafter
+      rfl
 
 end EventualFutureGeometry
 
