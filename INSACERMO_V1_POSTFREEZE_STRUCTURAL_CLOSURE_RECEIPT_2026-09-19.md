@@ -111,6 +111,47 @@ At the same final head, the following regression/integration workflows also comp
 - Final E2E OpenFlights Decision V1 — run #19
 - Post-Freeze Debian Installability V1 — run #18
 
+
+## 2D. Confirmatory real-data private-witness audit
+
+PR #78: **Post-freeze OpenFlights private-witness real-data audit V1**
+
+Frozen-before-result protocol commit:
+
+`70912a6f41a48b8312fc7674c87314b22018214a`
+
+Audit head:
+
+`90b1738248a02ceed3467fecfa3b1bcc8a764a64`
+
+Merged into PR #77 as:
+
+`a6362390b2c74f08c21d576e260e6ad22ac739d3`
+
+Workflow:
+
+- INSACERMO Post-Freeze OpenFlights Private Witness V1 — run #1 / ID `35403202183` — **SUCCESS**
+
+The protocol inherited the previously fixed OpenFlights joint settings: 67,663 routes, start `KEF`, the same 25 future targets, deadline `H=3`, and the same five scenarios. No target, horizon, start airport, or scenario was changed after observing the endpoint.
+
+Baseline result:
+
+- singleton feasibility: 25/25;
+- pair feasibility: 213/300;
+- triple feasibility: 754/2300;
+- minimal obstructions of order 2: 87;
+- minimal obstructions of order 3: 215;
+- rank-3 pairwise-compatibility check: **YES**.
+
+Across all five scenarios:
+
+- minimal obstructions: 1,859;
+- order 2: 390;
+- order 3: 1,469;
+- private-witness audit: **PASS**.
+
+Interpretation guardrail: these are finite-horizon `H=3` obstructions. They do not by themselves establish infinite-horizon irreversibility. The empirical audit confirms the minimal-obstruction/private-witness structure on the inherited OpenFlights adapter; it is not presented as a new discovery of joint interaction itself, which had already been observed in the earlier OpenFlights joint study.
+
 ## 3. Interpretation
 
 The post-freeze work does **not** replace the Core V1.4 paper.
