@@ -38,3 +38,7 @@ import InsacermoActionabilityInformation.FutureRepairPrice
 import InsacermoActionabilityInformation.UnknownFutureRobustness
 import InsacermoActionabilityInformation.UnknownFutureRisk
 import InsacermoActionabilityInformation.FutureRiskDecision
+
+import InsacermoActionabilityInformation.RepairPlanDuality
+
+import InsacermoActionabilityInformation.MasterClosureV1
