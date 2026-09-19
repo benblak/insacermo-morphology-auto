@@ -1,0 +1,17 @@
+name: INSACERMO V2 Tree Cavity Golden Audit
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/v2_tree_cavity_golden_audit.py'
+      - 'V2_TREE_CAVITY_GOLDEN_BRIDGE_2026-09-19.md'
+      - '.github/workflows/v2-tree-cavity-golden.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run V2 tree-cavity golden audit
+        run: python3 experiments/v2_tree_cavity_golden_audit.py
