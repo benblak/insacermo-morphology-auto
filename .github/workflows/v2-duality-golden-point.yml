@@ -1,0 +1,17 @@
+name: INSACERMO V2 Duality Golden Point Audit
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/v2_duality_golden_point_audit.py'
+      - 'V2_DUALITY_GOLDEN_POINT_FROZEN_PROTOCOL_2026-09-19.md'
+      - '.github/workflows/v2-duality-golden-point.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run frozen-before-result V2 duality/golden-point audit
+        run: python3 experiments/v2_duality_golden_point_audit.py
