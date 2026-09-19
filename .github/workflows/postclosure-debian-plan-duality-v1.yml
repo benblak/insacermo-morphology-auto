@@ -1,0 +1,21 @@
+name: INSACERMO Post-Closure Debian Plan Duality V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/postclosure_debian_plan_duality_v1.py'
+      - 'DEBIAN_PLAN_DUALITY_V1_FROZEN_PROTOCOL_2026-09-19.md'
+      - '.github/workflows/postclosure-debian-plan-duality-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  debian-plan-duality:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dose-debcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y dose-distcheck
+      - name: Run frozen-before-result Debian plan-duality audit
+        run: python3 experiments/postclosure_debian_plan_duality_v1.py
