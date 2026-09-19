@@ -1,0 +1,17 @@
+name: INSACERMO V2 Golden Path Obstruction Audit
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/v2_golden_path_obstruction_audit.py'
+      - 'V2_GOLDEN_PATH_OBSTRUCTION_BRIDGE_2026-09-19.md'
+      - '.github/workflows/v2-golden-path-obstruction.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run V2 golden path-obstruction audit
+        run: python3 experiments/v2_golden_path_obstruction_audit.py
