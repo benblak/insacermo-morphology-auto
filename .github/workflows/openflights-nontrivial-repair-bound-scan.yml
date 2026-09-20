@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'experiments/openflights_nontrivial_repair_bound_scan_v1.py'
+      - 'experiments/openflights_airline_pair_nontrivial_scan_v1.py'
       - '.github/workflows/openflights-nontrivial-repair-bound-scan.yml'
   workflow_dispatch:
 
@@ -15,5 +16,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run exploratory exact scan
+      - name: Run exploratory airport-pair scan
         run: python experiments/openflights_nontrivial_repair_bound_scan_v1.py
+      - name: Run exploratory airline-pair scan
+        run: python experiments/openflights_airline_pair_nontrivial_scan_v1.py
