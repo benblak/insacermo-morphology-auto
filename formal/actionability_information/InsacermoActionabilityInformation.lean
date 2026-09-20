@@ -52,3 +52,5 @@ import InsacermoActionabilityInformation.FractureObstructionRepairBound
 import InsacermoActionabilityInformation.WitnessInterception
 
 import InsacermoActionabilityInformation.RepairDiversityThreshold
+
+import InsacermoActionabilityInformation.RepairDiversityDimension
