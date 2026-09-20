@@ -54,3 +54,5 @@ import InsacermoActionabilityInformation.WitnessInterception
 import InsacermoActionabilityInformation.RepairDiversityThreshold
 
 import InsacermoActionabilityInformation.RepairDiversityDimension
+
+import InsacermoActionabilityInformation.WitnessRepairSignaturePacking
