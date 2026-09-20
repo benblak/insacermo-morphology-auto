@@ -50,3 +50,5 @@ import InsacermoActionabilityInformation.StructuralAuditSCCBridge
 import InsacermoActionabilityInformation.StructuralAuditReachability
 
 -- Structural audit E2E integration trigger: theorem layer unchanged.
+
+-- Email-Eu-core structural audit CI trigger; theorem statements unchanged.
