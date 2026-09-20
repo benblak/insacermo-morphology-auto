@@ -36,7 +36,7 @@ for _ in range(H):
     frontier=nxt
 
 bundles=[tuple(c) for k in range(1,MAX_BUNDLE+1) for c in itertools.combinations(REQUIRED,k)]
-bundle_index={b:i for i,b in enumerate(bundles)}
+bundle_index={frozenset(b):i for i,b in enumerate(bundles)}
 required_set=set(REQUIRED)
 
 # For each bundle, collect masks of required airports whose isolation would kill a witness.
@@ -48,10 +48,10 @@ for p in paths:
     touched=frozenset(required_set.intersection(p))
     for k in range(1,min(MAX_BUNDLE,len(seen))+1):
         for b in itertools.combinations(seen,k):
-            witness_touch[bundle_index[b]].add(touched)
+            witness_touch[bundle_index[frozenset(b)]].add(touched)
 
 def feasible_under(cut, b):
-    ws=witness_touch[bundle_index[b]]
+    ws=witness_touch[bundle_index[frozenset(b)]]
     return any(t.isdisjoint(cut) for t in ws)
 
 def proper_nonempty(b):
