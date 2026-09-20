@@ -60,12 +60,16 @@ theorem badWitnessAtMostTwo_of_chainCharacterization
       · intro hfeas
         have hc := (hchar ({q, r} : Finset Q)).1 hfeas
         have hcomp := hc.2 q (by simp) r (by simp) hqr
-        exact hinc hcomp
+        rcases hcomp with hqrRel | hrqRel
+        · exact hinc.1 hqrRel
+        · exact hinc.2 hrqRel
   · push_neg at hreach
     rcases hreach with ⟨q, hq, hqbad⟩
     refine ⟨{q}, ?_, ?_, ?_⟩
     · intro z hz
-      simpa using hq
+      have hzq : z = q := by simpa using hz
+      subst z
+      exact hq
     · simp
     · intro hfeas
       have hc := (hchar ({q} : Finset Q)).1 hfeas
