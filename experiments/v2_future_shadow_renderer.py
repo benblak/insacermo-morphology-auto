@@ -72,7 +72,7 @@ def analyze(g):
     pair_min_obs = set()
     for a,b in itertools.combinations(TARGETS,2):
         d = min_depth_covering(g,(a,b))
-        pair_depth[(a,b)] = d
+        pair_depth[tuple(sorted((a,b)))] = d
         if singleton_depth[a] is not None and singleton_depth[b] is not None and d is None:
             pair_min_obs.add(tuple(sorted((a,b))))
     triple_min_obs = set()
