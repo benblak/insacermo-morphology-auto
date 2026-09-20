@@ -46,3 +46,5 @@ import InsacermoActionabilityInformation.MasterClosureV1
 import InsacermoActionabilityInformation.FutureDamageCompositionLaw
 
 import InsacermoActionabilityInformation.FirstFractureRepairLaw
+
+import InsacermoActionabilityInformation.FractureObstructionRepairBound
