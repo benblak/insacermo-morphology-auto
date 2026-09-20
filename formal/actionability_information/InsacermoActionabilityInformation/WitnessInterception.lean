@@ -92,6 +92,7 @@ theorem not_avoidsSupport_iff_crossesSupport
     {X : Type*}
     {support : X → X → Prop} :
     ∀ p : List X, ¬ AvoidsSupport support p ↔ CrossesSupport support p := by
+  classical
   intro p
   induction p with
   | nil =>
@@ -101,7 +102,19 @@ theorem not_avoidsSupport_iff_crossesSupport
       | nil =>
           simp [AvoidsSupport, CrossesSupport]
       | cons y ys =>
-          simp [AvoidsSupport, CrossesSupport, ih]
+          constructor
+          · intro hnot
+            by_cases hxy : support x y
+            · exact Or.inl hxy
+            · right
+              apply ih.mp
+              intro htail
+              apply hnot
+              exact ⟨hxy, htail⟩
+          · intro hcross hav
+            rcases hcross with hxy | htail
+            · exact hav.1 hxy
+            · exact (ih.mpr htail) hav.2
 
 theorem destroyed_bundle_every_witness_crosses_support
     {Q X : Type*}
