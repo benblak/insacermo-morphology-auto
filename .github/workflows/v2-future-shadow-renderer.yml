@@ -1,0 +1,23 @@
+name: INSACERMO V2 Future Shadow Renderer
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/v2_future_shadow_renderer.py'
+      - '.github/workflows/v2-future-shadow-renderer.yml'
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Render deterministic future shadow
+        run: |
+          mkdir -p out/future_shadow
+          python3 experiments/v2_future_shadow_renderer.py --outdir out/future_shadow
+      - name: Upload deterministic render
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_FUTURE_SHADOW_OPENFLIGHTS_NO_FI
+          path: out/future_shadow/
