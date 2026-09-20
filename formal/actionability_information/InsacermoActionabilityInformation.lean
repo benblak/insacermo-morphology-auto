@@ -48,3 +48,5 @@ import InsacermoActionabilityInformation.FutureDamageCompositionLaw
 import InsacermoActionabilityInformation.FirstFractureRepairLaw
 
 import InsacermoActionabilityInformation.FractureObstructionRepairBound
+
+import InsacermoActionabilityInformation.WitnessInterception
