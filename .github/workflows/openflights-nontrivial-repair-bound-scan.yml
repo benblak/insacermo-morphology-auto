@@ -5,6 +5,7 @@ on:
     paths:
       - 'experiments/openflights_nontrivial_repair_bound_scan_v1.py'
       - 'experiments/openflights_airline_pair_nontrivial_scan_v1.py'
+      - 'experiments/openflights_nontrivial_repair_bound_selected_audit_v1.py'
       - '.github/workflows/openflights-nontrivial-repair-bound-scan.yml'
   workflow_dispatch:
 
@@ -20,3 +21,5 @@ jobs:
         run: python experiments/openflights_nontrivial_repair_bound_scan_v1.py
       - name: Run exploratory airline-pair scan
         run: python experiments/openflights_airline_pair_nontrivial_scan_v1.py
+      - name: Run selected TK-QR post-selection audit
+        run: python experiments/openflights_nontrivial_repair_bound_selected_audit_v1.py
