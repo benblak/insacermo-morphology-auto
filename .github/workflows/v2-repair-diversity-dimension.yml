@@ -1,0 +1,38 @@
+name: INSACERMO V2 Repair Diversity Dimension
+
+on:
+  pull_request:
+    paths:
+      - 'formal/actionability_information/InsacermoActionabilityInformation/RepairDiversityDimension.lean'
+      - 'formal/actionability_information/InsacermoActionabilityInformation.lean'
+      - '.github/workflows/v2-repair-diversity-dimension.yml'
+  workflow_dispatch:
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap Lean and Lake manifest
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake update
+      - name: Reject proof placeholders
+        shell: bash
+        run: |
+          if grep -R -nE '\b(sorry|admit)\b' formal/actionability_information/InsacermoActionabilityInformation/RepairDiversityDimension.lean; then
+            echo 'Proof placeholder found.'
+            exit 1
+          fi
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/actionability_information
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+          leanchecker: true
+          leanchecker-args: 'InsacermoActionabilityInformation.RepairDiversityDimension'
