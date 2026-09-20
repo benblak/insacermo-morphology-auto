@@ -239,18 +239,20 @@ finite. -/
 theorem reachable_transport_jointRecoverable
     {X : Type*} {Step : X → X → Prop}
     {x y : X}
-    (hxy : StateReachable Step x y)
-    {H : ℕ} {R : Set X}
-    (hR : JointRecoverable SingletonAvail Step H y R) :
-    ∃ H', JointRecoverable SingletonAvail Step H' x R := by
+    (hxy : StateReachable Step x y) :
+    ∀ {H : ℕ} {R : Set X},
+      JointRecoverable SingletonAvail Step H y R →
+      ∃ H', JointRecoverable SingletonAvail Step H' x R := by
   induction hxy with
   | refl =>
+      intro H R hR
       exact ⟨H, hR⟩
   | @tail b c hxb hbc ih =>
+      intro H R hR
       have hrest :
           JointRecoverable SingletonAvail Step H c
             (R \ SingletonAvail b) :=
-        jointRecoverable_downward H c hR Set.diff_subset
+        jointRecoverable_downward H c hR Set.sdiff_subset
       have hb :
           JointRecoverable SingletonAvail Step (H + 1) b R :=
         Or.inr ⟨c, hbc, hrest⟩
@@ -305,7 +307,17 @@ theorem eventual_stateGoal_chain_implies_feasible
           have hFset :
               (Set.insert q (↑G : Set X)) = (↑F : Set X) := by
             ext z
-            simp [G, hqF]
+            constructor
+            · intro hz
+              rcases hz with hqz | hGz
+              · subst z
+                exact hqF
+              · exact Finset.mem_of_mem_erase hGz
+            · intro hzF
+              by_cases hzq : z = q
+              · exact Or.inl hzq
+              · exact Or.inr (by
+                  exact Finset.mem_erase.mpr ⟨hzq, hzF⟩)
           have hFq :
               JointRecoverable SingletonAvail Step HG q (↑F : Set X) := by
             rw [← hFset]
