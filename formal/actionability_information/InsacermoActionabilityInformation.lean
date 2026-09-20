@@ -48,3 +48,5 @@ import InsacermoActionabilityInformation.StructuralAuditKernel
 import InsacermoActionabilityInformation.StructuralAuditSCCBridge
 
 import InsacermoActionabilityInformation.StructuralAuditReachability
+
+-- Structural audit E2E integration trigger: theorem layer unchanged.
