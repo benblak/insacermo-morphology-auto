@@ -78,15 +78,30 @@ theorem packing_lower_bound
     (∑ future ∈ P, floor future) ≤ SelectionCost atomCost H := by
   classical
 
-  choose pick hpick_mem hpick_sub using
-    fun future (hfuture : future ∈ P) => hrestore future hfuture
+  let pick : (future : F) → future ∈ P → W :=
+    fun future hfuture => Classical.choose (hrestore future hfuture)
 
-  let S : F → Finset I := fun future => M.signature (pick future)
+  have hpick_spec :
+      ∀ future (hfuture : future ∈ P),
+        pick future hfuture ∈ M.witnesses future ∧
+        M.signature (pick future hfuture) ⊆ H := by
+    intro future hfuture
+    exact Classical.choose_spec (hrestore future hfuture)
+
+  let S : F → Finset I := fun future =>
+    if hfuture : future ∈ P then M.signature (pick future hfuture) else ∅
+
+  have hS_eq :
+      ∀ future (hfuture : future ∈ P),
+        S future = M.signature (pick future hfuture) := by
+    intro future hfuture
+    simp [S, hfuture]
 
   have hS_sub_universe :
       ∀ future, future ∈ P → S future ⊆ M.RepairUniverse future := by
     intro future hfuture
-    exact M.signature_subset_repairUniverse (hpick_mem future hfuture)
+    rw [hS_eq future hfuture]
+    exact M.signature_subset_repairUniverse (hpick_spec future hfuture).1
 
   have hS_pairwise :
       (P : Set F).PairwiseDisjoint S := by
@@ -100,14 +115,16 @@ theorem packing_lower_bound
   have hU_sub_H : U ⊆ H := by
     intro i hi
     rcases Finset.mem_biUnion.mp hi with ⟨future, hfuture, hiS⟩
-    exact hpick_sub future hfuture hiS
+    rw [hS_eq future hfuture] at hiS
+    exact (hpick_spec future hfuture).2 hiS
 
   have hsum_floor :
       (∑ future ∈ P, floor future) ≤
         ∑ future ∈ P, SelectionCost atomCost (S future) := by
     apply Finset.sum_le_sum
     intro future hfuture
-    exact hlower future hfuture (pick future) (hpick_mem future hfuture)
+    rw [hS_eq future hfuture]
+    exact hlower future hfuture (pick future hfuture) (hpick_spec future hfuture).1
 
   have hsum_signatures :
       (∑ future ∈ P, SelectionCost atomCost (S future)) =
