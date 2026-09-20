@@ -49,7 +49,8 @@ theorem chain_destruction_localizes
           have hprefix : ChainNonImproving d n := by
             intro i hi
             exact hchain i (Nat.lt_trans hi (Nat.lt_succ_self n))
-          exact ih hprefix h0 hn
+          rcases ih hprefix h0 hn with ⟨i, hi, hfract⟩
+          exact ⟨i, Nat.lt_trans hi (Nat.lt_succ_self n), hfract⟩
 
 /-- There exists at least one fracture index under the hypotheses of the
 localization theorem. -/
@@ -61,8 +62,9 @@ def HasFracture
 future. -/
 noncomputable def FirstFractureIndex
     (d : Nat → DepthValue) (n : Nat)
-    (h : HasFracture d n) : Nat :=
-  Nat.find h
+    (h : HasFracture d n) : Nat := by
+  classical
+  exact Nat.find h
 
 /-- The first fracture index is indeed a destructive step inside the chain. -/
 theorem firstFractureIndex_spec
@@ -70,6 +72,7 @@ theorem firstFractureIndex_spec
     (h : HasFracture d n) :
     FirstFractureIndex d n h < n ∧
       FractureAt d (FirstFractureIndex d n h) := by
+  classical
   exact Nat.find_spec h
 
 /-- No earlier adjacent decision step destroys the future. -/
@@ -77,6 +80,7 @@ theorem no_fracture_before_first
     (d : Nat → DepthValue) (n : Nat)
     (h : HasFracture d n) :
     ∀ j, j < FirstFractureIndex d n h → ¬ FractureAt d j := by
+  classical
   intro j hj hfj
   have hjn : j < n := by
     exact Nat.lt_trans hj (firstFractureIndex_spec d n h).1
@@ -92,6 +96,7 @@ theorem firstFractureIndex_unique_minimal
     (hi : i < n ∧ FractureAt d i)
     (hminimal : ∀ j, j < i → ¬ FractureAt d j) :
     i = FirstFractureIndex d n h := by
+  classical
   have hfirst_le_i : FirstFractureIndex d n h ≤ i :=
     Nat.find_min' h hi
   have hi_le_first : i ≤ FirstFractureIndex d n h := by
@@ -131,7 +136,7 @@ depth in the master spectrum. -/
 theorem repair_after_destruction_is_creation
     {Q X Repair : Type*} [DecidableEq Q]
     {Avail : X → Set Q} {Step : X → X → Prop}
-    {applyRepair : Repair → X → X} {cost : Repair → Nat}
+    {applyRepair : Repair → X → X}
     {xBefore xAfter : X} {F : Finset Q} {r : Repair}
     (hdestr :
       Destroyed
@@ -154,7 +159,7 @@ strict spectrum improvement (an acceleration from infinity to finite depth). -/
 theorem repair_after_destruction_is_strict_improvement
     {Q X Repair : Type*} [DecidableEq Q]
     {Avail : X → Set Q} {Step : X → X → Prop}
-    {applyRepair : Repair → X → X} {cost : Repair → Nat}
+    {applyRepair : Repair → X → X}
     {xBefore xAfter : X} {F : Finset Q} {r : Repair}
     (hdestr :
       Destroyed
