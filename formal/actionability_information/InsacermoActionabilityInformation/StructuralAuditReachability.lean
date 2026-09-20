@@ -197,6 +197,139 @@ theorem eventual_stateGoal_feasible_implies_chain
     exact jointRecoverable_singletonAvail_implies_pairwiseComparable
       H x hH q hq r hr hqr
 
+
+/-- Adding the current state as a state-valued goal does not increase the
+required horizon: if the residual bundle is jointly recoverable from q, then
+the bundle obtained by also requiring q is jointly recoverable from q at the
+same horizon. -/
+theorem jointRecoverable_insert_current
+    {X : Type*} {Step : X → X → Prop}
+    {H : ℕ} {q : X} {R : Set X}
+    (hR : JointRecoverable SingletonAvail Step H q R) :
+    JointRecoverable SingletonAvail Step H q (Set.insert q R) := by
+  cases H with
+  | zero =>
+      intro z hz
+      rcases hz with rfl | hzR
+      · simp [SingletonAvail]
+      · have hzq : z = q := by
+          simpa [SingletonAvail] using hR hzR
+        subst z
+        simp [SingletonAvail]
+  | succ n =>
+      rcases hR with hnow | ⟨y, hqy, hrest⟩
+      · exact Or.inl (by
+          intro z hz
+          rcases hz with rfl | hzR
+          · simp [SingletonAvail]
+          · exact hnow hzR)
+      · refine Or.inr ⟨y, hqy, ?_⟩
+        have hsub :
+            (Set.insert q R \ SingletonAvail q) ⊆
+              (R \ SingletonAvail q) := by
+          intro z hz
+          rcases hz.1 with rfl | hzR
+          · exact False.elim (hz.2 (by simp [SingletonAvail]))
+          · exact ⟨hzR, hz.2⟩
+        exact jointRecoverable_downward n y hrest hsub
+
+/-- Joint recoverability transports backwards along any finite directed
+reachability witness.  The horizon may increase by the path length, but remains
+finite. -/
+theorem reachable_transport_jointRecoverable
+    {X : Type*} {Step : X → X → Prop}
+    {x y : X}
+    (hxy : StateReachable Step x y)
+    {H : ℕ} {R : Set X}
+    (hR : JointRecoverable SingletonAvail Step H y R) :
+    ∃ H', JointRecoverable SingletonAvail Step H' x R := by
+  induction hxy with
+  | refl =>
+      exact ⟨H, hR⟩
+  | @tail b c hxb hbc ih =>
+      have hrest :
+          JointRecoverable SingletonAvail Step H c
+            (R \ SingletonAvail b) :=
+        jointRecoverable_downward H c hR Set.diff_subset
+      have hb :
+          JointRecoverable SingletonAvail Step (H + 1) b R :=
+        Or.inr ⟨c, hbc, hrest⟩
+      exact ih hb
+
+/-- Sufficiency half of the state-goal SCC-chain characterization:
+individual reachability together with pairwise comparability implies one finite
+common trajectory that visits the whole finite bundle. -/
+theorem eventual_stateGoal_chain_implies_feasible
+    {X : Type*} [DecidableEq X]
+    {Step : X → X → Prop}
+    {x : X} {F : Finset X}
+    (hreach : ∀ q, q ∈ F → StateReachable Step x q)
+    (hpair : PairwiseComparableOn (StateReachable Step) F) :
+    HasFiniteJointRecoveryDepth SingletonAvail Step x F := by
+  classical
+  have aux :
+      ∀ n : ℕ, ∀ (F : Finset X) (x : X),
+        F.card = n →
+        (∀ q, q ∈ F → StateReachable Step x q) →
+        PairwiseComparableOn (StateReachable Step) F →
+        HasFiniteJointRecoveryDepth SingletonAvail Step x F := by
+    intro n
+    induction n using Nat.strong_induction_on with
+    | h n ih =>
+        intro F x hcard hreach hpair
+        by_cases hFempty : F = ∅
+        · subst F
+          exact ⟨0, by simpa [TemporalContractComplex] using
+            (jointRecoverable_empty SingletonAvail Step 0 x)⟩
+        · have hne : F.Nonempty := Finset.nonempty_iff_ne_empty.mpr hFempty
+          rcases exists_reach_source_of_pairwise
+              (Step := Step) hne hpair with ⟨q, hqF, hqall⟩
+          let G : Finset X := F.erase q
+          have hGcardlt : G.card < n := by
+            have hlt : (F.erase q).card < F.card :=
+              Finset.card_erase_lt_of_mem hqF
+            simpa [G, hcard] using hlt
+          have hpairG :
+              PairwiseComparableOn (StateReachable Step) G := by
+            intro a ha b hb hab
+            exact hpair a (Finset.mem_of_mem_erase ha)
+              b (Finset.mem_of_mem_erase hb) hab
+          have hreachG :
+              ∀ r, r ∈ G → StateReachable Step q r := by
+            intro r hr
+            exact hqall r (Finset.mem_of_mem_erase hr)
+          have hGfinite :
+              HasFiniteJointRecoveryDepth SingletonAvail Step q G := by
+            exact ih G.card hGcardlt G q rfl hreachG hpairG
+          rcases hGfinite with ⟨HG, hGj⟩
+          have hFset :
+              (Set.insert q (↑G : Set X)) = (↑F : Set X) := by
+            ext z
+            simp [G, hqF]
+          have hFq :
+              JointRecoverable SingletonAvail Step HG q (↑F : Set X) := by
+            rw [← hFset]
+            exact jointRecoverable_insert_current hGj
+          have hxq : StateReachable Step x q := hreach q hqF
+          rcases reachable_transport_jointRecoverable hxq hFq with
+            ⟨HF, hFx⟩
+          exact ⟨HF, hFx⟩
+  exact aux F.card F x rfl hreach hpair
+
+/-- Exact state-goal chain characterization for the eventual INSACERMO
+joint-recovery semantics. -/
+theorem eventual_stateGoal_feasible_iff_chain
+    {X : Type*} [DecidableEq X]
+    {Step : X → X → Prop}
+    {x : X} {F : Finset X} :
+    HasFiniteJointRecoveryDepth SingletonAvail Step x F ↔
+      (∀ q, q ∈ F → StateReachable Step x q) ∧
+        PairwiseComparableOn (StateReachable Step) F := by
+  constructor
+  · exact eventual_stateGoal_feasible_implies_chain
+  · rintro ⟨hreach, hpair⟩
+    exact eventual_stateGoal_chain_implies_feasible hreach hpair
+
 end StructuralAuditReachability
 
 end InsacermoActionabilityInformation
