@@ -46,3 +46,5 @@ import InsacermoActionabilityInformation.MasterClosureV1
 import InsacermoActionabilityInformation.StructuralAuditKernel
 
 import InsacermoActionabilityInformation.StructuralAuditSCCBridge
+
+import InsacermoActionabilityInformation.StructuralAuditReachability
