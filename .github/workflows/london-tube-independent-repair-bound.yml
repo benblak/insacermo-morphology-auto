@@ -1,0 +1,20 @@
+name: INSACERMO London Tube Independent Repair Bound
+
+on:
+  pull_request:
+    paths:
+      - 'LONDON_TUBE_INDEPENDENT_REPAIR_BOUND_FROZEN_PROTOCOL_2026-09-20.md'
+      - 'experiments/london_tube_independent_repair_bound_v1.py'
+      - '.github/workflows/london-tube-independent-repair-bound.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run preregistered independent London Tube endpoint
+        run: python experiments/london_tube_independent_repair_bound_v1.py
