@@ -43,3 +43,6 @@ jobs:
 
       - name: Run structural audit integrated OpenFlights engine
         run: python3 experiments/final_e2e_openflights_future_risk_decision_v1.py
+
+      - name: Run Email-Eu-core structural audit validation
+        run: python3 experiments/email_eu_core_structural_audit_v1.py
