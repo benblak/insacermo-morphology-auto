@@ -42,3 +42,9 @@ import InsacermoActionabilityInformation.FutureRiskDecision
 import InsacermoActionabilityInformation.RepairPlanDuality
 
 import InsacermoActionabilityInformation.MasterClosureV1
+
+import InsacermoActionabilityInformation.FutureDamageCompositionLaw
+
+import InsacermoActionabilityInformation.FirstFractureRepairLaw
+
+import InsacermoActionabilityInformation.FractureObstructionRepairBound
