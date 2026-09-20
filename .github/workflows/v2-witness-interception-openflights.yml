@@ -1,0 +1,52 @@
+name: INSACERMO V2 Witness Interception OpenFlights
+
+on:
+  pull_request:
+    paths:
+      - 'formal/actionability_information/InsacermoActionabilityInformation/WitnessInterception.lean'
+      - 'formal/actionability_information/InsacermoActionabilityInformation.lean'
+      - 'experiments/openflights_witness_interception_repair_bound_v1.py'
+      - '.github/workflows/v2-witness-interception-openflights.yml'
+  workflow_dispatch:
+
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap Lean and Lake manifest
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake update
+
+      - name: Reject proof placeholders
+        shell: bash
+        run: |
+          if grep -R -nE '\b(sorry|admit)\b'             formal/actionability_information/InsacermoActionabilityInformation/WitnessInterception.lean; then
+            echo 'Proof placeholder found.'
+            exit 1
+          fi
+
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/actionability_information
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+          leanchecker: true
+          leanchecker-args: 'InsacermoActionabilityInformation.WitnessInterception'
+
+  openflights:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run exact witness interception and repair-bound audit
+        run: python experiments/openflights_witness_interception_repair_bound_v1.py
