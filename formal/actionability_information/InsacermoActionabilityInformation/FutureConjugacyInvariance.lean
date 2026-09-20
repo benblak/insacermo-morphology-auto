@@ -62,9 +62,7 @@ theorem iterate_conjugacy
       rfl
   | succ n ih =>
       intro x
-      simp only [Function.iterate_succ_apply]
-      rw [hconj]
-      exact congrArg g (ih x)
+      simpa only [Function.iterate_succ_apply, hconj] using ih (f x)
 
 /--
 General transport theorem for one future query under a dynamical conjugacy,
@@ -80,7 +78,7 @@ theorem satisfies_conjugacy
     ∀ x, Satisfies f qx x ↔ Satisfies g qy (e x) := by
   intro x
   unfold Satisfies
-  subst same_time
+  rw [same_time]
   rw [← iterate_conjugacy e f g hconj qy.time x]
   exact hpred ((f^[qy.time]) x)
 
@@ -112,7 +110,8 @@ theorem future_bundle_feasibility_conjugacy
     intro q hq
     have hs := (satisfies_conjugacy e f g (qx q) (qy q)
       (htime q) hconj (hpred q) (e.symm y))
-    simpa using hs.mpr (hy q hq)
+    apply hs.mpr
+    simpa using hy q hq
 
 /-- Minimal obstruction certificates are invariant under transported conjugacy. -/
 theorem minimal_obstruction_conjugacy
