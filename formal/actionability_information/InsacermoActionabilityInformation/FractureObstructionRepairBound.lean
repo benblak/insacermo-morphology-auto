@@ -180,9 +180,10 @@ theorem hasFractureTransversal_of_hasEventualRepair
       ∀ r, SelectionCost atomCost (support r) ≤ repairCost r) :
     HasFractureTransversal family canResolve atomCost := by
   rcases hrepair with ⟨budget, r, hrcost, hrfeas⟩
-  refine ⟨budget, ?_⟩
-  exact successful_repair_yields_transversal_budget
-    family hsound hcost hrfeas
+  refine ⟨budget, support r, ?_, ?_⟩
+  · exact Nat.le_trans (hcost r) hrcost
+  · exact successful_target_repair_hits_fracture_family
+      family hsound hrfeas
 
 theorem fractureTransversalPrice_le_eventualRepairPrice
     {Q I X Repair : Type*}
