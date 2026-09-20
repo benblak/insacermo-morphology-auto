@@ -1,0 +1,22 @@
+name: INSACERMO V2 Conjugacy Invariance
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/v2_conjugacy_invariance.py'
+      - 'V2_CONJUGACY_INVARIANCE_PROTOCOL_2026-09-20.md'
+      - '.github/workflows/v2-conjugacy-invariance.yml'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run conjugacy-invariance audit
+        run: python3 experiments/v2_conjugacy_invariance.py
+      - name: Upload deterministic outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_CONJUGACY_INVARIANCE_V0_1
+          path: out/conjugacy_invariance/
