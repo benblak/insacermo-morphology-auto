@@ -59,6 +59,7 @@ degraded_edges = {(u,v) for u, vs in degraded.items() for v in vs}
 removed_support = baseline_edges - degraded_edges
 
 # Enumerate every directed path from KEF of <= H edges in the baseline graph.
+# H=3 makes this finite and exact.
 all_paths = [(START,)]
 frontier = [(START,)]
 for _ in range(H):
@@ -70,26 +71,33 @@ for _ in range(H):
             nxt.append(q)
     frontier = nxt
 
-def witnesses(bundle, action):
-    target = set(bundle)
-    g_edges = {(u,v) for u, vs in graphs[action].items() for v in vs}
-    out = []
-    for p in all_paths:
-        if target.issubset(p):
-            if all((p[i], p[i+1]) in g_edges for i in range(len(p)-1)):
-                out.append(p)
-    return out
-
 bundles = [
     tuple(c)
     for k in range(1, MAX_BUNDLE + 1)
     for c in itertools.combinations(REQUIRED, k)
 ]
+bundle_set = set(bundles)
+required_set = set(REQUIRED)
 
-feasible = {
-    a: {b: bool(witnesses(b, a)) for b in bundles}
+# One-pass exact feasibility catalogue for each action.
+# A path contributes every size<=3 subset of required airports that it visits.
+feasible = {a: {b: False for b in bundles} for a in ACTIONS}
+path_edges_by_action = {
+    a: {(u,v) for u, vs in graphs[a].items() for v in vs}
     for a in ACTIONS
 }
+path_records = []
+for p in all_paths:
+    pedges = tuple((p[i], p[i+1]) for i in range(len(p)-1))
+    seen_targets = tuple(sorted(required_set.intersection(p)))
+    path_records.append((p, pedges, seen_targets))
+    for action in ACTIONS:
+        aedges = path_edges_by_action[action]
+        if all(e in aedges for e in pedges):
+            for k in range(1, min(MAX_BUNDLE, len(seen_targets)) + 1):
+                for b in itertools.combinations(seen_targets, k):
+                    if b in bundle_set:
+                        feasible[action][b] = True
 
 def proper_nonempty(bundle):
     for k in range(1, len(bundle)):
@@ -108,22 +116,26 @@ obs_base = set(minimal_obstructions("RESTORE_BOTH"))
 obs_deg = set(minimal_obstructions("NONE"))
 new_obs = sorted(obs_deg - obs_base)
 
-# Exact witness interception audit for every bundle that was feasible in the
-# baseline and became infeasible after the combined decision.
-lost = [b for b in bundles if feasible["RESTORE_BOTH"][b] and not feasible["NONE"][b]]
+# Exact witness-interception audit: every baseline path witnessing a bundle
+# that becomes infeasible after the decision must cross a removed support edge.
+lost_set = {
+    b for b in bundles
+    if feasible["RESTORE_BOTH"][b] and not feasible["NONE"][b]
+}
 interception_checks = 0
 witness_count = 0
-for b in lost:
-    ws = witnesses(b, "RESTORE_BOTH")
-    assert ws
-    for p in ws:
-        witness_count += 1
-        uses_removed = any((p[i], p[i+1]) in removed_support for i in range(len(p)-1))
-        assert uses_removed, (b, p)
-        interception_checks += 1
+for p, pedges, seen_targets in path_records:
+    crosses = any(e in removed_support for e in pedges)
+    for k in range(1, min(MAX_BUNDLE, len(seen_targets)) + 1):
+        for b in itertools.combinations(seen_targets, k):
+            if b in lost_set:
+                witness_count += 1
+                assert crosses, (b, p)
+                interception_checks += 1
 
-# Repair-atom capabilities are derived locally by single-class restoration,
-# not from an arbitrary declaration.
+lost = sorted(lost_set)
+
+# Repair-atom capabilities are derived by actual single-class restoration.
 atoms = ("FI", "LHR")
 def atom_resolves(atom, obstruction):
     action = "RESTORE_FI" if atom == "FI" else "RESTORE_LHR"
@@ -133,9 +145,6 @@ capability = {
     b: {a for a in atoms if atom_resolves(a, b)}
     for b in new_obs
 }
-
-# Keep only obstructions individually repairable by at least one atomic class;
-# report any that require joint/non-atomic repair separately.
 atomic_obs = [b for b in new_obs if capability[b]]
 non_atomic_obs = [b for b in new_obs if not capability[b]]
 
@@ -155,16 +164,17 @@ for k in range(len(atoms)+1):
         break
 
 # Exact repair cost among the four concrete repair actions for restoring every
-# atomic obstruction simultaneously.
+# atomically repairable new obstruction simultaneously.
 def action_restores_all(action):
     return all(feasible[action][b] for b in atomic_obs)
 
 exact_candidates = [
-    (spec["cost"], a) for a, spec in ACTIONS.items() if action_restores_all(a)
+    (spec["cost"], a)
+    for a, spec in ACTIONS.items()
+    if action_restores_all(a)
 ]
 assert exact_candidates
 Cstar, best_action = min(exact_candidates)
-
 trivial = 1 if atomic_obs else 0
 
 assert tau is not None
