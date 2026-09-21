@@ -54,3 +54,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Email-Eu-core structural audit CI trigger; theorem statements unchanged.
 
 -- Wiki-Vote structural audit CI trigger; theorem statements unchanged.
+
+-- Created pair-incomparability stress-test CI trigger; theorem statements unchanged.
