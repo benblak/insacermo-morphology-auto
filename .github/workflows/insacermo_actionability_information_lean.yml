@@ -73,3 +73,6 @@ jobs:
 
       - name: Run France rail investment envelope frontier V5
         run: python3 experiments/france_rail_investment_frontier_v5.py
+
+      - name: Run France fiscal trajectory rail frontier V6
+        run: python3 experiments/france_fiscal_trajectory_rail_v6.py
