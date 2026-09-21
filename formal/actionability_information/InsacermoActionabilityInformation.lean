@@ -72,3 +72,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Retry V4 after transient GitHub/Elan 504; theorem statements unchanged.
 
 -- France rail investment envelope frontier V5 CI trigger; theorem statements unchanged.
+
+-- France fiscal trajectory rail V6 CI trigger; theorem statements unchanged.
