@@ -76,3 +76,6 @@ jobs:
 
       - name: Run France fiscal trajectory rail frontier V6
         run: python3 experiments/france_fiscal_trajectory_rail_v6.py
+
+      - name: Run France human capability baseline V0.2
+        run: python3 experiments/france_human_capability_baseline_v0_2.py
