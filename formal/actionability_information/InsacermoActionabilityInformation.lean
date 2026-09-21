@@ -62,3 +62,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Passenger-weighted France rail audit CI trigger; theorem statements unchanged.
 
 -- France sovereign finance V1 CI trigger; theorem statements unchanged.
+
+-- France sovereign finance investment-return V2 CI trigger; theorem statements unchanged.
