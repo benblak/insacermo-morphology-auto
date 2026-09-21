@@ -70,3 +70,6 @@ jobs:
 
       - name: Run France rail capability-finance bridge V4
         run: python3 experiments/france_capability_bridge_rail_v4.py
+
+      - name: Run France rail investment envelope frontier V5
+        run: python3 experiments/france_rail_investment_frontier_v5.py
