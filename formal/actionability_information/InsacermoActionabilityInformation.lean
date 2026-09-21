@@ -66,3 +66,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- France sovereign finance investment-return V2 CI trigger; theorem statements unchanged.
 
 -- France sovereign finance marginal-return V3 CI trigger; theorem statements unchanged.
+
+-- France rail capability-finance bridge V4 CI trigger; theorem statements unchanged.
