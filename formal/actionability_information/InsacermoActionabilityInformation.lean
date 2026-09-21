@@ -76,3 +76,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- France fiscal trajectory rail V6 CI trigger; theorem statements unchanged.
 
 -- France human capability baseline V0.2 CI trigger; theorem statements unchanged.
+
+-- France work-time transformation V0.3 CI trigger; theorem statements unchanged.
