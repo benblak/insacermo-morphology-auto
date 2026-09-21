@@ -46,3 +46,6 @@ jobs:
 
       - name: Run Email-Eu-core structural audit validation
         run: python3 experiments/email_eu_core_structural_audit_v1.py
+
+      - name: Run Wiki-Vote structural audit validation
+        run: python3 experiments/wiki_vote_structural_audit_v1.py
