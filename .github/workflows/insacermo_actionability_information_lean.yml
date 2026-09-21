@@ -52,3 +52,6 @@ jobs:
 
       - name: Run Wiki-Vote created pair-obstruction witness
         run: python3 experiments/wiki_vote_created_pair_obstruction_v1.py
+
+      - name: Run France rail structural audit pilot
+        run: python3 experiments/france_rail_structural_audit_v1.py
