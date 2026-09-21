@@ -64,3 +64,6 @@ jobs:
 
       - name: Run France sovereign finance investment return thresholds V2
         run: python3 experiments/france_sovereign_finance_investment_return_v2.py
+
+      - name: Run France sovereign finance marginal-return V3
+        run: python3 experiments/france_sovereign_finance_marginal_v3.py
