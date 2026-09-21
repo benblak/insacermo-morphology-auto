@@ -58,3 +58,6 @@ jobs:
 
       - name: Run passenger-weighted France rail audit
         run: python3 experiments/france_rail_passenger_weighted_audit_v1.py
+
+      - name: Run France sovereign finance capability audit V1
+        run: python3 experiments/france_sovereign_finance_v1.py
