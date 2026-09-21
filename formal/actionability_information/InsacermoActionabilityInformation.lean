@@ -80,3 +80,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- France work-time transformation V0.3 CI trigger; theorem statements unchanged.
 
 -- SIGNOR causal signaling stress-test CI trigger; theorem statements unchanged.
+
+-- SIGNOR direct-edge parsing fix CI trigger; theorem statements unchanged.
