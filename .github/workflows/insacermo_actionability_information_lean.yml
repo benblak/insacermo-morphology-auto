@@ -79,3 +79,6 @@ jobs:
 
       - name: Run France human capability baseline V0.2
         run: python3 experiments/france_human_capability_baseline_v0_2.py
+
+      - name: Run France work-time transformation V0.3
+        run: python3 experiments/france_work_time_transformation_v0_3.py
