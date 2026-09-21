@@ -74,3 +74,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- France rail investment envelope frontier V5 CI trigger; theorem statements unchanged.
 
 -- France fiscal trajectory rail V6 CI trigger; theorem statements unchanged.
+
+-- France human capability baseline V0.2 CI trigger; theorem statements unchanged.
