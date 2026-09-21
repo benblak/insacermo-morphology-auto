@@ -58,3 +58,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Created pair-incomparability stress-test CI trigger; theorem statements unchanged.
 
 -- France rail structural audit CI trigger; theorem statements unchanged.
+
+-- Passenger-weighted France rail audit CI trigger; theorem statements unchanged.
