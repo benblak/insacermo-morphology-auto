@@ -113,7 +113,7 @@ def parse_release(raw: bytes):
     # Prefer explicitly direct relations if the release uses a recognisable yes/no field
     # and the resulting network is sufficiently large; otherwise retain all curated
     # directed protein-protein causal relations.
-    yes_tokens = {"yes", "y", "true", "1", "direct"}
+    yes_tokens = {"yes", "y", "true", "t", "1", "direct"}
     direct_edges = [e for e in edges_all if lower(e[2]) in yes_tokens]
     if len(direct_edges) >= 500:
         edges_used = direct_edges
