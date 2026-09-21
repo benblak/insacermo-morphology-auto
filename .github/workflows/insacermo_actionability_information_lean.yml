@@ -67,3 +67,6 @@ jobs:
 
       - name: Run France sovereign finance marginal-return V3
         run: python3 experiments/france_sovereign_finance_marginal_v3.py
+
+      - name: Run France rail capability-finance bridge V4
+        run: python3 experiments/france_capability_bridge_rail_v4.py
