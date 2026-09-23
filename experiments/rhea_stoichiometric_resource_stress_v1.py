@@ -121,20 +121,30 @@ def parse_directions(raw):
 
 def parse_reaction_smiles(raw):
     rows = read_tsv(raw)
-    h = header_map(rows[0])
-    i_id = find_col(h, ["RHEA_ID", "RHEAID", "ID"])
-    i_rxn = find_col(h, ["REACTION_SMILES", "REACTIONSMILES", "SMILES"])
-    if i_id is None or i_rxn is None:
-        raise RuntimeError(f"Cannot resolve reaction-smiles columns: {rows[0]}")
+    # Current Rhea release may provide this export headerless as:
+    #   <RHEA_ID>\t<reaction SMILES>
+    first = rows[0]
+    headerless = len(first) >= 2 and first[0].strip().replace("RHEA:", "").isdigit() and ">>" in first[1]
+    if headerless:
+        i_id, i_rxn, start = 0, 1, 0
+        reported_header = ["HEADERLESS_RHEA_ID", "HEADERLESS_REACTION_SMILES"]
+    else:
+        h = header_map(first)
+        i_id = find_col(h, ["RHEA_ID", "RHEAID", "ID"])
+        i_rxn = find_col(h, ["REACTION_SMILES", "REACTIONSMILES", "SMILES"])
+        if i_id is None or i_rxn is None:
+            raise RuntimeError(f"Cannot resolve reaction-smiles columns: {first}")
+        start = 1
+        reported_header = first
     out = {}
-    for r in rows[1:]:
+    for r in rows[start:]:
         if len(r) <= max(i_id, i_rxn):
             continue
         rid = r[i_id].strip().replace("RHEA:", "")
         rxn = r[i_rxn].strip()
         if rid and ">>" in rxn:
             out[rid] = rxn
-    return out, rows[0]
+    return out, reported_header
 
 
 def parse_chebi_smiles(raw):
