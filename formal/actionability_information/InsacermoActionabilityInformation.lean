@@ -82,3 +82,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- SIGNOR causal signaling stress-test CI trigger; theorem statements unchanged.
 
 -- SIGNOR direct-edge parsing fix CI trigger; theorem statements unchanged.
+
+-- Rhea stoichiometric resource stress-test CI trigger; theorem statements unchanged.
