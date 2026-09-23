@@ -85,3 +85,6 @@ jobs:
 
       - name: Run SIGNOR human causal signaling structural stress test
         run: python3 experiments/signor_human_causal_structural_stress_v1.py
+
+      - name: Run Rhea stoichiometric resource competition stress test
+        run: python3 experiments/rhea_stoichiometric_resource_stress_v1.py
