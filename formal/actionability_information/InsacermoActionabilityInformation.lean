@@ -86,3 +86,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Rhea stoichiometric resource stress-test CI trigger; theorem statements unchanged.
 
 -- Rhea headerless reaction-SMILES parsing fix CI trigger; theorem statements unchanged.
+
+-- Rhea high-order obstruction search CI trigger; theorem statements unchanged.
