@@ -83,6 +83,38 @@ theorem hiddenDeadlineDebt_le
     Dfull - H ≤ R := by
   omega
 
+
+/-- Arithmetic core of a resource-capacity audit certificate.
+
+Suppose a minimal lost bundle has cardinality m ≥ 1. If every proper
+(m-1)-goal subbundle consumes at least δ units per goal of the same limiting
+resource and still fits inside post-transformation capacity C, then
+
+  m ≤ 1 + C / δ.
+
+The domain-specific Petri/stoichiometric layer must discharge the premise
+`(m - 1) * δ ≤ C`. -/
+theorem resourceCapacity_card_bound
+    {m C δ : ℕ}
+    (hm : 1 ≤ m)
+    (hδ : 0 < δ)
+    (hproper : (m - 1) * δ ≤ C) :
+    m ≤ 1 + C / δ := by
+  have hdiv : m - 1 ≤ C / δ := by
+    exact (Nat.le_div_iff_mul_le hδ).2 hproper
+  omega
+
+/-- Unit-demand specialization of `resourceCapacity_card_bound`.
+If every proper subbundle of an m-goal minimal resource obstruction fits in
+capacity C and every goal needs one unit of the limiting resource, then
+m ≤ C + 1. -/
+theorem unitResource_card_bound
+    {m C : ℕ}
+    (hm : 1 ≤ m)
+    (hproper : m - 1 ≤ C) :
+    m ≤ C + 1 := by
+  omega
+
 end StructuralAuditKernel
 
 end InsacermoActionabilityInformation
