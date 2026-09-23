@@ -84,3 +84,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- SIGNOR direct-edge parsing fix CI trigger; theorem statements unchanged.
 
 -- Rhea stoichiometric resource stress-test CI trigger; theorem statements unchanged.
+
+-- Rhea headerless reaction-SMILES parsing fix CI trigger; theorem statements unchanged.
