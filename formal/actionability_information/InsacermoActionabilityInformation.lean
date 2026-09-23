@@ -88,3 +88,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Rhea headerless reaction-SMILES parsing fix CI trigger; theorem statements unchanged.
 
 -- Rhea high-order obstruction search CI trigger; theorem statements unchanged.
+
+-- Resource-capacity certificate CI trigger; Rhea witness unchanged.
