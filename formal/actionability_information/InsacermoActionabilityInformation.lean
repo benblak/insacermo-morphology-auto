@@ -92,3 +92,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Resource-capacity certificate CI trigger; Rhea witness unchanged.
 
 -- PGLib IEEE14 DC hidden bundle audit CI trigger; theorem statements unchanged.
+
+-- PGLib dependency fix CI trigger; physical audit protocol unchanged.
