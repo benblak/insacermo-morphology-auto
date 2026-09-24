@@ -98,3 +98,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- AC/Petri V2 literature-stress CI trigger; theorem statements unchanged.
 
 -- AC rank scan + Rhea master join CI trigger; theorem statements unchanged.
+
+-- strict noncurrency Rhea V2 CI trigger; theorem statements unchanged.
