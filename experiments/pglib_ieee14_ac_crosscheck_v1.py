@@ -70,12 +70,40 @@ def make_case(base,bus0,gen0,branch0,gencost0,served,outage=None,warm=None):
 
 OPT=ppoption(VERBOSE=0,OUT_ALL=0,OPF_ALG=560)
 
-def solve(case):
-    try:
-        res=runopf(case,OPT)
-        return bool(res.get("success",False)),res,None
-    except Exception as e:
-        return False,None,type(e).__name__+": "+str(e)
+def solve(case, warm_candidates=None):
+    """Try several initializations. Failure remains numerical, not a proof."""
+    attempts=[]
+    candidates=[None]
+    if warm_candidates:
+        candidates += [w for w in warm_candidates if w is not None]
+    count=0
+    for warm in candidates:
+        test={
+            "version":case["version"],
+            "baseMVA":case["baseMVA"],
+            "bus":case["bus"].copy(),
+            "gen":case["gen"].copy(),
+            "branch":case["branch"].copy(),
+            "gencost":case["gencost"].copy(),
+        }
+        if warm is not None:
+            try:
+                test["bus"][:,7]=warm["bus"][:,7]
+                test["bus"][:,8]=warm["bus"][:,8]
+                test["gen"][:,1]=warm["gen"][:,1]
+                test["gen"][:,2]=warm["gen"][:,2]
+            except Exception:
+                pass
+        try:
+            res=runopf(test,OPT)
+            count += 1
+            if bool(res.get("success",False)):
+                return True,res,None,count
+            attempts.append("unsuccessful")
+        except Exception as e:
+            count += 1
+            attempts.append(type(e).__name__+": "+str(e))
+    return False,None," | ".join(attempts[:4]),count
 
 def main():
     raw=download(URL); sha=hashlib.sha256(raw).hexdigest()
@@ -92,13 +120,15 @@ def main():
 
     for mask in masks:
         served=tuple(WITNESS_BUSES[i] for i in range(len(WITNESS_BUSES)) if mask&(1<<i))
-        ok0,res0,err0=solve(make_case(base,bus,gen,branch,gencost,served,None,None))
+        basecase=make_case(base,bus,gen,branch,gencost,served,None,None)
+        ok0,res0,err0,n0=solve(basecase)
         if not ok0:
-            records[mask]=(False,False,"BASELINE_FAIL",err0)
+            records[mask]=(False,False,"BASELINE_FAIL",err0,n0)
             failures.append(("baseline",mask,err0))
             continue
-        ok1,res1,err1=solve(make_case(base,bus,gen,branch,gencost,served,OUTAGE_INDEX,res0))
-        records[mask]=(True,ok1,"OK" if ok1 else "OUTAGE_FAIL",err1)
+        outagecase=make_case(base,bus,gen,branch,gencost,served,OUTAGE_INDEX,None)
+        ok1,res1,err1,n1=solve(outagecase,[res0])
+        records[mask]=(True,ok1,"OK" if ok1 else "OUTAGE_FAIL",err1,n1)
 
     proper=[m for m in masks if m!=fullmask]
     proper_base=sum(1 for m in proper if records[m][0])
@@ -107,7 +137,7 @@ def main():
 
     # Restore branch == intact case; solve once more from flat/original start.
     fullset=set(WITNESS_BUSES)
-    restore_ok,_,restore_err=solve(make_case(base,bus,gen,branch,gencost,fullset,None,None))
+    restore_ok,_,restore_err,_=solve(make_case(base,bus,gen,branch,gencost,fullset,None,None))
 
     print("INSACERMO_PGLIB_AC_CROSSCHECK_V1")
     print("STATUS NUMERICAL_AC_OPF_STRESS_TEST")
@@ -126,7 +156,43 @@ def main():
     print("FULL_BUNDLE_AC_FEASIBLE_BASELINE",int(full[0]))
     print("FULL_BUNDLE_AC_FEASIBLE_AFTER_OUTAGE",int(full[1]))
     print("FULL_BUNDLE_AC_FEASIBLE_AFTER_RESTORE",int(restore_ok))
-    print("NUMERICAL_FAILURE_RECORDS",len(failures)+(0 if full[1] else 1))
+    unresolved_masks=[m for m in masks if records[m][0] and not records[m][1]]
+    print("NUMERICAL_OUTAGE_NONCONVERGENCES",len(unresolved_masks))
+    for m in unresolved_masks:
+        buses=[WITNESS_BUSES[i] for i in range(len(WITNESS_BUSES)) if m&(1<<i)]
+        print("OUTAGE_NONCONVERGENT_SUBBUNDLE",len(buses)," ".join(map(str,buses)))
+    # Numerical minimality scan. A clean numerical obstruction requires all
+    # non-empty proper subbundles to converge successfully after the outage.
+    numerical_minimal=[]
+    for m in masks:
+        if not records[m][0] or records[m][1]:
+            continue
+        proper_ok=True
+        sub=(m-1)&m
+        while sub:
+            if not records[sub][1]:
+                proper_ok=False
+                break
+            sub=(sub-1)&m
+        if proper_ok:
+            numerical_minimal.append(m)
+
+    if numerical_minimal:
+        numerical_minimal.sort(key=lambda m:(m.bit_count(),m))
+        min_order=numerical_minimal[0].bit_count()
+        max_order=max(m.bit_count() for m in numerical_minimal)
+        print("AC_NUMERICAL_MINIMAL_OBSTRUCTIONS",len(numerical_minimal))
+        print("AC_MIN_CONFIRMED_NUMERICAL_OBSTRUCTION_ORDER",min_order)
+        print("AC_MAX_CONFIRMED_NUMERICAL_OBSTRUCTION_ORDER",max_order)
+        for m in numerical_minimal:
+            if m.bit_count()==min_order:
+                buses=[WITNESS_BUSES[i] for i in range(len(WITNESS_BUSES)) if m&(1<<i)]
+                print("AC_MIN_ORDER_WITNESS_BUSES"," ".join(map(str,buses)))
+                break
+    else:
+        print("AC_NUMERICAL_MINIMAL_OBSTRUCTIONS",0)
+        print("AC_MIN_CONFIRMED_NUMERICAL_OBSTRUCTION_ORDER","NONE")
+
     if full[0] and proper_after==len(proper) and not full[1] and restore_ok:
         print("AC_ORDER7_PATTERN_REPRODUCED_NUMERICALLY 1")
         print("INTERPRETATION all_126_proper_subbundles_converged_but_full_bundle_did_not")
