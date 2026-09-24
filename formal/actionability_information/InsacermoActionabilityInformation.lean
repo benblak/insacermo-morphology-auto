@@ -94,3 +94,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- PGLib IEEE14 DC hidden bundle audit CI trigger; theorem statements unchanged.
 
 -- PGLib dependency fix CI trigger; physical audit protocol unchanged.
+
+-- AC/Petri V2 literature-stress CI trigger; theorem statements unchanged.
