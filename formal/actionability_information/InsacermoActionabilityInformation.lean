@@ -96,3 +96,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- PGLib dependency fix CI trigger; physical audit protocol unchanged.
 
 -- AC/Petri V2 literature-stress CI trigger; theorem statements unchanged.
+
+-- AC rank scan + Rhea master join CI trigger; theorem statements unchanged.
