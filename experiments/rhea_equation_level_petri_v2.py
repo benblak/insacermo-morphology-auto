@@ -93,18 +93,26 @@ def parse_rest(raw,lr_to_master):
     header=[x.lower().strip() for x in rows[0]]
     iid=next((i for i,x in enumerate(header) if "reaction" in x and "identifier" in x),0)
     ieq=next((i for i,x in enumerate(header) if "equation" in x),1)
+
+    # The Rhea REST table exposes canonical/master reaction identifiers.
+    # rhea-directions.tsv maps each master ID to its explicit LR sibling.
+    master_to_lr={master:lr for lr,master in lr_to_master.items()}
+
     out=[]; rejected=0
     for r in rows[1:]:
         if len(r)<=max(iid,ieq): continue
-        rid=r[iid].replace("RHEA:","").strip()
-        if rid not in lr_to_master: continue
+        master=r[iid].replace("RHEA:","").strip()
+        lr=master_to_lr.get(master)
+        if lr is None:
+            continue
         parts=split_equation(r[ieq].strip())
-        if not parts: rejected+=1; continue
+        if not parts:
+            rejected+=1; continue
         lefts,rights,sep=parts
         left=parse_side(lefts); right=parse_side(rights)
         if not left or not right or left==right:
             rejected+=1; continue
-        out.append({"lr":rid,"master":lr_to_master[rid],"left":left,"right":right,"equation":r[ieq].strip()})
+        out.append({"lr":lr,"master":master,"left":left,"right":right,"equation":r[ieq].strip()})
     return out,rejected
 
 def is_currency(name):
