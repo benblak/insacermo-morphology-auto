@@ -90,3 +90,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- Rhea high-order obstruction search CI trigger; theorem statements unchanged.
 
 -- Resource-capacity certificate CI trigger; Rhea witness unchanged.
+
+-- PGLib IEEE14 DC hidden bundle audit CI trigger; theorem statements unchanged.
