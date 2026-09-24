@@ -159,8 +159,16 @@ def main():
         right_freq=Counter(x for r in uniq for x in r["right"])
         usable=[]
         for r in uniq:
-            ts=sorted(x for x in r["right"] if x not in left_union and right_freq[x]==1)
-            if ts: usable.append((r,ts[0]))
+            # Strict witness: future goals must be chemically specific products,
+            # not generic currency metabolites/cofactors.
+            ts=sorted(
+                x for x in r["right"]
+                if x not in left_union
+                and right_freq[x]==1
+                and not is_currency(x)
+            )
+            if ts:
+                usable.append((r,ts[0]))
         if len(usable)<3: continue
         k=min(MAX_K,len(usable))
         chosen=usable[:k]
@@ -193,6 +201,7 @@ def main():
     print("PARSED_LR_EQUATIONS",len(reactions))
     print("REJECTED_OR_NONINTEGER_EQUATIONS",rejected)
     print("SEARCH_MAX_K",MAX_K)
+    print("STRICT_NONCURRENCY_TARGETS 1")
     print("RESOURCES_WITH_CLEAN_WITNESS",len(witnesses))
     if not witnesses:
         print("RESULT NO_CLEAN_HIGH_ORDER_WITNESS_FOUND"); return
