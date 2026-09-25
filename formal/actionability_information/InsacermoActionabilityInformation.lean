@@ -108,3 +108,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- DC Farkas certificate V3 CI trigger.
 
 -- automatic DC certificate router V1 trigger.
+
+-- DC heredity audit V1 trigger.
