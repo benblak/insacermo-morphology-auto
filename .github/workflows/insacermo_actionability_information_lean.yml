@@ -106,3 +106,8 @@ jobs:
 
       - name: Run Rhea equation-level Petri V2
         run: python3 experiments/rhea_equation_level_petri_v2.py
+
+      - name: Run PGLib IEEE14 DC cut certificate V2
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_cut_certificate_v2.py
