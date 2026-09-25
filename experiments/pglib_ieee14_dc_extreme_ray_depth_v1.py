@@ -41,14 +41,25 @@ import pglib_ieee14_dc_farkas_certificate_v3 as fv3
 
 TOP_LOAD_GOALS = 8
 SVD_TOL = 1e-9
+SVD_ABS_TOL = 1e-10
 POS_TOL = 1e-9
 RES_TOL = 1e-7
 BOUND_EPS = 1e-8
 
 
-def nullspace(M, tol=SVD_TOL):
+def nullspace(M, tol=SVD_TOL, abs_tol=SVD_ABS_TOL):
+    """Numerical nullspace with an absolute floor.
+
+    The absolute floor is essential here: structurally zero projected columns
+    can appear as ~1e-14 after floating elimination. A purely relative SVD
+    threshold would call a 1-column ~zero matrix full-rank because its largest
+    singular value is itself tiny, thereby deleting genuine singleton extreme
+    rays.
+    """
     u, s, vh = np.linalg.svd(M, full_matrices=True)
-    rank = int(np.sum(s > tol * max(M.shape) * (s[0] if len(s) else 1.0)))
+    scale = s[0] if len(s) else 0.0
+    threshold = max(abs_tol, tol * max(M.shape) * scale)
+    rank = int(np.sum(s > threshold))
     return vh[rank:].T, rank
 
 
