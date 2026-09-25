@@ -75,27 +75,28 @@ theorem exists_minimalNonface_subset_of_failure
     (hbad : ¬ K.feasible F) :
     ∃ G : Finset Q, G ⊆ F ∧ MinimalNonface K G := by
   classical
-  induction F using Finset.strongInductionOn with
-  | H F ih =>
-      by_cases hdel : ∀ q, q ∈ F → K.feasible (F.erase q)
-      · refine ⟨F, Finset.Subset.rfl, hbad, ?_⟩
-        intro G hGF
-        have hnot : ¬ F ⊆ G := hGF.2
-        push_neg at hnot
-        rcases hnot with ⟨q, hqF, hqG⟩
-        have hGdel : G ⊆ F.erase q := by
-          intro x hxG
-          exact Finset.mem_erase.mpr ⟨by
-            intro hxq
-            subst x
-            exact hqG hxG, hGF.1 hxG⟩
-        exact K.downward (hdel q hqF) hGdel
-      · push_neg at hdel
-        rcases hdel with ⟨q, hqF, hbadDel⟩
-        have hcard : (F.erase q).card < F.card :=
-          Finset.card_erase_lt_of_mem hqF
-        rcases ih (F.erase q) hcard hbadDel with ⟨G, hGF, hmin⟩
-        exact ⟨G, hGF.trans (Finset.erase_subset q F), hmin⟩
+  revert hbad
+  refine Finset.strongInductionOn F ?_
+  intro F ih hbad
+  by_cases hdel : ∀ q, q ∈ F → K.feasible (F.erase q)
+  · refine ⟨F, Finset.Subset.rfl, hbad, ?_⟩
+    intro G hGF
+    have hnot : ¬ F ⊆ G := hGF.2
+    push_neg at hnot
+    rcases hnot with ⟨q, hqF, hqG⟩
+    have hGdel : G ⊆ F.erase q := by
+      intro x hxG
+      exact Finset.mem_erase.mpr ⟨by
+        intro hxq
+        subst x
+        exact hqG hxG, hGF.1 hxG⟩
+    exact K.downward (hdel q hqF) hGdel
+  · push_neg at hdel
+    rcases hdel with ⟨q, hqF, hbadDel⟩
+    have hcard : (F.erase q).card < F.card :=
+      Finset.card_erase_lt_of_mem hqF
+    rcases ih (F.erase q) hcard hbadDel with ⟨G, hGF, hmin⟩
+    exact ⟨G, hGF.trans (Finset.erase_subset q F), hmin⟩
 
 /-- For downward-closed contract complexes, the generic bounded-bad-witness
 property is equivalent to saying that every minimal obstruction has size at
@@ -121,14 +122,14 @@ theorem finiteHellyAtMost_iff_badWitnessAtMost
       BadWitnessAtMost (intersectionContract K) r := by
   constructor
   · intro hHelly F hbad
-    by_contra hno
-    push_neg at hno
+    by_contra hnone
     have hall :
         ∀ G : Finset Q, G ⊆ F → G.card ≤ r →
           IntersectionFeasible K G := by
       intro G hGF hcard
       by_contra hGbad
-      exact hno G hGF hcard hGbad
+      apply hnone
+      exact ⟨G, hGF, hcard, hGbad⟩
     exact hbad (hHelly F hall)
   · intro hbad F hall
     by_contra hFbad
