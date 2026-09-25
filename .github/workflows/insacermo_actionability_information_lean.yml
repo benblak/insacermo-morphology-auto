@@ -121,3 +121,8 @@ jobs:
         run: |
           python3 -m pip install --quiet numpy scipy sympy
           python3 experiments/pglib_ieee14_dc_exact_farkas_v4.py
+
+      - name: Run automatic DC certificate router V1
+        run: |
+          python3 -m pip install --quiet numpy scipy sympy
+          python3 experiments/automatic_dc_certificate_router_v1.py
