@@ -136,3 +136,8 @@ jobs:
         run: |
           python3 -m pip install --quiet numpy scipy
           python3 experiments/pglib_ieee14_dc_extreme_ray_depth_v1.py
+
+      - name: Run PGLib IEEE14 tight extreme-ray pre-audit depth V2
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_extreme_ray_depth_v2.py
