@@ -16,3 +16,6 @@ jobs:
         run: python3 -m pip install --quiet numpy scipy sympy
       - name: Prove exact rational pre-audit depth
         run: python3 experiments/pglib_ieee14_dc_exact_preaudit_depth_v3.py
+
+      - name: Prove exact certificate-only depth closure V4
+        run: python3 experiments/pglib_ieee14_dc_exact_certificate_only_depth_v4.py
