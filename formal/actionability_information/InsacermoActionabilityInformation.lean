@@ -44,6 +44,7 @@ import InsacermoActionabilityInformation.RepairPlanDuality
 import InsacermoActionabilityInformation.MasterClosureV1
 
 import InsacermoActionabilityInformation.StructuralAuditKernel
+import InsacermoActionabilityInformation.CertificatePreAuditDepth
 
 import InsacermoActionabilityInformation.StructuralAuditSCCBridge
 
