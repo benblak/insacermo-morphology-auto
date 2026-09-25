@@ -32,6 +32,8 @@ jobs:
           test: false
           lint: false
           use-mathlib-cache: true
+          leanchecker: true
+          leanchecker-args: 'InsacermoActionabilityInformation.SignedTopologicalPreAuditBridge.actualTopologicalDepth_eq_preAuditDepth'
       - name: Check signed topological pre-audit bridge
         shell: bash
         run: |
