@@ -26,7 +26,7 @@ pre-audit pattern. -/
 theorem actualTopologicalDepth_eq_preAuditDepth
     (hU : ∃ n, SG.HasUnsatSubcontractAtMost n) :
     SG.topologicalDepth hU =
-      SG.topologicalPreAuditDepth
+      topologicalPreAuditDepth SG
         ((SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU) := by
   exact SG.topologicalDepth_eq_unbalancedGirth hU
 
@@ -34,11 +34,11 @@ theorem actualTopologicalDepth_eq_preAuditDepth
 topological depth. -/
 theorem preAuditDepth_eq_actualTopologicalDepth
     (hU : ∃ n, SG.HasUnsatSubcontractAtMost n) :
-    SG.topologicalPreAuditDepth
+    topologicalPreAuditDepth SG
         ((SG.exists_hasUnsatSubcontractAtMost_iff_exists_hasUnbalancedCycleAtMost).mp hU) =
       SG.topologicalDepth hU := by
   symm
-  exact SG.actualTopologicalDepth_eq_preAuditDepth hU
+  exact actualTopologicalDepth_eq_preAuditDepth SG hU
 
 /-- Atomic certificate classification: every inclusion-minimal finite UNSAT
 signed subcontract is exactly the edge set of an unbalanced simple cycle.
