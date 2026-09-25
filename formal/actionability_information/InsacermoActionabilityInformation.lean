@@ -106,3 +106,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- DC cut certificate V2 CI trigger.
 
 -- DC Farkas certificate V3 CI trigger.
+
+-- automatic DC certificate router V1 trigger.
