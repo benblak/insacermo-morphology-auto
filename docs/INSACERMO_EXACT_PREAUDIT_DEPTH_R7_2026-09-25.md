@@ -250,3 +250,160 @@ A conservative, defensible formulation is:
 > For the encoded PGLib IEEE-14 DC feasibility model with an eight-goal load catalogue, the extreme-ray pre-audit criterion has exact rational depth (r_{\mathrm{pre}}=7). This value is derived without bundle-feasibility calls or bundle enumeration and independently matches the maximum minimal-loss order (7) observed by exhaustive audit.
 
 Avoid stating that this is already a general theorem about all power systems or all INSACERMO contracts.
+
+
+---
+
+## Strengthened closure — certificate-only actual depth V4
+
+A stronger test was added after the exact pre-audit V3.
+
+The question was no longer only:
+
+> can the dual geometry prove the upper bound (r_{\mathrm{pre}}=7)?
+
+but:
+
+> can the same exact certificate family prove that an order-7 witness is genuinely minimal, without any primal feasibility call?
+
+The answer is yes for this benchmark.
+
+### Exact certificate-only result
+
+Dedicated exact workflow result:
+
+- `STATUS EXACT_DUAL_ONLY_MINIMAL_LOSS_CLOSURE`
+- `PRIMAL_FEASIBILITY_CALLS 0`
+- `FULL_CATALOGUE_BUNDLE_ENUMERATION_USED 0`
+- `TOTAL_EXACT_OUTAGE_RAYS 80276`
+- `EXACT_ORDER8_COMPATIBLE_RAYS 0`
+- `EXACT_CERTIFICATE_ONLY_DEPTH 7`
+- `RESULT COMPLETE`
+
+The witness is again:
+
+- outage 0,
+- branch 1–2,
+- buses ({3,4,2,14,13,6,10}).
+
+For the post-outage system:
+
+[
+\texttt{POST\_OUTAGE\_EXACT\_RAYS}=4722.
+]
+
+Exactly one ray rejects the full seven-goal bundle:
+
+[
+\texttt{FULL\_BUNDLE\_NEGATIVE\_RAYS}=1,
+]
+
+with exact value
+
+[
+-\frac{1317}{100}=-13.17.
+]
+
+### Strong minimality without a primal solver
+
+The V4 checker does not assume downward closure.
+
+Instead, it enumerates all proper subbundles of the one seven-goal witness:
+
+[
+\sum_{k=0}^{6} \binom{7}{k}=127.
+]
+
+Every one of those 127 proper subbundles is evaluated against every one of the 4,722 exact post-outage rays.
+
+The result is:
+
+- `WITNESS_PROPER_SUBBUNDLES_CHECKED 127`
+- `WITNESS_PROPER_SUBBUNDLES_WITH_NEGATIVE_RAY 0`
+- `ALL_PROPER_SUBBUNDLES_ACCEPTED_BY_ALL_POST_OUTAGE_RAYS 1`
+- `CROSS_CERTIFIED_MINIMAL 1`
+
+For each one-goal deletion specifically, the exact minimum certificate value is (0), never negative.
+
+Thus the full order-7 witness is rejected, while every proper subbundle is accepted by the complete exact post-outage certificate family.
+
+### Baseline feasibility from certificates alone
+
+The witness is also checked against the exact baseline certificate family:
+
+[
+\texttt{BASELINE\_EXACT\_RAYS}=4943.
+]
+
+No baseline ray rejects it:
+
+[
+\texttt{BASELINE\_NEGATIVE\_RAYS\_FOR\_WITNESS}=0.
+]
+
+Therefore the same dual framework establishes:
+
+1. feasible before outage,
+2. infeasible after outage,
+3. every proper subbundle feasible after outage,
+
+without calling the primal feasibility solver.
+
+For this witness, actual minimality is therefore dual-certified exactly.
+
+### Formal theorem layer
+
+A new Lean module was added:
+
+`InsacermoActionabilityInformation/CertificatePreAuditDepth.lean`
+
+It formalizes the abstract bridge between certificate pre-audit depth and actual obstruction depth.
+
+Key theorem:
+
+[
+\boxed{\kappa\le r_{\mathrm{pre}}}
+]
+
+whenever the certificate family exactly characterizes feasibility.
+
+The module also defines a stronger condition, `CrossCertifiedMinimal`, and proves that if an exact pre-audit upper bound (r) is attained by a cross-certified witness of cardinality (r), then the actual obstruction depth is exactly (r).
+
+The dedicated Lean workflow passed:
+
+- bootstrap: SUCCESS,
+- placeholder rejection: SUCCESS,
+- mathlib/Lean action: SUCCESS,
+- direct theorem-file check: SUCCESS.
+
+Hence, for this benchmark, the computational V4 witness discharges the exact structural condition required by the formally verified theorem scheme.
+
+### Updated conclusion
+
+The strongest current statement for this benchmark is now:
+
+[
+oxed{
+r_{\mathrm{pre}}^{\mathrm{exact}}
+=
+\kappa_{\mathrm{certificate\text{-}closed}}^{\mathrm{exact}}
+=
+7.
+}
+]
+
+More concretely:
+
+> For the encoded PGLib IEEE-14 DC model and the fixed eight-goal catalogue, exact extreme-ray certificates both derive the audit upper bound 7 before full catalogue enumeration and certify an actual minimal order-7 loss without any primal feasibility call.
+
+This remains benchmark-specific and does not establish a universal equality for arbitrary INSACERMO systems.
+
+### Additional traceability
+
+- Lean theorem commit: `a80d22bdd81998f2ae7d951bbeb204e9b525669b`
+- Lean import commit: `121fc4152c51029d2794a451720ae1a8a4052634`
+- Dedicated Lean workflow commit: `ddbd3af74d0b27763212ae9c4857a035d7e42faf`
+- Certificate-only V4 experiment commit: `e9db3af3401795dce1819d79543873c107a42454`
+- Strong all-proper-subbundle V4 commit: `822d62d59e5a23fee8ab6d5fbf4eb24edf71eff7`
+- Workflow integration commit: `363bd209b262a69593e66371cb91fcb2db4d0dae`
+- Exact V4 successful workflow: run 10 of `INSACERMO Exact DC Preaudit Depth V3`.
