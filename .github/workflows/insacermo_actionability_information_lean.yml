@@ -107,6 +107,9 @@ jobs:
       - name: Run Rhea equation-level Petri V2
         run: python3 experiments/rhea_equation_level_petri_v2.py
 
+      - name: Run Rhea exact resource pre-audit depth V3
+        run: python3 experiments/rhea_exact_resource_preaudit_depth_v3.py
+
       - name: Run PGLib IEEE14 DC cut certificate V2
         run: |
           python3 -m pip install --quiet numpy scipy
