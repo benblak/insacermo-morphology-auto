@@ -9,16 +9,13 @@
 # We use the exact extreme-ray machinery of V3.  For one order-7 witness F:
 #   1. every exact baseline ray accepts F          -> feasible before outage;
 #   2. one exact outage ray rejects F              -> infeasible after outage;
-#   3. every exact outage ray accepts F\{q} for every q in F
-#                                                -> every one-deletion feasible.
+#   3. every exact outage ray accepts every proper subbundle G subset F
+#                                                -> genuine minimality.
 #
-# Because this benchmark feasibility family is downward closed for the encoded
-# DC model (zero generator Pmin, zero-load omitted goals, linear network
-# constraints), one-deletion feasibility implies all proper subbundles are
-# feasible.  To avoid relying on that extra monotonicity in the computational
-# statement, we phrase the exact dual check directly on the seven one-deletions,
-# which is the CrossCertifiedMinimal condition needed by the Lean theorem once
-# downward closure is supplied.
+# We deliberately check ALL proper subbundles of the single witness instead of
+# assuming downward closure.  This is still not a catalogue-wide feasibility
+# audit: no primal solver is called, and only the proper subsets of one dual-
+# derived witness are evaluated against the already-enumerated exact rays.
 #
 # No base.dc_feasible() call appears in this file.
 
@@ -94,7 +91,7 @@ def main():
     print("INSACERMO_PGLIB_DC_EXACT_CERTIFICATE_ONLY_DEPTH_V4")
     print("STATUS EXACT_DUAL_ONLY_MINIMAL_LOSS_CLOSURE")
     print("PRIMAL_FEASIBILITY_CALLS", 0)
-    print("BUNDLE_ENUMERATION_USED", 0)
+    print("FULL_CATALOGUE_BUNDLE_ENUMERATION_USED", 0)
     print("GOAL_LOAD_BUSES", " ".join(map(str, goal_buses)))
 
     # Re-derive a candidate order-7 witness from exact outage rays only.
@@ -151,18 +148,30 @@ def main():
     if not full_negative:
         raise RuntimeError("order-7 full witness is not dual-certified infeasible")
 
+    # Strong cross-certificate closure: EVERY proper subbundle is accepted
+    # by EVERY post-outage exact ray.
+    proper_checked = 0
+    proper_bad = []
     deletion_min = {}
     deletion_bad_counts = {}
-    for q in F:
-        G = tuple(b for b in F if b != q)
-        vals = [value(beta, weights, G) for _, beta, weights in post_rays]
-        deletion_min[q] = min(vals)
-        deletion_bad_counts[q] = sum(1 for x in vals if x < 0)
 
-    if any(n != 0 for n in deletion_bad_counts.values()):
+    for k in range(0, len(F)):
+        for G in itertools.combinations(F, k):
+            vals = [value(beta, weights, G) for _, beta, weights in post_rays]
+            proper_checked += 1
+            bad = sum(1 for x in vals if x < 0)
+            if bad:
+                proper_bad.append((G, bad, min(vals)))
+            if k == len(F) - 1:
+                removed = next(q for q in F if q not in G)
+                deletion_min[removed] = min(vals)
+                deletion_bad_counts[removed] = bad
+
+    if proper_bad:
+        G, bad, vmin = proper_bad[0]
         raise RuntimeError(
-            "candidate is not cross-certified: "
-            + repr(deletion_bad_counts)
+            "candidate is not cross-certified on a proper subbundle: "
+            f"G={G}, negative_rays={bad}, min={vmin}"
         )
 
     # Exact baseline certificate family: no outage.
@@ -199,8 +208,10 @@ def main():
             "MIN_EXACT_VALUE", v3.compact_rat(deletion_min[q]),
         )
 
-    print("ALL_ONE_DELETIONS_ACCEPTED_BY_ALL_POST_OUTAGE_RAYS", 1)
-    print("CROSS_CERTIFIED_ONE_DELETION_MINIMAL", 1)
+    print("WITNESS_PROPER_SUBBUNDLES_CHECKED", proper_checked)
+    print("WITNESS_PROPER_SUBBUNDLES_WITH_NEGATIVE_RAY", len(proper_bad))
+    print("ALL_PROPER_SUBBUNDLES_ACCEPTED_BY_ALL_POST_OUTAGE_RAYS", 1)
+    print("CROSS_CERTIFIED_MINIMAL", 1)
     print("BASELINE_EXACT_RAYS", len(pre_rays))
     print("BASELINE_NEGATIVE_RAYS_FOR_WITNESS", pre_bad)
     print("BASELINE_WITNESS_ACCEPTED_BY_ALL_RAYS", 1)
