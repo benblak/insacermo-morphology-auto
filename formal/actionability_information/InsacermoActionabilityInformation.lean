@@ -102,3 +102,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- strict noncurrency Rhea V2 CI trigger; theorem statements unchanged.
 
 -- bounded-witness router theorem CI trigger.
+
+-- DC cut certificate V2 CI trigger.
