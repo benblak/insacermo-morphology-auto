@@ -114,3 +114,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- generic feasibility family router trigger.
 
 -- extreme-ray DC pre-audit depth V1 trigger.
+
+-- tight extreme-ray DC pre-audit depth V2 trigger.
