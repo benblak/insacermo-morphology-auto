@@ -110,3 +110,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- automatic DC certificate router V1 trigger.
 
 -- DC heredity audit V1 trigger.
+
+-- generic feasibility family router trigger.
