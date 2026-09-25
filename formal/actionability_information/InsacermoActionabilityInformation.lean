@@ -116,3 +116,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- extreme-ray DC pre-audit depth V1 trigger.
 
 -- tight extreme-ray DC pre-audit depth V2 trigger.
+
+-- singleton Farkas ray tolerance fix trigger.
