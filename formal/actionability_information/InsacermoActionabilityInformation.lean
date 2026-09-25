@@ -46,6 +46,7 @@ import InsacermoActionabilityInformation.MasterClosureV1
 
 import InsacermoActionabilityInformation.StructuralAuditKernel
 import InsacermoActionabilityInformation.CertificatePreAuditDepth
+import InsacermoActionabilityInformation.CertificateDomain
 
 import InsacermoActionabilityInformation.StructuralAuditSCCBridge
 
