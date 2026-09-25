@@ -1,0 +1,40 @@
+name: INSACERMO Certificate Preaudit Lean
+
+on:
+  pull_request:
+    paths:
+      - 'formal/actionability_information/InsacermoActionabilityInformation/CertificatePreAuditDepth.lean'
+      - '.github/workflows/certificate_preaudit_lean.yml'
+  workflow_dispatch:
+
+jobs:
+  certificate-preaudit-lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap Lean
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake update
+      - name: Reject placeholders
+        run: |
+          if grep -nE '\b(sorry|admit)\b' formal/actionability_information/InsacermoActionabilityInformation/CertificatePreAuditDepth.lean; then
+            echo 'Proof placeholder found.'
+            exit 1
+          fi
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/actionability_information
+          build: false
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: Check certificate pre-audit theorem
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake env lean InsacermoActionabilityInformation/CertificatePreAuditDepth.lean
