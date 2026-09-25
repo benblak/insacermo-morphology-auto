@@ -7,6 +7,54 @@ namespace StructuralAuditKernel
 
 open FutureRobustness
 
+/-- General bounded-witness structural certificate.
+
+Every infeasible finite contract contains an infeasible sub-contract whose
+cardinality is at most r.  Each system class may discharge this hypothesis with
+its own structural certificate (SCC/comparability, resource capacity, cuts,
+duality, Hall-type witnesses, etc.). -/
+def BadWitnessAtMost
+    {Q : Type*} [DecidableEq Q]
+    (K : ContractComplex Q) (r : ℕ) : Prop :=
+  ∀ F : Finset Q, ¬ K.feasible F →
+    ∃ G : Finset Q, G ⊆ F ∧ G.card ≤ r ∧ ¬ K.feasible G
+
+/-- Certificate-router theorem: if every failure contains a bad witness of
+cardinality at most r, then every minimal obstruction has cardinality at most r. -/
+theorem minimalNonface_card_le_of_boundedWitness
+    {Q : Type*} [DecidableEq Q]
+    {K : ContractComplex Q}
+    {r : ℕ}
+    (hcert : BadWitnessAtMost K r)
+    {F : Finset Q}
+    (hmin : MinimalNonface K F) :
+    F.card ≤ r := by
+  by_contra hnot
+  have hgt : r < F.card := Nat.lt_of_not_ge hnot
+  rcases hcert F hmin.1 with ⟨G, hGF, hGcard, hGbad⟩
+  have hproper : G ⊂ F := by
+    constructor
+    · exact hGF
+    · intro hFG
+      have hcardFG : F.card ≤ G.card := Finset.card_le_card hFG
+      omega
+  exact hGbad (hmin.2 G hproper)
+
+/-- Operational stopping theorem.  Under a bounded-witness certificate of
+radius r, auditing every bundle of cardinality at most r is complete: if all
+such bundles are feasible, then every finite bundle is feasible. -/
+theorem audit_complete_of_boundedWitness
+    {Q : Type*} [DecidableEq Q]
+    {K : ContractComplex Q}
+    {r : ℕ}
+    (hcert : BadWitnessAtMost K r)
+    (hsmall : ∀ G : Finset Q, G.card ≤ r → K.feasible G) :
+    ∀ F : Finset Q, K.feasible F := by
+  intro F
+  by_contra hF
+  rcases hcert F hF with ⟨G, _hGF, hGcard, hGbad⟩
+  exact hGbad (hsmall G hGcard)
+
 /-- Structural certificate saying that every infeasible finite contract contains
 an infeasible sub-contract of cardinality at most two.  In graph instances with
 state-valued goals at unbounded horizon, the SCC condensation theorem is meant
@@ -14,8 +62,7 @@ to discharge exactly this hypothesis. -/
 def BadWitnessAtMostTwo
     {Q : Type*} [DecidableEq Q]
     (K : ContractComplex Q) : Prop :=
-  ∀ F : Finset Q, ¬ K.feasible F →
-    ∃ G : Finset Q, G ⊆ F ∧ G.card ≤ 2 ∧ ¬ K.feasible G
+  BadWitnessAtMost K 2
 
 /-- If every failure has a singleton-or-pair witness, then no minimal
 obstruction can have cardinality larger than two. -/
@@ -26,16 +73,7 @@ theorem minimalNonface_card_le_two
     {F : Finset Q}
     (hmin : MinimalNonface K F) :
     F.card ≤ 2 := by
-  by_contra hnot
-  have hgt : 2 < F.card := Nat.lt_of_not_ge hnot
-  rcases hcert F hmin.1 with ⟨G, hGF, hGcard, hGbad⟩
-  have hproper : G ⊂ F := by
-    constructor
-    · exact hGF
-    · intro hFG
-      have hcardFG : F.card ≤ G.card := Finset.card_le_card hFG
-      omega
-  exact hGbad (hmin.2 G hproper)
+  exact minimalNonface_card_le_of_boundedWitness hcert hmin
 
 /-- Arithmetic core of the finite-horizon audit-rank certificate.
 If every proper (m-1)-goal witness needs at least d + (m-2)δ resource,
@@ -114,6 +152,32 @@ theorem unitResource_card_bound
     (hproper : m - 1 ≤ C) :
     m ≤ C + 1 := by
   omega
+
+/-- Exact unit-resource minimal-obstruction law.
+
+If the full unit-demand bundle of size m exceeds capacity C, while every
+(m-1)-goal proper subbundle fits, then the obstruction size is exactly C+1.
+This explains saturation in clean shared-resource witnesses. -/
+theorem unitResource_minimalObstruction_exact
+    {m C : ℕ}
+    (hfull : C < m)
+    (hproper : m - 1 ≤ C) :
+    m = C + 1 := by
+  omega
+
+/-- Weighted arithmetic window for a minimal shared-resource obstruction.
+If total demand is above capacity C, and removing the lightest required goal
+(weight wmin) makes the bundle fit, then total demand lies in the narrow window
+C < total ≤ C + wmin. -/
+theorem weightedResource_minimalObstruction_window
+    {total C wmin : ℕ}
+    (hfull : C < total)
+    (hwmin : wmin ≤ total)
+    (hproper : total - wmin ≤ C) :
+    C < total ∧ total ≤ C + wmin := by
+  constructor
+  · exact hfull
+  · omega
 
 end StructuralAuditKernel
 
