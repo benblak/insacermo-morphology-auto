@@ -154,6 +154,74 @@ def exact_reduced_inequalities(grid, outage_idx):
     return rows, hs, labels, redundant_angle_rows
 
 
+def prune_trivial_zero_factors(grid, goal_buses, A, rows, hs, labels):
+    """Remove exact product factors that cannot affect catalogue feasibility.
+
+    A single-line outage can isolate a zero-load, zero-active-generation bus.
+    Its nodal equation is then 0=0 and its angle appears only in its own finite
+    bounds.  That factor is independently feasible (theta=0), so deleting the
+    zero equality row, the decoupled variable, and its pure bound inequalities
+    preserves feasibility for every catalogue bundle exactly.
+    """
+    zero_eq_rows = [
+        i for i in range(A.rows)
+        if all(A[i, j] == 0 for j in range(A.cols))
+    ]
+    for i in zero_eq_rows:
+        bus = grid.bus_ids[i]
+        if bus in goal_buses or q(grid.load.get(bus, 0.0)) != 0:
+            raise RuntimeError(
+                f"cannot prune zero balance row for catalogue/load bus {bus}"
+            )
+
+    keep_eq = [i for i in range(A.rows) if i not in set(zero_eq_rows)]
+    A1 = A.extract(keep_eq, list(range(A.cols)))
+
+    zero_cols = [
+        j for j in range(A1.cols)
+        if all(A1[i, j] == 0 for i in range(A1.rows))
+    ]
+    removable_cols = []
+    touched_rows = set()
+
+    for j in zero_cols:
+        touched = [ri for ri, row in enumerate(rows) if row[0, j] != 0]
+        # Only remove a variable if every inequality touching it is pure in
+        # that variable and x_j=0 satisfies all of those inequalities.
+        pure = all(
+            all(k == j or rows[ri][0, k] == 0 for k in range(A.cols))
+            for ri in touched
+        )
+        zero_feasible = all(hs[ri] >= 0 for ri in touched)
+        if pure and zero_feasible:
+            removable_cols.append(j)
+            touched_rows.update(touched)
+
+    keep_cols = [
+        j for j in range(A.cols) if j not in set(removable_cols)
+    ]
+    keep_ineq = [
+        ri for ri in range(len(rows)) if ri not in touched_rows
+    ]
+
+    A2 = A1.extract(list(range(A1.rows)), keep_cols)
+    rows2 = [rows[ri].extract([0], keep_cols) for ri in keep_ineq]
+    hs2 = [hs[ri] for ri in keep_ineq]
+    labels2 = [labels[ri] for ri in keep_ineq]
+    row_index = {orig: new for new, orig in enumerate(keep_eq)}
+
+    if A2.rank() != A2.rows:
+        raise RuntimeError(
+            "nontrivial rank defect remains after exact product-factor pruning: "
+            f"rank={A2.rank()} rows={A2.rows}"
+        )
+
+    return (
+        A2, rows2, hs2, labels2, row_index,
+        len(zero_eq_rows), len(removable_cols), len(touched_rows),
+    )
+
+
 def det2(a, b):
     return sp.factor(a[0] * b[1] - a[1] * b[0])
 
@@ -248,7 +316,9 @@ def prepare_y_solver(A, rows):
     return y_parts
 
 
-def ray_data(grid, goal_buses, A, rows, hs, support, zvals, y_parts):
+def ray_data(
+    grid, goal_buses, A, rows, hs, support, zvals, y_parts, row_index
+):
     y = sp.zeros(A.rows, 1)
     for idx, zz in zip(support, zvals):
         y += zz * y_parts[idx]
@@ -260,10 +330,15 @@ def ray_data(grid, goal_buses, A, rows, hs, support, zvals, y_parts):
         raise RuntimeError(f"nonzero exact stationarity for support {support}")
 
     beta = sp.factor(sum(hs[idx] * zz for idx, zz in zip(support, zvals)))
-    weights = {
-        bus: sp.factor(q(grid.load[bus]) * y[grid.pos[bus], 0])
-        for bus in goal_buses
-    }
+    weights = {}
+    for bus in goal_buses:
+        orig_row = grid.pos[bus]
+        if orig_row not in row_index:
+            weights[bus] = Q(0)
+        else:
+            weights[bus] = sp.factor(
+                q(grid.load[bus]) * y[row_index[orig_row], 0]
+            )
     return beta, weights
 
 
@@ -332,6 +407,12 @@ def main():
 
         A = exact_A(grid, outage)
         rows, hs, labels, redundant = exact_reduced_inequalities(grid, outage)
+        (
+            A, rows, hs, labels, row_index,
+            dropped_eq, dropped_vars, dropped_ineq,
+        ) = prune_trivial_zero_factors(
+            grid, goal_buses, A, rows, hs, labels
+        )
         cols = projected_columns(A, rows)
         rankB, rays = enumerate_exact_extreme_rays(cols)
         y_parts = prepare_y_solver(A, rows)
@@ -343,7 +424,8 @@ def main():
 
         for support, zvals in rays:
             beta, weights = ray_data(
-                grid, goal_buses, A, rows, hs, support, zvals, y_parts
+                grid, goal_buses, A, rows, hs, support, zvals, y_parts,
+                row_index,
             )
 
             ok8, rec8 = compatible_minimality(beta, weights, tuple(goal_buses))
@@ -374,6 +456,9 @@ def main():
             "ORDER8_COMPATIBLE_RAYS", scenario_8,
             "ORDER7_COMPATIBLE_RAYS", scenario_7,
             "REDUNDANT_ANGLE_ROWS_REMOVED", redundant,
+            "TRIVIAL_EQ_ROWS_DROPPED", dropped_eq,
+            "TRIVIAL_VARS_DROPPED", dropped_vars,
+            "TRIVIAL_BOUND_ROWS_DROPPED", dropped_ineq,
         )
 
     if order8_compatible:
