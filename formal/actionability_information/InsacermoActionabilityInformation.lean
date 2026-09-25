@@ -104,3 +104,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- bounded-witness router theorem CI trigger.
 
 -- DC cut certificate V2 CI trigger.
+
+-- DC Farkas certificate V3 CI trigger.
