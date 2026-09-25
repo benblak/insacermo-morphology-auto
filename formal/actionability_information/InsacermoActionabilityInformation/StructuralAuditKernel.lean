@@ -179,6 +179,31 @@ theorem weightedResource_minimalObstruction_window
   · exact hfull
   · omega
 
+/-- Arithmetic core for an additive dual/cut certificate.
+
+A domain-specific dual certificate can often be oriented as a nonnegative
+"burden" per goal against a total certificate capacity C.  If every goal in a
+minimal obstruction contributes at least delta > 0 and every (m-1)-goal proper
+subbundle remains below C, then the same cardinality bound as for a physical
+resource follows.  The theorem is intentionally domain-agnostic: cuts,
+Farkas rays, Hall deficits, and other additive certificates may discharge the
+premise. -/
+theorem additiveCertificate_card_bound
+    {m C delta : ℕ}
+    (hm : 1 ≤ m)
+    (hdelta : 0 < delta)
+    (hproper : (m - 1) * delta ≤ C) :
+    m ≤ 1 + C / delta := by
+  exact resourceCapacity_card_bound hm hdelta hproper
+
+/-- Exact unit-burden form for an additive certificate. -/
+theorem unitAdditiveCertificate_exact
+    {m C : ℕ}
+    (hfull : C < m)
+    (hproper : m - 1 ≤ C) :
+    m = C + 1 := by
+  exact unitResource_minimalObstruction_exact hfull hproper
+
 end StructuralAuditKernel
 
 end InsacermoActionabilityInformation
