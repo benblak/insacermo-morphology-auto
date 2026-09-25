@@ -28,7 +28,7 @@ jobs:
       - uses: leanprover/lean-action@v1
         with:
           lake-package-directory: formal/actionability_information
-          build: false
+          build: true
           test: false
           lint: false
           use-mathlib-cache: true
