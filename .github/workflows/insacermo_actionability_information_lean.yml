@@ -126,3 +126,8 @@ jobs:
         run: |
           python3 -m pip install --quiet numpy scipy sympy
           python3 experiments/automatic_dc_certificate_router_v1.py
+
+      - name: Run PGLib IEEE14 DC heredity audit V1
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_heredity_audit_v1.py
