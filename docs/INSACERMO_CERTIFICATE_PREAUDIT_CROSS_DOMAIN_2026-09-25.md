@@ -191,3 +191,114 @@ Key commits:
 - `822d62d59e5a23fee8ab6d5fbf4eb24edf71eff7` — strong all-proper-subbundle DC V4.
 - `47dbb7f97e918f96c2f08345fb4b70824b020009` — Rhea exact resource pre-audit.
 - `33cadc22852153ff8857a1fceb672b6bbe744981` — dedicated Rhea pre-audit workflow.
+
+
+## Domain C — Signed topology / unbalanced-cycle certificate
+
+Certificate class: unbalanced simple cycle in a signed-XOR graph.
+
+This domain is qualitatively stronger than the first two: the certificate invariant is already known exactly to equal the actual obstruction depth.
+
+The Lean development proves:
+
+[
+\boxed{\kappa_{\mathrm{top}} = g_-}
+]
+
+where (g_-) is the unbalanced girth, i.e. the least length of an unbalanced cycle.
+
+The proof chain already establishes:
+
+1. selected signed constraints are UNSAT iff they contain an unbalanced cycle;
+2. every inclusion-minimal finite UNSAT subcontract is exactly the edge set of an unbalanced simple cycle;
+3. every unbalanced simple cycle is inclusion-minimal UNSAT;
+4. therefore the least UNSAT subcontract cardinality equals the least unbalanced-cycle length.
+
+A new bridge module was added:
+
+`InsacermoActionabilityInformation/SignedTopologicalPreAuditBridge.lean`
+
+to expose this result explicitly as a certificate pre-audit identity.
+
+### Concrete benchmark
+
+A canonical signed-cycle benchmark was added:
+
+`experiments/signed_topological_preaudit_v1.py`
+
+For small cases, the pre-audit derives (r=n) from the unbalanced cycle before subset enumeration, and exhaustive auditing then confirms that the full cycle is UNSAT while every proper subset is SAT:
+
+- (n=3): 7 proper subsets, all SAT;
+- (n=4): 15 proper subsets, all SAT;
+- (n=5): 31 proper subsets, all SAT;
+- (n=7): 127 proper subsets, all SAT;
+- (n=9): 511 proper subsets, all SAT;
+- (n=12): 4095 proper subsets, all SAT.
+
+For larger cases, structural minimality is used directly:
+
+- (n=17),
+- (n=31),
+- (n=101),
+- (n=1001).
+
+In every case:
+
+[
+\boxed{r_{\mathrm{pre}}=g_-=\kappa_{\mathrm{top}}=n}.
+]
+
+The benchmark workflow reports:
+
+- `STATUS EXACT_COMBINATORIAL_PREAUDIT_BENCHMARK`,
+- `BUNDLE_ENUMERATION_USED_TO_DERIVE_R 0`,
+- `MAX_STRUCTURAL_N 1001`,
+- `RESULT COMPLETE`.
+
+### Literature positioning
+
+The underlying signed-graph facts are classical in substance: balance is characterized by the absence of negative/unbalanced cycles, and signed-graph theory has long studied cycle signs, switching, balance, frustration, and related invariants.
+
+INSACERMO should therefore not claim novelty for the existence or role of negative cycles themselves.
+
+The relevant INSACERMO contribution is the architectural reinterpretation:
+
+[
+\text{domain certificate invariant}
+\rightarrow
+\text{pre-audit depth}
+\rightarrow
+\text{actual contract-obstruction depth}.
+]
+
+In this signed-XOR domain, the classical topological invariant happens to supply an exact instance of that architecture.
+
+## Three-domain synthesis
+
+The current certificate-pre-audit layer is now instantiated by three mathematically distinct mechanisms:
+
+[
+\begin{array}{lll}
+\text{PGLib DC} & \text{exact Farkas extreme rays} & r_{\mathrm{pre}}=7,\\
+\text{Rhea/Petri} & \text{integer resource capacity} & r_{\mathrm{pre}}=10,\\
+\text{Signed topology} & \text{unbalanced girth} & r_{\mathrm{pre}}=\kappa_{\mathrm{top}}=g_-.
+\end{array}
+]
+
+The common INSACERMO abstraction is therefore not any one certificate formalism. It is:
+
+[
+\boxed{
+\text{CONTRACT}
+\rightarrow
+\text{DOMAIN CERTIFICATES}
+\rightarrow
+\text{PRE-AUDIT DEPTH}
+\rightarrow
+\text{CROSS-CERTIFIED / ATOMIC WITNESS}
+\rightarrow
+\text{ACTUAL OBSTRUCTION DEPTH}
+}
+]
+
+This is the strongest evidence so far that certificate pre-audit depth is a reusable cross-domain component of the larger INSACERMO engine.
