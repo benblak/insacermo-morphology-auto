@@ -7,6 +7,72 @@ namespace StructuralAuditKernel
 
 open FutureRobustness
 
+
+/-!
+## Generic finite feasibility families
+
+ContractComplex is intentionally downward closed. Some physical feasibility
+models need not be. The certificate-router logic itself does not need downward
+closure: it only needs a predicate on finite bundles plus a bounded-bad-witness
+property.
+-/
+
+/-- An arbitrary feasibility predicate on finite bundles. No monotonicity or
+downward-closure assumption is imposed. -/
+abbrev FeasibilityFamily (Q : Type*) [DecidableEq Q] :=
+  Finset Q → Prop
+
+/-- Inclusion-minimal failure for an arbitrary feasibility family. -/
+def MinimalFailure
+    {Q : Type*} [DecidableEq Q]
+    (P : FeasibilityFamily Q) (F : Finset Q) : Prop :=
+  ¬ P F ∧ ∀ G : Finset Q, G ⊂ F → P G
+
+/-- Generic bounded-witness certificate, requiring no downward closure:
+every failed finite bundle contains a failed sub-bundle of size at most r. -/
+def FamilyBadWitnessAtMost
+    {Q : Type*} [DecidableEq Q]
+    (P : FeasibilityFamily Q) (r : ℕ) : Prop :=
+  ∀ F : Finset Q, ¬ P F →
+    ∃ G : Finset Q, G ⊆ F ∧ G.card ≤ r ∧ ¬ P G
+
+/-- Generic certificate-router theorem. Downward closure is not needed:
+bounded failed sub-witnesses alone bound every inclusion-minimal failure. -/
+theorem minimalFailure_card_le_of_boundedWitness
+    {Q : Type*} [DecidableEq Q]
+    {P : FeasibilityFamily Q}
+    {r : ℕ}
+    (hcert : FamilyBadWitnessAtMost P r)
+    {F : Finset Q}
+    (hmin : MinimalFailure P F) :
+    F.card ≤ r := by
+  by_contra hnot
+  have hgt : r < F.card := Nat.lt_of_not_ge hnot
+  rcases hcert F hmin.1 with ⟨G, hGF, hGcard, hGbad⟩
+  have hproper : G ⊂ F := by
+    constructor
+    · exact hGF
+    · intro hFG
+      have hcardFG : F.card ≤ G.card := Finset.card_le_card hFG
+      omega
+  exact hGbad (hmin.2 G hproper)
+
+/-- Generic stopping theorem. If every failure contains a failed witness of
+size at most r, then checking every bundle through size r is complete even for
+a non-hereditary feasibility family. -/
+theorem familyAudit_complete_of_boundedWitness
+    {Q : Type*} [DecidableEq Q]
+    {P : FeasibilityFamily Q}
+    {r : ℕ}
+    (hcert : FamilyBadWitnessAtMost P r)
+    (hsmall : ∀ G : Finset Q, G.card ≤ r → P G) :
+    ∀ F : Finset Q, P F := by
+  intro F
+  by_contra hF
+  rcases hcert F hF with ⟨G, _hGF, hGcard, hGbad⟩
+  exact hGbad (hsmall G hGcard)
+
+
 /-- General bounded-witness structural certificate.
 
 Every infeasible finite contract contains an infeasible sub-contract whose
@@ -18,6 +84,16 @@ def BadWitnessAtMost
     (K : ContractComplex Q) (r : ℕ) : Prop :=
   ∀ F : Finset Q, ¬ K.feasible F →
     ∃ G : Finset Q, G ⊆ F ∧ G.card ≤ r ∧ ¬ K.feasible G
+
+
+/-- Every downward-closed ContractComplex induces the generic family
+certificate with exactly the same radius. -/
+theorem familyBadWitnessAtMost_of_contractComplex
+    {Q : Type*} [DecidableEq Q]
+    {K : ContractComplex Q} {r : ℕ}
+    (hcert : BadWitnessAtMost K r) :
+    FamilyBadWitnessAtMost K.feasible r := by
+  exact hcert
 
 /-- Certificate-router theorem: if every failure contains a bad witness of
 cardinality at most r, then every minimal obstruction has cardinality at most r. -/
