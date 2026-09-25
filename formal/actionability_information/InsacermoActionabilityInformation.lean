@@ -100,3 +100,5 @@ import InsacermoActionabilityInformation.StructuralAuditReachability
 -- AC rank scan + Rhea master join CI trigger; theorem statements unchanged.
 
 -- strict noncurrency Rhea V2 CI trigger; theorem statements unchanged.
+
+-- bounded-witness router theorem CI trigger.
