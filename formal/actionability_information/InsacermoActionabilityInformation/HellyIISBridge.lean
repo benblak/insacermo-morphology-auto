@@ -81,21 +81,13 @@ theorem exists_minimalNonface_subset_of_failure
   by_cases hdel : ∀ q, q ∈ F → K.feasible (F.erase q)
   · refine ⟨F, Finset.Subset.rfl, hbad, ?_⟩
     intro G hGF
-    have hnot : ¬ F ⊆ G := hGF.2
-    push_neg at hnot
-    rcases hnot with ⟨q, hqF, hqG⟩
-    have hGdel : G ⊆ F.erase q := by
-      intro x hxG
-      exact Finset.mem_erase.mpr ⟨by
-        intro hxq
-        subst x
-        exact hqG hxG, hGF.1 hxG⟩
+    rcases Finset.ssubset_iff_exists_subset_erase.mp hGF with
+      ⟨q, hqF, hGdel⟩
     exact K.downward (hdel q hqF) hGdel
   · push_neg at hdel
     rcases hdel with ⟨q, hqF, hbadDel⟩
-    have hcard : (F.erase q).card < F.card :=
-      Finset.card_erase_lt_of_mem hqF
-    rcases ih (F.erase q) hcard hbadDel with ⟨G, hGF, hmin⟩
+    have hlt : F.erase q ⊂ F := Finset.erase_ssubset hqF
+    rcases ih (F.erase q) hlt hbadDel with ⟨G, hGF, hmin⟩
     exact ⟨G, hGF.trans (Finset.erase_subset q F), hmin⟩
 
 /-- For downward-closed contract complexes, the generic bounded-bad-witness
