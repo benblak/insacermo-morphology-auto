@@ -13,7 +13,7 @@ variable {X : Type*}
 /-- Encode an ordinary state-safety set as a one-future INSACERMO
 availability map.  The unique future is available exactly in safe states. -/
 def StateSafetyAvail (Safe : Set X) (x : X) : Set Unit :=
-  Set.setOf (fun _ : Unit => x ∈ Safe)
+  fun _ : Unit => x ∈ Safe
 
 @[simp] theorem unit_mem_stateSafetyAvail_iff
     {Safe : Set X} {x : X} :
