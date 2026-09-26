@@ -1,0 +1,53 @@
+{
+  "contract": {
+    "contract_id": "site-demo-real-engine",
+    "horizon": 2,
+    "requirements": [
+      {
+        "future_id": "A",
+        "required": true,
+        "description": "Service principal"
+      },
+      {
+        "future_id": "B",
+        "required": true,
+        "description": "Option de secours"
+      },
+      {
+        "future_id": "C",
+        "required": true,
+        "description": "Capacité critique"
+      }
+    ]
+  },
+  "backend": {
+    "type": "exact_catalogue",
+    "model_id": "site-exact-catalogue-demo-v1",
+    "available_now": [
+      "A"
+    ],
+    "recovery_depths": {
+      "B": 2
+    },
+    "irreversible": [
+      "C"
+    ],
+    "forbidden_bundles": [
+      [
+        "B",
+        "C"
+      ]
+    ],
+    "repairs": [
+      {
+        "repair_id": "restore-Y",
+        "repairs": [
+          "B",
+          "C"
+        ],
+        "explanation": "Restaurer la capacité Y.",
+        "cost": 1
+      }
+    ]
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "contract": {
+    "contract_id": "modechoice14-real-structural-demo",
+    "requirements": [
+      {
+        "future_id": "individual_5",
+        "required": true
+      },
+      {
+        "future_id": "individual_15",
+        "required": true
+      },
+      {
+        "future_id": "individual_19",
+        "required": true
+      },
+      {
+        "future_id": "individual_57",
+        "required": true
+      },
+      {
+        "future_id": "individual_16",
+        "required": true
+      },
+      {
+        "future_id": "individual_17",
+        "required": true
+      },
+      {
+        "future_id": "individual_66",
+        "required": true
+      },
+      {
+        "future_id": "individual_106",
+        "required": true
+      },
+      {
+        "future_id": "individual_24",
+        "required": true
+      },
+      {
+        "future_id": "individual_46",
+        "required": true
+      },
+      {
+        "future_id": "individual_1",
+        "required": true
+      },
+      {
+        "future_id": "individual_2",
+        "required": true
+      },
+      {
+        "future_id": "individual_175",
+        "required": true
+      },
+      {
+        "future_id": "individual_191",
+        "required": true
+      }
+    ]
+  },
+  "backend": {
+    "type": "modechoice14_frozen",
+    "model_id": "modechoice-real-14world-structural-v1"
+  }
+}

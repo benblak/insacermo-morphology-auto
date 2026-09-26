@@ -1,0 +1,47 @@
+name: INSACERMO Future Task Bridge Lean
+
+on:
+  pull_request:
+    paths:
+      - 'formal/actionability_information/InsacermoActionabilityInformation/FutureTaskBridge.lean'
+      - 'formal/actionability_information/InsacermoActionabilityInformation.lean'
+      - '.github/workflows/future_task_bridge_lean.yml'
+
+jobs:
+  future-task-bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap Lean
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake update
+
+      - name: Reject placeholders
+        shell: bash
+        run: |
+          if grep -nE '\b(sorry|admit)\b' formal/actionability_information/InsacermoActionabilityInformation/FutureTaskBridge.lean; then
+            echo 'Proof placeholder found.'
+            exit 1
+          fi
+
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/actionability_information
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+          leanchecker: true
+          leanchecker-args: 'InsacermoActionabilityInformation.FutureTaskBridge'
+
+      - name: Check future task bridge
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake env lean InsacermoActionabilityInformation/FutureTaskBridge.lean

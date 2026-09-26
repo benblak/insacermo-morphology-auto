@@ -1,0 +1,39 @@
+name: INSACERMO Rhea Resource Backend V1
+
+on:
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'engine/rhea_resource_backend_v1.py'
+      - 'engine/test_rhea_resource_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'site_prototype/rhea_contract_input_example.json'
+      - '.github/workflows/rhea_resource_backend_v1.yml'
+  pull_request:
+    paths:
+      - 'engine/rhea_resource_backend_v1.py'
+      - 'engine/test_rhea_resource_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'site_prototype/rhea_contract_input_example.json'
+      - '.github/workflows/rhea_resource_backend_v1.yml'
+
+jobs:
+  rhea-resource:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Rhea backend tests
+        run: python -m engine.test_rhea_resource_backend_v1
+      - name: Run Rhea site example
+        run: |
+          python -m engine.contract_cli_v1 site_prototype/rhea_contract_input_example.json --pretty > /tmp/rhea.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/rhea.json'))
+          assert p['decision']=='REPAIR'
+          assert len(p['joint_obstructions'])==1
+          assert len(p['joint_obstructions'][0]['bundle'])==10
+          assert p['certificates'][0]['evidence_level']=='exact'
+          print('RHEA_SITE_ENGINE_EXAMPLE: PASS')
+          PY

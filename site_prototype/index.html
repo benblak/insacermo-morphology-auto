@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INSACERMO — Future Capability Engine</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2d;--muted:#8ea0bd;--text:#eef4ff;--line:#253451;--accent:#65d0ff;--good:#7ee2a8;--warn:#ffd166;--bad:#ff7b7b;--repair:#c6a7ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#0b1020,#0f1628);color:var(--text)}
+main{max-width:1160px;margin:auto;padding:34px 20px 70px}
+.hero{padding:28px 0 18px}.kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:800}
+h1{font-size:clamp(38px,6vw,70px);line-height:.98;margin:10px 0 18px;max-width:950px}.lead{font-size:19px;line-height:1.5;color:#c8d5ea;max-width:900px}
+.badge{display:inline-flex;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}.card{background:rgba(18,26,45,.9);border:1px solid var(--line);border-radius:18px;padding:21px}
+.card h2,.card h3{margin-top:0}label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+select,button,textarea{font:inherit}select,textarea{width:100%;background:#0c1323;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+textarea{min-height:260px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+button{border:0;border-radius:12px;padding:12px 16px;font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#07101c;width:100%;margin-top:14px}
+.secondary{background:#17223a;color:#dce9ff;border:1px solid var(--line);width:100%;margin-top:8px}
+.verdict{display:flex;align-items:center;gap:14px;border-radius:16px;padding:18px;border:1px solid var(--line);background:#0c1323}.verdict strong{font-size:31px}.verdict small{display:block;color:var(--muted);margin-top:3px}
+.ACT strong{color:var(--good)}.PROBE strong{color:var(--warn)}.REPAIR strong{color:var(--repair)}.REFUSE strong{color:var(--bad)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:13px}.metric{background:#0d1526;border:1px solid var(--line);border-radius:14px;padding:13px}.metric b{display:block;font-size:25px}.metric span{font-size:12px;color:var(--muted)}
+.future{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.future:last-child{border-bottom:0}
+.status{font-size:12px;border-radius:999px;padding:5px 9px;border:1px solid var(--line)}.immediate{color:var(--good)}.recoverable{color:var(--accent)}.irreversible{color:var(--bad)}.unknown{color:var(--warn)}
+.callout{margin-top:12px;padding:13px 15px;border-left:3px solid var(--accent);background:#0d1526;border-radius:8px}.callout.bad{border-left-color:var(--bad)}.callout.repair{border-left-color:var(--repair)}
+details{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}summary{cursor:pointer;font-weight:750}
+code,pre{background:#0a1120;border:1px solid var(--line);border-radius:6px}code{padding:2px 5px}pre{padding:12px;white-space:pre-wrap;overflow:auto;color:#cfe0ff}
+.ok{color:var(--good)}.err{color:var(--bad)}.muted{color:var(--muted)}.footer{margin-top:30px;color:var(--muted);font-size:13px}
+@media(max-width:840px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+  <div class="kicker">INSACERMO · Future Capability Engine</div>
+  <h1>Décider aujourd’hui sans détruire aveuglément demain.</h1>
+  <p class="lead">Déclarez les capacités qui doivent rester possibles. Le moteur audite le contrat, détecte les obstructions, expose le niveau d’évidence et répond ACT, PROBE, REPAIR ou REFUSE.</p>
+  <div class="badge" id="health">Connexion moteur…</div>
+</section>
+
+<div class="grid">
+<section class="card">
+  <h2>1. Choisir un cas</h2>
+  <label>Backend / exemple</label>
+  <select id="example">
+    <option value="contract_input_example.json">Catalogue fini exact — démo générique</option>
+    <option value="rhea_contract_input_example.json">Rhea — ressource exacte</option>
+    <option value="pglib_contract_input_example.json">PGLib IEEE-14 — certificat DC exact</option>
+    <option value="modechoice_contract_input_example.json">ModeChoice — structure réelle 14 mondes</option>
+  </select>
+  <button class="secondary" id="load">Charger l’exemple</button>
+  <label>Contrat JSON envoyé au moteur</label>
+  <textarea id="payload"></textarea>
+  <button class="primary" id="analyze">Analyser réellement</button>
+  <p class="muted" style="font-size:12px">Cette page appelle <code>/api/analyze</code>. Le verdict affiché ci-dessous est celui renvoyé par le moteur Python, pas un scénario codé dans l’interface.</p>
+</section>
+
+<section class="card">
+  <h2>2. Verdict moteur</h2>
+  <div id="result"><p class="muted">Chargez un exemple puis lancez l’analyse.</p></div>
+</section>
+</div>
+
+<div class="grid">
+<section class="card">
+  <h2>Carte des futurs</h2>
+  <div id="futureMap"><p class="muted">Aucun résultat.</p></div>
+</section>
+<section class="card">
+  <h2>Pourquoi ? Que faire ensuite ?</h2>
+  <div id="explanation"><p class="muted">Aucun résultat.</p></div>
+</section>
+</div>
+
+<section class="card" style="margin-top:18px">
+  <h2>Audit expert</h2>
+  <div id="audit"><p class="muted">Backend, certificats et niveau d’évidence apparaîtront ici.</p></div>
+</section>
+
+<p class="footer">INSACERMO Engine · interface API V1 · Les niveaux formal / exact / exhaustive / empirical / heuristic / declared restent explicitement distingués.</p>
+</main>
+
+<script>
+const $ = (id)=>document.getElementById(id);
+const escapeHtml=(s)=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]));
+
+async function health(){
+  try{
+    const r=await fetch("/api/health",{cache:"no-store"});
+    const j=await r.json();
+    if(!r.ok||!j.ok) throw new Error("service indisponible");
+    $("health").innerHTML='<span class="ok">● moteur connecté</span> · '+j.backends.length+' backends';
+  }catch(e){
+    $("health").innerHTML='<span class="err">● moteur non connecté</span> · lancez python -m engine.http_api_v1';
+  }
+}
+
+async function loadExample(){
+  const f=$("example").value;
+  const r=await fetch("/"+f,{cache:"no-store"});
+  if(!r.ok) throw new Error("Impossible de charger "+f);
+  const j=await r.json();
+  $("payload").value=JSON.stringify(j,null,2);
+}
+
+function renderFutureRows(result){
+  const rows=[];
+  for(const id of result.immediate_futures||[]) rows.push([id,"immediate","Disponible","0"]);
+  for(const x of result.recoverable_futures||[]) rows.push([x.future_id,"recoverable","Récupérable",x.depth]);
+  for(const id of result.irreversible_futures||[]) rows.push([id,"irreversible","Irréversible","∞"]);
+  for(const id of result.unknown_futures||[]) rows.push([id,"unknown","Non certifié","?"]);
+  if(!rows.length) return '<p class="muted">Aucun futur retourné.</p>';
+  return rows.map(x=>'<div class="future"><div><b>'+escapeHtml(x[0])+'</b></div><span class="status '+x[1]+'">'+x[2]+'</span><b>'+x[3]+'</b></div>').join("");
+}
+
+function render(result){
+  const d=result.decision;
+  const counts=[
+    (result.immediate_futures||[]).length,
+    (result.recoverable_futures||[]).length,
+    (result.irreversible_futures||[]).length,
+    (result.unknown_futures||[]).length
+  ];
+  $("result").innerHTML='<div class="verdict '+d+'"><div><strong>'+escapeHtml(d)+'</strong><small>'+escapeHtml(result.backend_name||"backend")+'</small></div></div>'+
+  '<div class="metrics"><div class="metric"><b>'+counts[0]+'</b><span>immédiats</span></div><div class="metric"><b>'+counts[1]+'</b><span>récupérables</span></div><div class="metric"><b>'+counts[2]+'</b><span>irréversibles</span></div><div class="metric"><b>'+counts[3]+'</b><span>inconnus</span></div></div>';
+
+  $("futureMap").innerHTML=renderFutureRows(result);
+
+  const reasons=(result.reasons||[]).map(x=>'<div class="callout">'+escapeHtml(x)+'</div>').join("");
+  const obs=(result.joint_obstructions||[]).map(o=>'<div class="callout bad"><b>Obstruction :</b> {'+o.bundle.map(escapeHtml).join(", ")+'}<br>'+escapeHtml(o.explanation||"")+'</div>').join("");
+  const repairs=(result.repairs||[]).map(r=>'<div class="callout repair"><b>Réparation :</b> '+escapeHtml(r.repair_id)+'<br>'+escapeHtml(r.explanation||"")+'</div>').join("");
+  const probes=(result.probes||[]).map(p=>'<div class="callout"><b>Probe :</b> '+escapeHtml(p.probe_id)+'<br>'+escapeHtml(p.explanation||"")+'</div>').join("");
+  $("explanation").innerHTML=reasons+obs+repairs+probes || '<p class="muted">Pas d’explication supplémentaire.</p>';
+
+  const certs=result.certificates||[];
+  let audit='<p><b>Backend :</b> <code>'+escapeHtml(result.backend_name||"")+'</code></p>';
+  audit+='<p><b>Certificats :</b> '+certs.length+'</p>';
+  if(certs.length){
+    audit+='<details open><summary>Voir les certificats</summary>'+certs.map(c=>
+      '<p><code>'+escapeHtml(c.evidence_level)+'</code> · '+(c.verified?'<span class="ok">verified</span>':'non verified')+
+      '<br><b>'+escapeHtml(c.certificate_id)+'</b><br>'+escapeHtml(c.statement||"")+
+      (c.reference?'<br><span class="muted">'+escapeHtml(c.reference)+'</span>':'')+'</p>'
+    ).join("")+'</details>';
+  }
+  audit+='<details><summary>JSON complet renvoyé par le moteur</summary><pre>'+escapeHtml(JSON.stringify(result,null,2))+'</pre></details>';
+  $("audit").innerHTML=audit;
+}
+
+async function analyze(){
+  $("analyze").disabled=true;
+  $("analyze").textContent="Analyse…";
+  try{
+    const payload=JSON.parse($("payload").value);
+    const r=await fetch("/api/analyze",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    const j=await r.json();
+    if(!r.ok) throw new Error(j.error||("HTTP "+r.status));
+    render(j);
+  }catch(e){
+    $("result").innerHTML='<div class="callout bad"><b>Erreur :</b> '+escapeHtml(e.message)+'</div>';
+  }finally{
+    $("analyze").disabled=false;
+    $("analyze").textContent="Analyser réellement";
+  }
+}
+
+$("load").addEventListener("click",()=>loadExample().catch(e=>alert(e.message)));
+$("example").addEventListener("change",()=>loadExample().catch(e=>alert(e.message)));
+$("analyze").addEventListener("click",analyze);
+health();
+loadExample();
+</script>
+</body>
+</html>

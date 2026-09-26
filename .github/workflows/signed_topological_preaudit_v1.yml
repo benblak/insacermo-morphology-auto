@@ -1,0 +1,16 @@
+name: INSACERMO Signed Topological Preaudit V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/signed_topological_preaudit_v1.py'
+      - '.github/workflows/signed_topological_preaudit_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  signed-topological-preaudit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run signed topological pre-audit benchmark
+        run: python3 experiments/signed_topological_preaudit_v1.py

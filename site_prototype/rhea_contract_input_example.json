@@ -1,0 +1,50 @@
+{
+  "contract": {
+    "contract_id": "rhea-frozen-10-goal-demo",
+    "requirements": [
+      {
+        "future_id": "RHEA:15434",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:31540",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:32756",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:35488",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:57589",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:61085",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:61097",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:61105",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:65153",
+        "required": true
+      },
+      {
+        "future_id": "RHEA:73288",
+        "required": true
+      }
+    ]
+  },
+  "backend": {
+    "type": "rhea_resource_frozen"
+  }
+}

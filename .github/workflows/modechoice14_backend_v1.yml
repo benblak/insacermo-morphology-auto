@@ -1,0 +1,38 @@
+name: INSACERMO ModeChoice14 Backend V1
+
+on:
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'engine/modechoice14_backend_v1.py'
+      - 'engine/test_modechoice14_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'site_prototype/modechoice_contract_input_example.json'
+      - '.github/workflows/modechoice14_backend_v1.yml'
+  pull_request:
+    paths:
+      - 'engine/modechoice14_backend_v1.py'
+      - 'engine/test_modechoice14_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'site_prototype/modechoice_contract_input_example.json'
+      - '.github/workflows/modechoice14_backend_v1.yml'
+
+jobs:
+  modechoice14:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ModeChoice backend tests
+        run: python -m engine.test_modechoice14_backend_v1
+      - name: Run ModeChoice site example
+        run: |
+          python -m engine.contract_cli_v1 site_prototype/modechoice_contract_input_example.json --pretty > /tmp/modechoice.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/modechoice.json'))
+          assert p['decision']=='REPAIR'
+          assert len(p['joint_obstructions'])==12
+          assert all(c['evidence_level']=='exact' for c in p['certificates'])
+          print('MODECHOICE_SITE_ENGINE_EXAMPLE: PASS')
+          PY

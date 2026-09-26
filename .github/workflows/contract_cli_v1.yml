@@ -1,0 +1,38 @@
+name: INSACERMO Contract CLI V1
+
+on:
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'engine/exact_catalogue_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'engine/test_contract_cli_v1.py'
+      - '.github/workflows/contract_cli_v1.yml'
+      - 'site_prototype/contract_input_example.json'
+  pull_request:
+    paths:
+      - 'engine/exact_catalogue_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'engine/test_contract_cli_v1.py'
+      - '.github/workflows/contract_cli_v1.yml'
+      - 'site_prototype/contract_input_example.json'
+
+jobs:
+  contract-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact catalogue CLI tests
+        run: python -m engine.test_contract_cli_v1
+      - name: Run site example through real engine
+        run: |
+          python -m engine.contract_cli_v1 site_prototype/contract_input_example.json --pretty > /tmp/result.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/result.json'))
+          assert p['decision'] == 'REPAIR'
+          assert p['backend_name'] == 'site-exact-catalogue-demo-v1'
+          assert p['certificates'][0]['evidence_level'] == 'exact'
+          print('SITE_ENGINE_EXAMPLE: PASS')
+          PY

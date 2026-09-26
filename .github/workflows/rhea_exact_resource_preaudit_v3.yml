@@ -1,0 +1,16 @@
+name: INSACERMO Rhea Exact Resource Preaudit V3
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/rhea_exact_resource_preaudit_depth_v3.py'
+      - '.github/workflows/rhea_exact_resource_preaudit_v3.yml'
+  workflow_dispatch:
+
+jobs:
+  rhea-resource-preaudit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact integer resource pre-audit
+        run: python3 experiments/rhea_exact_resource_preaudit_depth_v3.py
