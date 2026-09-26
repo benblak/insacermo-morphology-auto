@@ -1,0 +1,23 @@
+name: INSACERMO Contract Engine IO V1
+
+on:
+  pull_request:
+    paths:
+      - 'engine/contract_io_v1.py'
+      - 'engine/test_contract_io_v1.py'
+      - '.github/workflows/contract_engine_io_v1.yml'
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'engine/contract_io_v1.py'
+      - 'engine/test_contract_io_v1.py'
+      - '.github/workflows/contract_engine_io_v1.yml'
+
+jobs:
+  contract-engine-io:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run contract engine I/O tests
+        run: python engine/test_contract_io_v1.py
