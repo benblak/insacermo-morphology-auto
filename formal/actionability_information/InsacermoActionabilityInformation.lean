@@ -50,6 +50,7 @@ import InsacermoActionabilityInformation.CertificateDomain
 import InsacermoActionabilityInformation.HellyIISBridge
 import InsacermoActionabilityInformation.ViabilityBridge
 import InsacermoActionabilityInformation.FutureTaskBridge
+import InsacermoActionabilityInformation.BlackwellProbeBridge
 
 import InsacermoActionabilityInformation.StructuralAuditSCCBridge
 
