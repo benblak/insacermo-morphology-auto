@@ -20,4 +20,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run contract engine I/O tests
-        run: python engine/test_contract_io_v1.py
+        run: python -m engine.test_contract_io_v1
