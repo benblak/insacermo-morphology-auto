@@ -30,6 +30,10 @@ from engine.exact_catalogue_backend_v1 import (
     audit_exact_catalogue,
     model_from_dict,
 )
+from engine.rhea_resource_backend_v1 import (
+    FrozenRheaResourceModel,
+    audit_frozen_rhea_resource,
+)
 
 
 def contract_from_dict(data: dict) -> ContractInput:
@@ -54,14 +58,22 @@ def run_payload(payload: dict) -> dict:
     backend = payload["backend"]
     backend_type = backend.get("type")
 
-    if backend_type != "exact_catalogue":
-        raise ValueError(
-            f"unsupported backend type {backend_type!r}; "
-            "currently supported: exact_catalogue"
+    if backend_type == "exact_catalogue":
+        model = model_from_dict(backend)
+        audit = audit_exact_catalogue(contract, model)
+    elif backend_type == "rhea_resource_frozen":
+        model = FrozenRheaResourceModel(
+            model_id=backend.get(
+                "model_id", "rhea-frozen-naringenin-resource-v1"
+            ),
+            repair_cost=float(backend.get("repair_cost", 1.0)),
         )
-
-    model = model_from_dict(backend)
-    audit = audit_exact_catalogue(contract, model)
+        audit = audit_frozen_rhea_resource(contract, model)
+    else:
+        raise ValueError(
+            f"unsupported backend type {backend_type!r}; currently supported: "
+            "exact_catalogue, rhea_resource_frozen"
+        )
     return evaluate_contract(contract, audit).to_dict()
 
 
