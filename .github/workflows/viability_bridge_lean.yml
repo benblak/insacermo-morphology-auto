@@ -1,0 +1,47 @@
+name: INSACERMO Viability Bridge Lean
+
+on:
+  pull_request:
+    paths:
+      - 'formal/actionability_information/InsacermoActionabilityInformation/ViabilityBridge.lean'
+      - 'formal/actionability_information/InsacermoActionabilityInformation.lean'
+      - '.github/workflows/viability_bridge_lean.yml'
+
+jobs:
+  viability-bridge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bootstrap Lean
+        shell: bash
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake update
+
+      - name: Reject placeholders
+        shell: bash
+        run: |
+          if grep -nE '\b(sorry|admit)\b' formal/actionability_information/InsacermoActionabilityInformation/ViabilityBridge.lean; then
+            echo 'Proof placeholder found.'
+            exit 1
+          fi
+
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: formal/actionability_information
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+          leanchecker: true
+          leanchecker-args: 'InsacermoActionabilityInformation.ViabilityBridge'
+
+      - name: Check viability bridge
+        shell: bash
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          cd formal/actionability_information
+          lake env lean InsacermoActionabilityInformation/ViabilityBridge.lean

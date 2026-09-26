@@ -1,0 +1,39 @@
+name: INSACERMO PGLib IEEE14 Backend V1
+
+on:
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'engine/pglib_ieee14_backend_v1.py'
+      - 'engine/test_pglib_ieee14_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'site_prototype/pglib_contract_input_example.json'
+      - '.github/workflows/pglib_ieee14_backend_v1.yml'
+  pull_request:
+    paths:
+      - 'engine/pglib_ieee14_backend_v1.py'
+      - 'engine/test_pglib_ieee14_backend_v1.py'
+      - 'engine/contract_cli_v1.py'
+      - 'site_prototype/pglib_contract_input_example.json'
+      - '.github/workflows/pglib_ieee14_backend_v1.yml'
+
+jobs:
+  pglib-ieee14:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run PGLib backend tests
+        run: python -m engine.test_pglib_ieee14_backend_v1
+      - name: Run PGLib site example
+        run: |
+          python -m engine.contract_cli_v1 site_prototype/pglib_contract_input_example.json --pretty > /tmp/pglib.json
+          python - <<'PY'
+          import json
+          p=json.load(open('/tmp/pglib.json'))
+          assert p['decision']=='REPAIR'
+          assert len(p['joint_obstructions'])==1
+          assert len(p['joint_obstructions'][0]['bundle'])==7
+          assert p['certificates'][0]['evidence_level']=='exact'
+          print('PGLIB_SITE_ENGINE_EXAMPLE: PASS')
+          PY

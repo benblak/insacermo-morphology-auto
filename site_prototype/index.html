@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>INSACERMO — Future Capability Engine</title>
+<style>
+:root{
+  --bg:#0b1020;--panel:#121a2d;--muted:#8ea0bd;--text:#eef4ff;
+  --line:#253451;--accent:#65d0ff;--good:#7ee2a8;--warn:#ffd166;
+  --bad:#ff7b7b;--repair:#c6a7ff;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:linear-gradient(180deg,#0b1020 0%,#0f1628 100%);color:var(--text)}
+main{max-width:1120px;margin:auto;padding:36px 20px 72px}
+.hero{padding:34px 0 20px}
+.kicker{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+h1{font-size:clamp(38px,6vw,72px);line-height:.98;margin:10px 0 18px;max-width:900px}
+.lead{font-size:20px;line-height:1.5;color:#c8d5ea;max-width:850px}
+.badge{display:inline-flex;padding:7px 11px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px;margin-top:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:26px}
+.card{background:rgba(18,26,45,.88);border:1px solid var(--line);border-radius:18px;padding:22px;box-shadow:0 12px 38px rgba(0,0,0,.16)}
+.card h2,.card h3{margin-top:0}
+label{display:block;font-size:13px;color:var(--muted);margin:12px 0 6px}
+input,select,button{font:inherit}
+input,select{width:100%;background:#0c1323;color:var(--text);border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+button{border:0;border-radius:12px;padding:12px 16px;font-weight:750;cursor:pointer}
+.primary{background:var(--accent);color:#07101c;width:100%;margin-top:16px}
+.scenarios{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.scenarios button{background:#17223a;color:#dce9ff;border:1px solid var(--line)}
+.scenarios button.active{outline:2px solid var(--accent)}
+.result{margin-top:18px}
+.verdict{display:flex;align-items:center;gap:14px;border-radius:16px;padding:18px;border:1px solid var(--line);background:#0c1323}
+.verdict strong{font-size:30px}
+.verdict small{display:block;color:var(--muted);margin-top:3px}
+.ACT strong{color:var(--good)} .PROBE strong{color:var(--warn)} .REPAIR strong{color:var(--repair)} .REFUSE strong{color:var(--bad)}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+.metric{background:#0d1526;border:1px solid var(--line);border-radius:14px;padding:14px}
+.metric b{display:block;font-size:26px}.metric span{font-size:12px;color:var(--muted)}
+.future{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.future:last-child{border-bottom:0}
+.status{font-size:12px;border-radius:999px;padding:5px 9px;border:1px solid var(--line)}
+.immediate{color:var(--good)} .recoverable{color:var(--accent)} .irreversible{color:var(--bad)} .unknown{color:var(--warn)}
+.callout{margin-top:14px;padding:14px 16px;border-left:3px solid var(--accent);background:#0d1526;border-radius:8px}
+.callout.bad{border-left-color:var(--bad)} .callout.repair{border-left-color:var(--repair)}
+details{margin-top:16px;border-top:1px solid var(--line);padding-top:14px}
+summary{cursor:pointer;font-weight:700}
+code{background:#0a1120;border:1px solid var(--line);border-radius:6px;padding:2px 5px}
+.footer{margin-top:34px;color:var(--muted);font-size:13px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(2,1fr)}.scenarios{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<section class="hero">
+  <div class="kicker">INSACERMO · Future Capability Engine</div>
+  <h1>Décider aujourd’hui sans détruire aveuglément demain.</h1>
+  <p class="lead">Déclarez ce qui doit rester possible. INSACERMO distingue ce qui est disponible maintenant, récupérable plus tard, bloqué, irréversible, et indique s’il faut agir, mesurer davantage, réparer ou refuser.</p>
+  <div class="badge">Prototype d’interface · les scénarios ci-dessous utilisent des données de démonstration</div>
+</section>
+
+<div class="grid">
+  <section class="card">
+    <h2>1. Future Contract</h2>
+    <p style="color:var(--muted)">Quelles capacités doivent rester possibles ?</p>
+    <label>Nom du contrat</label>
+    <input value="Contrat critique — démonstration">
+    <label>Horizon maximal de récupération</label>
+    <select><option>2 étapes</option><option>1 étape</option><option>4 étapes</option></select>
+    <label>Futurs requis</label>
+    <input value="A · service principal, B · option de secours, C · capacité critique">
+    <button class="primary" id="analyze">Analyser le système</button>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:0">Dans le produit final, cette entrée sera reliée au moteur contractuel et aux backends de domaine.</p>
+  </section>
+
+  <section class="card">
+    <h2>2. Voir un verdict</h2>
+    <p style="color:var(--muted)">Choisissez un exemple pour voir la forme de sortie.</p>
+    <div class="scenarios">
+      <button data-s="ACT">ACT</button>
+      <button data-s="PROBE">PROBE</button>
+      <button data-s="REPAIR" class="active">REPAIR</button>
+      <button data-s="REFUSE">REFUSE</button>
+    </div>
+    <div class="result" id="result"></div>
+  </section>
+</div>
+
+<div class="grid">
+  <section class="card">
+    <h2>Carte des futurs</h2>
+    <div id="futureMap"></div>
+  </section>
+  <section class="card">
+    <h2>Pourquoi ? Que faire ensuite ?</h2>
+    <div id="explanation"></div>
+  </section>
+</div>
+
+<section class="card" style="margin-top:18px">
+  <h2>Comparaison des décisions</h2>
+  <p style="color:var(--muted)">Deux choix peuvent avoir le même coût immédiat et pourtant ne pas préserver le même futur.</p>
+  <div style="overflow:auto">
+  <table style="width:100%;border-collapse:collapse;min-width:700px">
+    <thead><tr style="text-align:left;color:var(--muted)"><th style="padding:10px">Critère</th><th style="padding:10px">Action A</th><th style="padding:10px">Action B</th></tr></thead>
+    <tbody>
+      <tr><td style="padding:10px;border-top:1px solid var(--line)">Coût immédiat</td><td style="padding:10px;border-top:1px solid var(--line)">10</td><td style="padding:10px;border-top:1px solid var(--line)">10</td></tr>
+      <tr><td style="padding:10px;border-top:1px solid var(--line)">Futurs récupérables</td><td style="padding:10px;border-top:1px solid var(--line)">3</td><td style="padding:10px;border-top:1px solid var(--line)">3</td></tr>
+      <tr><td style="padding:10px;border-top:1px solid var(--line)">Contrat critique α</td><td style="padding:10px;border-top:1px solid var(--line);color:var(--bad)">perdu</td><td style="padding:10px;border-top:1px solid var(--line);color:var(--good)">préservé</td></tr>
+      <tr><td style="padding:10px;border-top:1px solid var(--line)">Verdict</td><td style="padding:10px;border-top:1px solid var(--line);font-weight:800;color:var(--bad)">REFUSE</td><td style="padding:10px;border-top:1px solid var(--line);font-weight:800;color:var(--good)">ACT</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <details>
+    <summary>Voir la preuve / l’audit</summary>
+    <p>Le produit final affichera ici le backend utilisé, le type de certificat, le niveau d’évidence, l’obstruction minimale, la profondeur de pre-audit, la référence Lean éventuelle et le statut exact de vérification.</p>
+    <p><code>evidence_level</code> : formal / exact / exhaustive / empirical / heuristic / declared.</p>
+  </details>
+</section>
+
+<p class="footer">INSACERMO Engine · Core reference 2026-09-26 · L’interface distingue explicitement preuve formelle, calcul exact, audit empirique et résultat déclaré.</p>
+</main>
+
+<script>
+const scenarios = {
+ACT:{
+ title:"Le contrat futur reste garanti.",
+ stats:[9,2,0,0],
+ futures:[
+  ["A · service principal","immediate","Disponible","0"],
+  ["B · option de secours","recoverable","Récupérable","1"],
+  ["C · capacité critique","recoverable","Récupérable","2"]
+ ],
+ explain:`<div class="callout">Toutes les capacités requises sont soit immédiatement disponibles, soit récupérables dans la deadline déclarée. Aucun bundle requis n'est signalé comme bloqué.</div><details><summary>Voir la preuve / l’audit</summary><p>Backend : <code>demo</code><br>Niveau : <code>declared</code><br>Produit final : certificat et référence de calcul ici.</p></details>`
+},
+PROBE:{
+ title:"Il manque une information pour garantir le contrat.",
+ stats:[7,2,0,1],
+ futures:[
+  ["A · service principal","immediate","Disponible","0"],
+  ["B · option de secours","recoverable","Récupérable","2"],
+  ["C · capacité critique","unknown","Non certifié","?"]
+ ],
+ explain:`<div class="callout">Le statut de C n'est pas encore certifié. Un probe couvre exactement cette inconnue.</div><div class="callout"><b>Probe proposé :</b> mesurer la variable X.<br>Branche 1 → ACT · Branche 2 → REPAIR.</div><details><summary>Voir la preuve / l’audit</summary><p>Le moteur final enregistrera pourquoi ce probe est informatif pour le contrat déclaré.</p></details>`
+},
+REPAIR:{
+ title:"Le futur est bloqué, mais une réparation est disponible.",
+ stats:[7,3,1,0],
+ futures:[
+  ["A · service principal","immediate","Disponible","0"],
+  ["B · option de secours","recoverable","Récupérable","2"],
+  ["C · capacité critique","irreversible","Bloqué actuellement","∞"]
+ ],
+ explain:`<div class="callout bad"><b>Obstruction :</b> les exigences B et C sont individuellement admissibles mais ne peuvent pas être garanties ensemble dans l'état courant.</div><div class="callout repair"><b>Réparation proposée :</b> restaurer / ajouter la capacité Y. Après réparation, le backend doit recalculer le contrat avant ACT.</div><details><summary>Voir la preuve / l’audit</summary><p>Exemple de panneau expert : obstruction minimale <code>{B,C}</code> · backend <code>demo</code> · niveau <code>declared</code>.</p></details>`
+},
+REFUSE:{
+ title:"L'action actuelle détruirait un futur requis.",
+ stats:[6,1,2,0],
+ futures:[
+  ["A · service principal","immediate","Disponible","0"],
+  ["B · option de secours","irreversible","Irréversible","∞"],
+  ["C · capacité critique","irreversible","Irréversible","∞"]
+ ],
+ explain:`<div class="callout bad">Au moins un futur obligatoire devient irréversible et aucune réparation ou information déclarée ne couvre l'obstruction. Le contrat n'est donc pas certifié.</div><details><summary>Voir la preuve / l’audit</summary><p>Le produit final distinguera toujours « non certifié » de « mathématiquement impossible » selon le backend et le niveau d'évidence.</p></details>`
+}
+};
+
+let current="REPAIR";
+function render(){
+ const s=scenarios[current];
+ document.querySelectorAll(".scenarios button").forEach(b=>b.classList.toggle("active",b.dataset.s===current));
+ document.getElementById("result").innerHTML=`
+ <div class="verdict ${current}">
+   <div><strong>${current}</strong><small>${s.title}</small></div>
+ </div>
+ <div class="metrics">
+  <div class="metric"><b>${s.stats[0]}</b><span>immédiats</span></div>
+  <div class="metric"><b>${s.stats[1]}</b><span>récupérables</span></div>
+  <div class="metric"><b>${s.stats[2]}</b><span>irréversibles</span></div>
+  <div class="metric"><b>${s.stats[3]}</b><span>inconnus</span></div>
+ </div>`;
+ document.getElementById("futureMap").innerHTML=s.futures.map(f=>`
+   <div class="future">
+    <div><b>${f[0]}</b></div>
+    <span class="status ${f[1]}">${f[2]}</span>
+    <b>${f[3]}</b>
+   </div>`).join("");
+ document.getElementById("explanation").innerHTML=s.explain;
+}
+document.querySelectorAll(".scenarios button").forEach(b=>b.addEventListener("click",()=>{current=b.dataset.s;render()}));
+document.getElementById("analyze").addEventListener("click",()=>render());
+render();
+</script>
+</body>
+</html>

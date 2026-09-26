@@ -1,0 +1,18 @@
+name: INSACERMO France Capability Bridge V4
+
+on:
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'experiments/france_capability_bridge_rail_v4.py'
+      - '.github/workflows/france_capability_bridge_v4.yml'
+  workflow_dispatch:
+
+jobs:
+  france-capability-bridge-v4:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run France rail capability-finance bridge V4
+        run: python3 experiments/france_capability_bridge_rail_v4.py

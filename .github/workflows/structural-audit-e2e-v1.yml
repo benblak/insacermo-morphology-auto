@@ -1,0 +1,20 @@
+name: INSACERMO Structural Audit E2E V1
+
+on:
+  pull_request:
+    branches: [insacermo-repair-nerve-future-helly-v1-20260919]
+  workflow_dispatch:
+
+jobs:
+  structural-audit-e2e:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run structural audit integrated engine
+        run: python3 experiments/final_e2e_openflights_future_risk_decision_v1.py
+
+      - name: Run exact rational DC pre-audit depth V3
+        run: |
+          python3 -m pip install --quiet numpy scipy sympy
+          python3 experiments/pglib_ieee14_dc_exact_preaudit_depth_v3.py

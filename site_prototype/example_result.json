@@ -1,0 +1,54 @@
+{
+  "contract_id": "demo-critical",
+  "decision": "REPAIR",
+  "backend_name": "demo",
+  "immediate_futures": [
+    "A"
+  ],
+  "recoverable_futures": [
+    {
+      "future_id": "B",
+      "depth": 2
+    }
+  ],
+  "irreversible_futures": [
+    "C"
+  ],
+  "unknown_futures": [],
+  "deadline_violations": [],
+  "joint_obstructions": [
+    {
+      "bundle": [
+        "B",
+        "C"
+      ],
+      "explanation": "B and C cannot be guaranteed jointly in the current state",
+      "certificate_id": "demo-obstruction-01"
+    }
+  ],
+  "probes": [],
+  "repairs": [
+    {
+      "repair_id": "restore-Y",
+      "repairs": [
+        "B",
+        "C"
+      ],
+      "explanation": "Restore/add capability Y",
+      "cost": 1
+    }
+  ],
+  "certificates": [
+    {
+      "certificate_id": "demo-obstruction-01",
+      "backend": "demo",
+      "evidence_level": "declared",
+      "statement": "Interface example only",
+      "verified": false,
+      "reference": ""
+    }
+  ],
+  "reasons": [
+    "At least one required joint bundle is obstructed; a declared repair covers the affected requirements."
+  ]
+}

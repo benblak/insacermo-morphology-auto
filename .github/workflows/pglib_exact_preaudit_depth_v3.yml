@@ -1,0 +1,21 @@
+name: INSACERMO Exact DC Preaudit Depth V3
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/pglib_ieee14_dc_exact_preaudit_depth_v3.py'
+      - '.github/workflows/pglib_exact_preaudit_depth_v3.yml'
+  workflow_dispatch:
+
+jobs:
+  exact-preaudit-depth:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact audit dependencies
+        run: python3 -m pip install --quiet numpy scipy sympy
+      - name: Prove exact rational pre-audit depth
+        run: python3 experiments/pglib_ieee14_dc_exact_preaudit_depth_v3.py
+
+      - name: Prove exact certificate-only depth closure V4
+        run: python3 experiments/pglib_ieee14_dc_exact_certificate_only_depth_v4.py

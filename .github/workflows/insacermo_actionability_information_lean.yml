@@ -5,6 +5,7 @@ on:
     paths:
       - 'formal/actionability_information/**'
       - '.github/workflows/insacermo_actionability_information_lean.yml'
+      - 'experiments/final_e2e_openflights_future_risk_decision_v1.py'
 
 jobs:
   lean-kernel:
@@ -39,3 +40,112 @@ jobs:
           use-mathlib-cache: true
           leanchecker: true
           leanchecker-args: 'InsacermoActionabilityInformation.DecisionSemantics'
+
+      - name: Run structural audit integrated OpenFlights engine
+        run: python3 experiments/final_e2e_openflights_future_risk_decision_v1.py
+
+      - name: Run Email-Eu-core structural audit validation
+        run: python3 experiments/email_eu_core_structural_audit_v1.py
+
+      - name: Run Wiki-Vote structural audit validation
+        run: python3 experiments/wiki_vote_structural_audit_v1.py
+
+      - name: Run Wiki-Vote created pair-obstruction witness
+        run: python3 experiments/wiki_vote_created_pair_obstruction_v1.py
+
+      - name: Run France rail structural audit pilot
+        run: python3 experiments/france_rail_structural_audit_v1.py
+
+      - name: Run passenger-weighted France rail audit
+        run: python3 experiments/france_rail_passenger_weighted_audit_v1.py
+
+      - name: Run France sovereign finance capability audit V1
+        run: python3 experiments/france_sovereign_finance_v1.py
+
+      - name: Run France sovereign finance investment return thresholds V2
+        run: python3 experiments/france_sovereign_finance_investment_return_v2.py
+
+      - name: Run France sovereign finance marginal-return V3
+        run: python3 experiments/france_sovereign_finance_marginal_v3.py
+
+      - name: Run France rail capability-finance bridge V4
+        run: python3 experiments/france_capability_bridge_rail_v4.py
+
+      - name: Run France rail investment envelope frontier V5
+        run: python3 experiments/france_rail_investment_frontier_v5.py
+
+      - name: Run France fiscal trajectory rail frontier V6
+        run: python3 experiments/france_fiscal_trajectory_rail_v6.py
+
+      - name: Run France human capability baseline V0.2
+        run: python3 experiments/france_human_capability_baseline_v0_2.py
+
+      - name: Run France work-time transformation V0.3
+        run: python3 experiments/france_work_time_transformation_v0_3.py
+
+      - name: Run SIGNOR human causal signaling structural stress test
+        run: python3 experiments/signor_human_causal_structural_stress_v1.py
+
+      - name: Run Rhea stoichiometric resource competition stress test
+        run: python3 experiments/rhea_stoichiometric_resource_stress_v1.py
+
+      - name: Run Rhea high-order resource obstruction search
+        run: |
+          cd experiments
+          python3 rhea_high_order_resource_obstruction_v1.py
+
+      - name: Run PGLib IEEE14 DC hidden bundle audit
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_hidden_bundle_audit_v1.py
+
+      - name: Run PGLib IEEE14 AC cross-check
+        run: |
+          python3 -m pip install --quiet numpy scipy pypower
+          python3 experiments/pglib_ieee14_ac_crosscheck_v1.py
+
+      - name: Run Rhea equation-level Petri V2
+        run: python3 experiments/rhea_equation_level_petri_v2.py
+
+      - name: Run Rhea exact resource pre-audit depth V3
+        run: python3 experiments/rhea_exact_resource_preaudit_depth_v3.py
+
+      - name: Run PGLib IEEE14 DC cut certificate V2
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_cut_certificate_v2.py
+
+      - name: Run PGLib IEEE14 DC Farkas certificate V3
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_farkas_certificate_v3.py
+
+      - name: Run PGLib IEEE14 exact rational Farkas V4
+        run: |
+          python3 -m pip install --quiet numpy scipy sympy
+          python3 experiments/pglib_ieee14_dc_exact_farkas_v4.py
+
+      - name: Run automatic DC certificate router V1
+        run: |
+          python3 -m pip install --quiet numpy scipy sympy
+          python3 experiments/automatic_dc_certificate_router_v1.py
+
+      - name: Run PGLib IEEE14 DC heredity audit V1
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_heredity_audit_v1.py
+
+      - name: Run PGLib IEEE14 DC extreme-ray pre-audit depth V1
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_extreme_ray_depth_v1.py
+
+      - name: Run PGLib IEEE14 tight extreme-ray pre-audit depth V2
+        run: |
+          python3 -m pip install --quiet numpy scipy
+          python3 experiments/pglib_ieee14_dc_extreme_ray_depth_v2.py
+
+      - name: Run PGLib IEEE14 exact rational pre-audit depth V3
+        run: |
+          python3 -m pip install --quiet numpy scipy sympy
+          python3 experiments/pglib_ieee14_dc_exact_preaudit_depth_v3.py
