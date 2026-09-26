@@ -1,0 +1,145 @@
+name: INSACERMO Site Engine Package V1
+
+on:
+  push:
+    branches:
+      - insacermo-structural-audit-kernel-v1-20260920
+    paths:
+      - 'engine/**'
+      - 'site_prototype/**'
+      - '.github/workflows/package_site_engine_v1.yml'
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run consolidated engine tests
+        run: |
+          python -m engine.test_contract_io_v1
+          python -m engine.test_contract_cli_v1
+          python -m engine.test_rhea_resource_backend_v1
+          python -m engine.test_pglib_ieee14_backend_v1
+          python -m engine.test_modechoice14_backend_v1
+
+      - name: Build consolidated package
+        run: |
+          set -euo pipefail
+          PKG=INSACERMO_SITE_ENGINE_V1_1_2026-09-26
+          mkdir -p "$PKG/engine" "$PKG/site_prototype/results"
+
+          cp engine/__init__.py "$PKG/engine/" 2>/dev/null || touch "$PKG/engine/__init__.py"
+          cp engine/contract_io_v1.py "$PKG/engine/"
+          cp engine/exact_catalogue_backend_v1.py "$PKG/engine/"
+          cp engine/contract_cli_v1.py "$PKG/engine/"
+          cp engine/rhea_resource_backend_v1.py "$PKG/engine/"
+          cp engine/pglib_ieee14_backend_v1.py "$PKG/engine/"
+          cp engine/modechoice14_backend_v1.py "$PKG/engine/"
+          cp engine/test_contract_io_v1.py "$PKG/engine/"
+          cp engine/test_contract_cli_v1.py "$PKG/engine/"
+          cp engine/test_rhea_resource_backend_v1.py "$PKG/engine/"
+          cp engine/test_pglib_ieee14_backend_v1.py "$PKG/engine/"
+          cp engine/test_modechoice14_backend_v1.py "$PKG/engine/"
+
+          cp site_prototype/index.html "$PKG/site_prototype/"
+          cp site_prototype/contract_input_example.json "$PKG/site_prototype/"
+          cp site_prototype/rhea_contract_input_example.json "$PKG/site_prototype/"
+          cp site_prototype/pglib_contract_input_example.json "$PKG/site_prototype/"
+          cp site_prototype/modechoice_contract_input_example.json "$PKG/site_prototype/"
+
+          python -m engine.contract_cli_v1 site_prototype/contract_input_example.json --pretty > "$PKG/site_prototype/results/generic_result.json"
+          python -m engine.contract_cli_v1 site_prototype/rhea_contract_input_example.json --pretty > "$PKG/site_prototype/results/rhea_result.json"
+          python -m engine.contract_cli_v1 site_prototype/pglib_contract_input_example.json --pretty > "$PKG/site_prototype/results/pglib_result.json"
+          python -m engine.contract_cli_v1 site_prototype/modechoice_contract_input_example.json --pretty > "$PKG/site_prototype/results/modechoice_result.json"
+
+          cat > "$PKG/README.md" <<'EOF'
+          # INSACERMO Site Engine V1.1 — Consolidated Package
+
+          Reference date: 2026-09-26
+
+          This package contains the contract-driven INSACERMO software layer used
+          by the public-site prototype.
+
+          ## Central outputs
+
+          - ACT
+          - PROBE
+          - REPAIR
+          - REFUSE
+
+          ## Included backends
+
+          1. exact_catalogue
+             Generic exact finite-catalogue adapter.
+
+          2. rhea_resource_frozen
+             Frozen Rhea local finite-inventory resource witness.
+             Expected demo: 10 goals -> REPAIR; 9-goal proper bundle -> ACT.
+             Scope: local Rhea module, not whole-cell metabolism.
+
+          3. pglib_ieee14_dc_frozen
+             Frozen IEEE-14 encoded DC-LP exact certificate slice.
+             Exact witness depth 7; Farkas/extreme-ray evidence.
+             Scope: encoded DC LP and fixed catalogue, not full AC security.
+
+          4. modechoice14_frozen
+             Real-data-derived 14-world ModeChoice structural sample.
+             12 exact order-2 minimal obstructions; exhaustive one-action support
+             repair audit.
+             Scope: structural actionability test, not a transport recommendation.
+
+          ## Run an example
+
+              python -m engine.contract_cli_v1 site_prototype/rhea_contract_input_example.json --pretty
+
+          Replace the JSON path with the PGLib, ModeChoice or generic example.
+
+          ## Run all packaged tests
+
+              python -m engine.test_contract_io_v1
+              python -m engine.test_contract_cli_v1
+              python -m engine.test_rhea_resource_backend_v1
+              python -m engine.test_pglib_ieee14_backend_v1
+              python -m engine.test_modechoice14_backend_v1
+
+          ## Evidence rule
+
+          The interface retains evidence levels. A formal, exact, exhaustive,
+          empirical, heuristic or declared result must not be presented as another
+          evidence class.
+
+          ## Scientific freeze reference
+
+          Frozen semantic reference:
+          branch: insacermo-engine-freeze-2026-09-26
+          commit: 3b712a0afdbe5f8893a43cbbe94868f2b8627e06
+          root global validation run: 36244409179 — SUCCESS
+
+          Consolidated software package source commit is recorded in BUILD_INFO.txt.
+          EOF
+
+          cat > "$PKG/BUILD_INFO.txt" <<EOF
+          PACKAGE=INSACERMO_SITE_ENGINE_V1_1_2026-09-26
+          SOURCE_BRANCH=insacermo-structural-audit-kernel-v1-20260920
+          SOURCE_COMMIT=$GITHUB_SHA
+          BUILD_WORKFLOW=INSACERMO Site Engine Package V1
+          BUILD_STATUS=tests_passed_before_packaging
+          BACKENDS=exact_catalogue,rhea_resource_frozen,pglib_ieee14_dc_frozen,modechoice14_frozen
+          EOF
+
+          (
+            cd "$PKG"
+            find . -type f ! -name SHA256.txt -print0 | sort -z | xargs -0 sha256sum > SHA256.txt
+          )
+
+          zip -qr "${PKG}.zip" "$PKG"
+
+      - name: Upload consolidated package
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_SITE_ENGINE_V1_1_2026-09-26
+          path: INSACERMO_SITE_ENGINE_V1_1_2026-09-26.zip
+          if-no-files-found: error
+          retention-days: 30
