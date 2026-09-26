@@ -1,0 +1,39 @@
+{
+  "contract": {
+    "contract_id": "pglib-ieee14-exact-witness7",
+    "requirements": [
+      {
+        "future_id": "BUS:3",
+        "required": true
+      },
+      {
+        "future_id": "BUS:4",
+        "required": true
+      },
+      {
+        "future_id": "BUS:2",
+        "required": true
+      },
+      {
+        "future_id": "BUS:14",
+        "required": true
+      },
+      {
+        "future_id": "BUS:13",
+        "required": true
+      },
+      {
+        "future_id": "BUS:6",
+        "required": true
+      },
+      {
+        "future_id": "BUS:10",
+        "required": true
+      }
+    ]
+  },
+  "backend": {
+    "type": "pglib_ieee14_dc_frozen",
+    "model_id": "pglib-ieee14-dc-exact-witness-v1"
+  }
+}
