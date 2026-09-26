@@ -92,7 +92,9 @@ theorem insacermoDeadlineObjective_eq_anticipatory_expectedMissCost
       AnticipatoryObjective immediateCost
         (fun q => ExpectedDeadlineMissCost Ω w (postSpectrum q) H) p := by
   unfold InsacermoDeadlineObjective AnticipatoryObjective
-  rw [expectedDeadlineMissCost_eq_catalogueDeadlineRisk]
+  have h := expectedDeadlineMissCost_eq_catalogueDeadlineRisk
+    (Ω := Ω) (w := w) (S := postSpectrum p) (H := H)
+  exact congrArg (fun z : ℝ => immediateCost p + z) h.symm
 
 /-- Hard contract preservation at a deadline: every required future bundle
 must lie below the deadline in the post-plan depth spectrum. -/
@@ -158,9 +160,23 @@ theorem anticipatory_scalar_objective_ties :
       InsacermoDeadlineObjective symmetricCatalogue unitWeight postSpectrum 0
         zeroImmediateCost loseBeta := by
   unfold InsacermoDeadlineObjective AnticipatoryObjective
-  rw [← expectedDeadlineMissCost_eq_catalogueDeadlineRisk,
-      ← expectedDeadlineMissCost_eq_catalogueDeadlineRisk]
-  exact symmetric_expected_future_cost_ties
+  simp only [zeroImmediateCost, zero_add]
+  calc
+    CatalogueDeadlineRisk symmetricCatalogue unitWeight
+        (postSpectrum loseAlpha) 0 =
+      ExpectedDeadlineMissCost symmetricCatalogue unitWeight
+        (postSpectrum loseAlpha) 0 := by
+          exact (expectedDeadlineMissCost_eq_catalogueDeadlineRisk
+            (Ω := symmetricCatalogue) (w := unitWeight)
+            (S := postSpectrum loseAlpha) (H := 0)).symm
+    _ = ExpectedDeadlineMissCost symmetricCatalogue unitWeight
+        (postSpectrum loseBeta) 0 :=
+      symmetric_expected_future_cost_ties
+    _ = CatalogueDeadlineRisk symmetricCatalogue unitWeight
+        (postSpectrum loseBeta) 0 := by
+          exact expectedDeadlineMissCost_eq_catalogueDeadlineRisk
+            (Ω := symmetricCatalogue) (w := unitWeight)
+            (S := postSpectrum loseBeta) (H := 0)
 
 /-- The plan that loses alpha violates the hard alpha contract. -/
 theorem loseAlpha_breaks_required_alpha :
