@@ -34,6 +34,10 @@ from engine.rhea_resource_backend_v1 import (
     FrozenRheaResourceModel,
     audit_frozen_rhea_resource,
 )
+from engine.pglib_ieee14_backend_v1 import (
+    FrozenPglibIEEE14Model,
+    audit_frozen_pglib_ieee14,
+)
 
 
 def contract_from_dict(data: dict) -> ContractInput:
@@ -69,10 +73,19 @@ def run_payload(payload: dict) -> dict:
             repair_cost=float(backend.get("repair_cost", 1.0)),
         )
         audit = audit_frozen_rhea_resource(contract, model)
+    elif backend_type == "pglib_ieee14_dc_frozen":
+        repair_cost = backend.get("repair_cost")
+        model = FrozenPglibIEEE14Model(
+            model_id=backend.get(
+                "model_id", "pglib-ieee14-dc-exact-witness-v1"
+            ),
+            repair_cost=None if repair_cost is None else float(repair_cost),
+        )
+        audit = audit_frozen_pglib_ieee14(contract, model)
     else:
         raise ValueError(
             f"unsupported backend type {backend_type!r}; currently supported: "
-            "exact_catalogue, rhea_resource_frozen"
+            "exact_catalogue, rhea_resource_frozen, pglib_ieee14_dc_frozen"
         )
     return evaluate_contract(contract, audit).to_dict()
 
