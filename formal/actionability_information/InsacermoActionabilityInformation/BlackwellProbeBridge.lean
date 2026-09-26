@@ -168,8 +168,8 @@ def GoodSecond (s : FourWorld) (a : Bit) : Prop :=
 
 theorem first_safe_for_first_contract :
     SafeRep GoodFirst Set.univ Set.univ firstObs := by
-  simpa [GoodFirst, GoodCoarseCode] using
-    (coarse_safe_for_own_code firstObs)
+  change SafeRep (GoodCoarseCode firstObs) Set.univ Set.univ firstObs
+  exact coarse_safe_for_own_code firstObs
 
 theorem second_not_safe_for_first_contract :
     ¬ SafeRep GoodFirst Set.univ Set.univ secondObs := by
@@ -181,8 +181,8 @@ theorem second_not_safe_for_first_contract :
 
 theorem second_safe_for_second_contract :
     SafeRep GoodSecond Set.univ Set.univ secondObs := by
-  simpa [GoodSecond, GoodCoarseCode] using
-    (coarse_safe_for_own_code secondObs)
+  change SafeRep (GoodCoarseCode secondObs) Set.univ Set.univ secondObs
+  exact coarse_safe_for_own_code secondObs
 
 theorem first_not_safe_for_second_contract :
     ¬ SafeRep GoodSecond Set.univ Set.univ firstObs := by
