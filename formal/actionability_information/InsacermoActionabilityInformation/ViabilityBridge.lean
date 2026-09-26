@@ -13,13 +13,12 @@ variable {X : Type*}
 /-- Encode an ordinary state-safety set as a one-future INSACERMO
 availability map.  The unique future is available exactly in safe states. -/
 def StateSafetyAvail (Safe : Set X) (x : X) : Set Unit :=
-  if x ∈ Safe then Set.univ else ∅
+  { _ | x ∈ Safe }
 
 @[simp] theorem unit_mem_stateSafetyAvail_iff
     {Safe : Set X} {x : X} :
     () ∈ StateSafetyAvail Safe x ↔ x ∈ Safe := by
-  unfold StateSafetyAvail
-  by_cases hx : x ∈ Safe <;> simp [hx]
+  rfl
 
 /-- A strict one-future INSACERMO PRESERVE judgment is exactly membership in
 the classical state-safety set. -/
