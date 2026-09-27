@@ -1,9 +1,9 @@
-name: INSACERMO Frontier Factorization Kernel
+name: INSACERMO Discovery Dialect Kernel
 
 on:
   push:
     branches:
-      - insacermo-frontier-factorization-kernel-v1
+      - insacermo-discovery-dialect-v1
   workflow_dispatch:
 
 jobs:
@@ -34,6 +34,8 @@ jobs:
             echo 'Forbidden proof placeholder/custom axiom found.'
             exit 1
           fi
+      - name: Discovery Lab reproducibility
+        run: python3 scripts/discovery_lab_v1.py > discovery_lab_v1_results.json
       - name: Kernel build
         run: lake build
       - name: Axiom audit
