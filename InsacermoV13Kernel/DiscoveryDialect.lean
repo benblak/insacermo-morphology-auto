@@ -9,6 +9,17 @@ namespace InsacermoV13Kernel
 def FutureInteraction (a b c d : Nat) : Int :=
   (b : Int) + (c : Int) - (a : Int) - (d : Int)
 
+
+/-- Exact decomposition of the joint right-to-forget dividend:
+    joint gain = isolated gain of u + isolated gain of v + interaction. -/
+theorem jointDividend_decomposition (a b c d : Nat) :
+    (a : Int) - (d : Int) =
+      ((a : Int) - (b : Int)) +
+      ((a : Int) - (c : Int)) +
+      FutureInteraction a b c d := by
+  simp [FutureInteraction]
+  ring
+
 /-- Monotonicity alone confines the interaction to the total joint-change band.
     Here a=m(C), b=m(C+u), c=m(C+v), d=m(C+u+v). -/
 theorem futureInteraction_band
