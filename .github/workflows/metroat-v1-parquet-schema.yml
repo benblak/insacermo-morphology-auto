@@ -43,7 +43,7 @@ jobs:
           PY
           )
           echo "ENTRY=$ENTRY"
-          7zz e -so train.zip "$ENTRY" > sample.parquet
+          7z e -so train.zip "$ENTRY" > sample.parquet
           python - <<'PY'
           import pathlib, json, pyarrow.parquet as pq
           schema=pq.read_schema("sample.parquet")
