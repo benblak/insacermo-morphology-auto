@@ -37,7 +37,11 @@ theorem separatorObs_eq_implies_context_eq
       SeparatorObs obsL obsR y =
         SeparatorObs obsL obsR x) :
     y.1 = x.1 := by
-  exact congrArg Prod.fst h
+  have hk :
+      (SeparatorObs obsL obsR y).1 =
+        (SeparatorObs obsL obsR x).1 :=
+    congrArg (fun z => z.1) h
+  simpa [SeparatorObs] using hk
 
 /-- Exact separator decomposition.
     When the separator context is observed exactly, and left/right admissibility
@@ -203,10 +207,13 @@ theorem separatorRegion_upperClosed
       (SeparatorLe le₁ le₂) := by
   intro p q hp hpq
   have hk : p.1 = q.1 := hpq.1
-  subst q
-  exact
-    ⟨h₁ p.1 hp.1 hpq.2.1,
-     h₂ p.1 hp.2 hpq.2.2⟩
+  constructor
+  · have hlocal : U₁ p.1 q.2.1 :=
+      h₁ p.1 hp.1 hpq.2.1
+    simpa [← hk] using hlocal
+  · have hlocal : U₂ p.1 q.2.2 :=
+      h₂ p.1 hp.2 hpq.2.2
+    simpa [← hk] using hlocal
 
 /-- Exact slice-wise characterization of generated upper regions under a
     separator-preserving resource order. -/
@@ -227,10 +234,13 @@ theorem generatedUpper_separator_iff
   constructor
   · rintro ⟨a, ha, hap⟩
     have hk : a.1 = p.1 := hap.1
-    subst a
-    exact
-      ⟨⟨p.2.1, ha.1, hap.2.1⟩,
-       ⟨p.2.2, ha.2, hap.2.2⟩⟩
+    constructor
+    · refine ⟨a.2.1, ?_, ?_⟩
+      · simpa [hk] using ha.1
+      · simpa [hk] using hap.2.1
+    · refine ⟨a.2.2, ?_, ?_⟩
+      · simpa [hk] using ha.2
+      · simpa [hk] using hap.2.2
   · rintro ⟨⟨a₁, ha₁, hap₁⟩, ⟨a₂, ha₂, hap₂⟩⟩
     exact
       ⟨(p.1, (a₁, a₂)),
