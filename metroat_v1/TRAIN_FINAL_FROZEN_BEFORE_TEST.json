@@ -1,0 +1,52 @@
+{
+  "status": "TRAIN_FINAL_FROZEN_BEFORE_TEST",
+  "date": "2026-09-27",
+  "train_run_id": 36322103082,
+  "train_job_id": 108627792909,
+  "implementation_commit": "88903abf6d9607dcb1c513b1ac27124c7bb974e3",
+  "test_data_opened": false,
+  "n_minutes": 249990,
+  "n_features": 276,
+  "horizons": {
+    "1h": {
+      "support_status": "SUPPORTED",
+      "eligible": 222746,
+      "ACT": 10148,
+      "PROBE": 212598,
+      "REFUSE": 0,
+      "finite_D_info": 222746,
+      "INF_D_info": 0,
+      "destruction_vs_q4_ALL": {
+        "4": 222498,
+        "8": 207136,
+        "16": 123554,
+        "32": 18632,
+        "64": 22,
+        "128": 0
+      },
+      "monotonicity_violations_total": 0
+    },
+    "6h": {
+      "support_status": "SUPPORTED",
+      "eligible": 134554,
+      "ACT": 10071,
+      "PROBE": 124483,
+      "REFUSE": 0,
+      "finite_D_info": 134554,
+      "INF_D_info": 0,
+      "destruction_vs_q4_ALL": {
+        "4": 134018,
+        "8": 115880,
+        "16": 56097,
+        "32": 6007,
+        "64": 10,
+        "128": 0
+      },
+      "monotonicity_violations_total": 0
+    },
+    "24h": "UNSUPPORTED_BY_CONTINUITY",
+    "72h": "UNSUPPORTED_BY_CONTINUITY",
+    "168h": "UNSUPPORTED_BY_CONTINUITY"
+  },
+  "holdout_policy": "Apply TRAIN-derived q2/q4 thresholds and SHA256 feature order to official TEST without retuning."
+}
