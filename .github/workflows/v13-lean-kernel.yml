@@ -1,0 +1,27 @@
+name: INSACERMO V1.3 Lean Kernel
+
+on:
+  push:
+    branches:
+      - insacermo-v1-3-lean-kernel
+  workflow_dispatch:
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+      - name: Source discipline
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -R -n -E '(^|[[:space:]])(sorry|admit)([[:space:]]|$)|^[[:space:]]*axiom[[:space:]]' \
+            --include='*.lean' InsacermoV13Kernel scripts; then
+            echo 'Forbidden proof placeholder/custom axiom found.'
+            exit 1
+          fi
+      - name: Kernel build
+        run: lake build
+      - name: Axiom audit
+        run: lake env lean scripts/CheckAxioms.lean
