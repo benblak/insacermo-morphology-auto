@@ -5,3 +5,4 @@ import InsacermoV13Kernel.ActionabilityGeometry
 import InsacermoV13Kernel.FrontierUniversality
 import InsacermoV13Kernel.FrontierFactorization
 import InsacermoV13Kernel.SeparatorDecomposition
+import InsacermoV13Kernel.FamilySeparatorDecomposition
