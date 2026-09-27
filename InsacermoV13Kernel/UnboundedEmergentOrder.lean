@@ -142,23 +142,28 @@ theorem actionCover_lower_succ
     Fin.cases oddSlot pick
   apply Fin.le_of_injective embed
   intro x y hxy
-  refine Fin.cases ?_ (fun i => ?_) x
-  · refine Fin.cases rfl (fun j => ?_) y
-    have h : oddSlot = pick j := by
-      simpa [embed] using hxy
-    exact False.elim (hne j h.symm)
-  · intro i
-    refine Fin.cases ?_ (fun j => ?_) y
-    · have h : pick i = oddSlot := by
+  rcases Fin.eq_zero_or_eq_succ x with hx | ⟨i, hx⟩
+  · rcases Fin.eq_zero_or_eq_succ y with hy | ⟨j, hy⟩
+    · exact hx.trans hy.symm
+    · subst x
+      subst y
+      have h : oddSlot = pick j := by
+        simpa [embed] using hxy
+      exact False.elim (hne j h.symm)
+  · rcases Fin.eq_zero_or_eq_succ y with hy | ⟨j, hy⟩
+    · subst x
+      subst y
+      have h : pick i = oddSlot := by
         simpa [embed] using hxy
       exact False.elim (hne i h)
-    · intro j
+    · subst x
+      subst y
       have hp : pick i = pick j := by
         simpa [embed] using hxy
       have hj := hpick j
       rw [← hp] at hj
       have hij : i = j := admissible_even_same_index (hpick i) hj
-      simpa [hij]
+      exact congrArg Fin.succ hij
 
 theorem isMinActionCover_full (n : Nat) :
     IsMinActionCover
