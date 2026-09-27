@@ -6,3 +6,4 @@ import InsacermoV13Kernel.FrontierUniversality
 import InsacermoV13Kernel.FrontierFactorization
 import InsacermoV13Kernel.SeparatorDecomposition
 import InsacermoV13Kernel.FamilySeparatorDecomposition
+import InsacermoV13Kernel.InterfaceQuotient
