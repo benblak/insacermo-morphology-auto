@@ -36,6 +36,8 @@ jobs:
           fi
       - name: Discovery Lab reproducibility
         run: python3 scripts/discovery_lab_v1.py > discovery_lab_v1_results.json
+      - name: Higher-order Discovery Lab reproducibility
+        run: python3 scripts/discovery_lab_v2_highorder.py > discovery_lab_v2_results.json
       - name: Kernel build
         run: lake build
       - name: Axiom audit
