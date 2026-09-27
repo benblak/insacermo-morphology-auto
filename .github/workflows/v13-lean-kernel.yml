@@ -1,9 +1,9 @@
-name: INSACERMO Tree Context Congruence Kernel
+name: INSACERMO Total Closure Kernel
 
 on:
   push:
     branches:
-      - insacermo-tree-context-congruence-kernel-v1
+      - insacermo-total-closure-kernel-v1
   workflow_dispatch:
 
 jobs:
