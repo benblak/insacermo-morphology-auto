@@ -14,7 +14,7 @@ jobs:
       - name: Python version
         run: python3 --version
       - name: Test executable actionability engine
-        run: python3 audits/test_actionability_engine_v1.py
+        run: PYTHONPATH=. python3 audits/test_actionability_engine_v1.py
       - name: Run exhaustive finite audit
         run: python3 audits/exhaustive_finite_kernel_audit.py
       - name: Show audit artifact
