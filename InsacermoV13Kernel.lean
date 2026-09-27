@@ -16,3 +16,4 @@ import InsacermoV13Kernel.TreeMessagePassing
 import InsacermoV13Kernel.RecursiveTreeCertificates
 import InsacermoV13Kernel.TreeContextCongruence
 import InsacermoV13Kernel.TotalClosure
+import InsacermoV13Kernel.ConcreteAdapterSoundness
