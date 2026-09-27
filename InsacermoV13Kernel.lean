@@ -1,2 +1,3 @@
 import InsacermoV13Kernel.RawActionabilityBridge
 import InsacermoV13Kernel.InformationCapabilityFrontier
+import InsacermoV13Kernel.InformationCapabilityCover
