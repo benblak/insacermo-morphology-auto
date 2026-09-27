@@ -26,7 +26,11 @@ jobs:
         run: PYTHONPATH=. python audits/test_actionability_engine_v1.py
       - name: Run Sigma0 frozen experiment
         run: PYTHONPATH=. python sigma0_semantic_symmetry_v1/run_sigma0.py
+      - name: Exhaustive n=6 semantic symmetry audit
+        run: PYTHONPATH=. python sigma0_semantic_symmetry_v1/exhaustive_n6.py
       - name: Show results
         run: |
           cat sigma0_semantic_symmetry_v1/RESULTS.md
           cat sigma0_semantic_symmetry_v1/results.json
+          cat sigma0_semantic_symmetry_v1/EXHAUSTIVE_N6_RESULTS.md
+          cat sigma0_semantic_symmetry_v1/exhaustive_n6_results.json
