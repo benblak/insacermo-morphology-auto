@@ -1,0 +1,104 @@
+{
+  "status": "FROZEN_BEFORE_NUMERICAL_ANALYSIS",
+  "date": "2026-09-27",
+  "schema_gate_run": 36316441393,
+  "schema_gate_commit": "3360f1092b40d52f5e2a93cda50aa0140b7e2dfc",
+  "n_schema_columns": 109,
+  "excluded_time_partition": [
+    "TIMESTAMP",
+    "year",
+    "month",
+    "day"
+  ],
+  "future_event_columns": [
+    {
+      "name": "TRAIN_IS_IN_FAILURE",
+      "type": "bool",
+      "future_presence_rule": "any True in (t,t+H]"
+    },
+    {
+      "name": "TRAIN_FAILURE_TYPE",
+      "type": "string",
+      "future_presence_rule": "any non-null non-empty value in (t,t+H]"
+    },
+    {
+      "name": "TRAIN_IS_IN_MAINTENANCE",
+      "type": "bool",
+      "future_presence_rule": "any True in (t,t+H]"
+    },
+    {
+      "name": "TRAIN_MAINTENANCE_TYPE",
+      "type": "string",
+      "future_presence_rule": "any non-null non-empty value in (t,t+H]"
+    }
+  ],
+  "aggregated": [
+    "AMBIENT_TEMPERATURE",
+    "TRAIN_SPEED_ACTUAL"
+  ],
+  "operational": [
+    "TRAIN_BRAKE_SIGNAL",
+    "TRAIN_AUTOMATIC_MODE",
+    "TRAIN_MANUAL_MODE",
+    "TRAIN_EMERGENCY_MODE",
+    "TRAIN_LINE",
+    "TRAIN_CURRENT_SECTION",
+    "TRAIN_IS_SPECIAL_SECTION"
+  ],
+  "binary_rules": [
+    "name ends with _COMPRESSOR_RUNNING",
+    "name contains _SPRING_BRAKE_ACTIVE_BOGIE",
+    "name ends with _PNEUMATIC_BRAKE_ACTIVE",
+    "name contains _PROPORTIONAL_VALVE_PRESSURE_AVAILABLE_BOGIE"
+  ],
+  "expected_counts": {
+    "continuous_analog": 72,
+    "binary": 20,
+    "operational": 7,
+    "aggregated": 2,
+    "observable_total": 101
+  },
+  "continuous_rule": "all remaining observable columns after excluding time, future-event, binary, operational, and aggregated fields",
+  "derived_features": {
+    "continuous_and_aggregated": [
+      "current",
+      "trailing_60s_mean",
+      "current_minus_60s_earlier"
+    ],
+    "binary_and_operational": [
+      "current",
+      "changed_within_last_60s"
+    ]
+  },
+  "decision_state_rule": "one state per observed calendar minute, using the last observation in that minute as current; trailing summaries use only observations from that minute/current and earlier",
+  "continuity_rule": "a state is horizon-eligible only when every intervening calendar minute through t+H is represented within the same official split; gaps break continuity",
+  "quantization": "TRAIN-only q2 median and q4 quartiles; missing dedicated token",
+  "feature_order": "ascending SHA256(feature_name)",
+  "prefixes": [
+    4,
+    8,
+    16,
+    32,
+    64,
+    128,
+    "ALL"
+  ],
+  "current_setting": {
+    "q": "q2",
+    "k": 16
+  },
+  "horizons_seconds": [
+    3600,
+    21600,
+    86400,
+    259200,
+    604800
+  ],
+  "primary_verdicts": [
+    "ACT",
+    "PROBE",
+    "REFUSE"
+  ],
+  "repair_primary": false,
+  "holdout_retuning": false
+}
