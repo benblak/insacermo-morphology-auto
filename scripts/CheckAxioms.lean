@@ -1,14 +1,7 @@
-import InsacermoV13Kernel.SeparatorDecomposition
+import InsacermoV13Kernel.FamilySeparatorDecomposition
 
-#print axioms InsacermoV13Kernel.globalSafe_product_iff
-#print axioms InsacermoV13Kernel.productRegion_upperClosed
-#print axioms InsacermoV13Kernel.generatedUpper_product_iff
-#print axioms InsacermoV13Kernel.minimalGenerated_product_iff
-#print axioms InsacermoV13Kernel.additiveCost_product_optimal
-#print axioms InsacermoV13Kernel.factorized_upper_region_realizable
-#print axioms InsacermoV13Kernel.separatorObs_eq_implies_context_eq
-#print axioms InsacermoV13Kernel.globalSafe_separator_iff
-#print axioms InsacermoV13Kernel.globalSafe_fin_separator_iff
-#print axioms InsacermoV13Kernel.globalSafe_single_separator_iff
-#print axioms InsacermoV13Kernel.separatorRegion_upperClosed
-#print axioms InsacermoV13Kernel.generatedUpper_separator_iff
+#print axioms InsacermoV13Kernel.familySeparatorObs_eq_implies_context_eq
+#print axioms InsacermoV13Kernel.globalSafe_family_separator_iff
+#print axioms InsacermoV13Kernel.globalSafe_fin_family_separator_iff
+#print axioms InsacermoV13Kernel.globalSafe_empty_family
+#print axioms InsacermoV13Kernel.globalSafe_singleton_family_iff
