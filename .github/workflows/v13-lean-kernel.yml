@@ -1,9 +1,9 @@
-name: INSACERMO Information-Capability Frontier Kernel
+name: INSACERMO Information-Capability Cover Kernel
 
 on:
   push:
     branches:
-      - insacermo-info-capability-frontier-kernel-v1
+      - insacermo-info-capability-cover-kernel-v1
   workflow_dispatch:
 
 jobs:
