@@ -179,7 +179,11 @@ theorem summary_strictly_forgets_context :
     summary b0 = summary b1 ∧
     a0 ≠ a1 ∧
     b0 ≠ b1 := by
-  decide
+  refine ⟨rfl, rfl, ?_, ?_⟩
+  · intro h
+    cases h
+  · intro h
+    cases h
 
 /-- Complete erasure is impossible: A-contexts require alpha and B-contexts
     require beta, so one context-free message cannot certify both. -/
