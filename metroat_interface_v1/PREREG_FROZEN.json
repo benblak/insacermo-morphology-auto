@@ -1,0 +1,64 @@
+{
+  "status": "FROZEN_BEFORE_NEW_ENDPOINT_COMPUTATION",
+  "date": "2026-09-27",
+  "evidence_class": "PRE_SPECIFIED_SECONDARY_HOLDOUT_REANALYSIS_NOT_PRISTINE_PROSPECTIVE",
+  "dataset": {
+    "name": "MetroAT v1",
+    "doi": "10.48436/9ja0q-bq581",
+    "train_md5": "6ba8fd0cd9c65b02ca5319e99a6fa002",
+    "test_md5": "e5638ac4ced34231223015f1bfcb29d2"
+  },
+  "frozen_prior": {
+    "train_run": 36322103082,
+    "thresholds_sha256": "980c95f2cdbdea6ac8c7840d25b9a8e020ffbf18df80a9c4dc00c5a7888fea09",
+    "feature_order_sha256": "1c7f643034d3fd6d76154bd49d5a874ae08c0141f12620a81edb5f9ad5557d5d"
+  },
+  "horizons_hours": [
+    1,
+    6
+  ],
+  "components": [
+    "CW1",
+    "CW2",
+    "MW1",
+    "MW2",
+    "MW3",
+    "MW4"
+  ],
+  "global_context": [
+    "TRAIN_*",
+    "AMBIENT_TEMPERATURE",
+    "TRAIN_SPEED_ACTUAL"
+  ],
+  "quantizations": [
+    "q2",
+    "q4"
+  ],
+  "context_depths": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    "ALL"
+  ],
+  "local_depths": [
+    1,
+    2,
+    4,
+    8,
+    16,
+    32,
+    "ALL"
+  ],
+  "retune_on_test": false,
+  "exact_minimality_claim": false,
+  "primary_endpoints": [
+    "finite_interface_D",
+    "REFUSE_interface",
+    "monotonicity",
+    "per_state_minimal_frontier",
+    "constructed_globally_safe_pareto",
+    "centralized_reference"
+  ]
+}
