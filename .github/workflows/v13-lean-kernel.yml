@@ -1,9 +1,9 @@
-name: INSACERMO Discovery Dialect Kernel
+name: INSACERMO Unbounded Emergent Order Kernel
 
 on:
   push:
     branches:
-      - insacermo-discovery-dialect-v1
+      - insacermo-unbounded-emergent-order-kernel-v1
   workflow_dispatch:
 
 jobs:
