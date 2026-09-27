@@ -23,7 +23,7 @@ jobs:
           test -f bennu_curation_v1/cases.json
           git diff --exit-code
       - name: Engine regression tests
-        run: python -m unittest audits/test_actionability_engine_v1.py
+        run: python audits/test_actionability_engine_v1.py
       - name: Run frozen Bennu curation experiment
         run: python bennu_curation_v1/run_bennu_curation_v1.py
       - name: Show results
