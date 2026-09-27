@@ -1,9 +1,9 @@
-name: INSACERMO Unbounded Emergent Order Kernel
+name: INSACERMO Self-Discovery V1
 
 on:
   push:
     branches:
-      - insacermo-unbounded-emergent-order-kernel-v1
+      - insacermo-self-discovery-v1
   workflow_dispatch:
 
 jobs:
@@ -40,6 +40,8 @@ jobs:
         run: python3 scripts/discovery_lab_v2_highorder.py > discovery_lab_v2_results.json
       - name: Unbounded-order Discovery Lab reproducibility
         run: python3 scripts/discovery_lab_v3_unbounded_order.py > discovery_lab_v3_results.json
+      - name: Unary-universality Discovery Lab reproducibility
+        run: python3 scripts/discovery_lab_v4_unary_universality.py > discovery_lab_v4_results.json
       - name: Kernel build
         run: lake build
       - name: Axiom audit
