@@ -1,9 +1,9 @@
-name: INSACERMO Information-Capability Cover Kernel
+name: INSACERMO Actionability Geometry Kernel
 
 on:
   push:
     branches:
-      - insacermo-info-capability-cover-kernel-v1
+      - insacermo-actionability-geometry-kernel-v1
   workflow_dispatch:
 
 jobs:
