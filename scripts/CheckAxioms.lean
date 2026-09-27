@@ -1,0 +1,7 @@
+import InsacermoV13Kernel.RawActionabilityBridge
+
+#print axioms InsacermoV13Kernel.fiberSafe_of_refinement
+#print axioms InsacermoV13Kernel.Refines.trans
+#print axioms InsacermoV13Kernel.fiberSafe_of_capability_expansion
+#print axioms InsacermoV13Kernel.not_fiberSafe_of_alias_conflict
+#print axioms InsacermoV13Kernel.no_safe_to_unsafe_under_probe
