@@ -1,0 +1,82 @@
+name: MetroAT Interface Pareto V1
+
+on:
+  push:
+    branches:
+      - insacermo-metroat-interface-pareto-v1
+    paths:
+      - 'metroat_interface_v1/**'
+      - '.github/workflows/metroat-interface-pareto-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  interface:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - split: TRAIN
+            archive: train.zip
+            url: https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/train.zip/content
+            md5: 6ba8fd0cd9c65b02ca5319e99a6fa002
+            root: split_data/train
+          - split: TEST
+            archive: test.zip
+            url: https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/test.zip/content
+            md5: e5638ac4ced34231223015f1bfcb29d2
+            root: split_data
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frozen prior TRAIN artifact
+        run: |
+          mkdir frozen_train
+          gh run download 36322103082 -n metroat-v1-train-mechanics -D frozen_train
+          test -f frozen_train/TRAIN_THRESHOLDS.json
+          test -f frozen_train/FEATURE_ORDER.json
+          echo "980c95f2cdbdea6ac8c7840d25b9a8e020ffbf18df80a9c4dc00c5a7888fea09  frozen_train/TRAIN_THRESHOLDS.json" | sha256sum -c -
+          echo "1c7f643034d3fd6d76154bd49d5a874ae08c0141f12620a81edb5f9ad5557d5d  frozen_train/FEATURE_ORDER.json" | sha256sum -c -
+
+      - name: Download official MetroAT ${{ matrix.split }}
+        run: |
+          curl -L --fail --retry 3 --retry-delay 5 --progress-bar -o ${{ matrix.archive }} "${{ matrix.url }}"
+          echo "${{ matrix.md5 }}  ${{ matrix.archive }}" | md5sum -c -
+
+      - name: Install readers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq 7zip
+          python -m pip install --quiet pandas numpy pyarrow
+
+      - name: Extract official split
+        run: |
+          mkdir split_data
+          7z x -y -osplit_data ${{ matrix.archive }} >/dev/null
+          n=$(find split_data -type f -name '*.parquet' | wc -l)
+          echo "PARQUET_FILES=$n"
+          test "$n" -gt 0
+
+      - name: Run frozen interface Pareto analysis
+        run: |
+          PYTHONPATH=metroat_interface_v1 python metroat_interface_v1/run_interface_analysis.py \
+            --root "${{ matrix.root }}" \
+            --frozen-train frozen_train \
+            --split-name "${{ matrix.split }}" \
+            --out "metroat_interface_${{ matrix.split }}"
+
+      - name: Show compact summary
+        run: cat "metroat_interface_${{ matrix.split }}/${{ matrix.split }}_INTERFACE_PARETO_SUMMARY.csv"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metroat-interface-pareto-v1-${{ matrix.split }}
+          path: metroat_interface_${{ matrix.split }}/
+          retention-days: 30
