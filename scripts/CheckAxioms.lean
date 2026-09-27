@@ -1,4 +1,4 @@
-import InsacermoV13Kernel.FrontierFactorization
+import InsacermoV13Kernel.DiscoveryDialect
 
 #print axioms InsacermoV13Kernel.generatedUpper_upward
 #print axioms InsacermoV13Kernel.generatedUpper_iff_of_upperClosed
@@ -15,3 +15,8 @@ import InsacermoV13Kernel.FrontierFactorization
 #print axioms InsacermoV13Kernel.minimalGenerated_product_iff
 #print axioms InsacermoV13Kernel.additiveCost_product_optimal
 #print axioms InsacermoV13Kernel.factorized_upper_region_realizable
+
+#print axioms InsacermoV13Kernel.futureInteraction_band
+#print axioms InsacermoV13Kernel.futureInteraction_pure_complementarity
+#print axioms InsacermoV13Kernel.futureInteraction_pure_redundancy
+#print axioms InsacermoV13Kernel.futureInteraction_trichotomy
