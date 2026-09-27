@@ -1,0 +1,52 @@
+{
+  "metadata": {
+    "frozen_date": "2026-09-27",
+    "source_newsletter": "ARES Astromaterials Newsletter Vol. 8 No. 1, May 2026",
+    "source_request_guidance": "NASA NTRS 20250011677",
+    "direct_replay_note": "Catalog entries, not necessarily distinct physical particles."
+  },
+  "xct_scanned": [
+    "OREX-800057-0",
+    "OREX-800095-0",
+    "OREX-800106-0",
+    "OREX-800136-0",
+    "OREX-800161-0",
+    "OREX-800195-0",
+    "OREX-800256-0",
+    "OREX-800218-0",
+    "OREX-800219-0",
+    "OREX-800157-0",
+    "OREX-800216-0",
+    "OREX-800238-0",
+    "OREX-800258-0",
+    "OREX-800175-0",
+    "OREX-800097-1",
+    "OREX-800097-2",
+    "OREX-800097-9"
+  ],
+  "no_xct": [
+    "OREX-800061-0",
+    "OREX-800090-0",
+    "OREX-800101-0",
+    "OREX-800148-0",
+    "OREX-800155-0",
+    "OREX-800209-0",
+    "OREX-800233-0",
+    "OREX-800249-0"
+  ],
+  "probe_case": {
+    "id": "GENERIC-XCT-SENSITIVITY",
+    "missing_fact": "xct_could_negatively_affect_proposed_science",
+    "completions": [
+      false,
+      true
+    ]
+  },
+  "repair_case": {
+    "id": "MOTTLED-SEM-RETURNED-SUBSTITUTION",
+    "base_action": "prepare_new_nonpristine_mottled_chip",
+    "repair_action": "use_returned_OREX-800023-120",
+    "returned_sample": "OREX-800023-120",
+    "description": "returned mottled chip on carbon tape on SEM stub"
+  }
+}
