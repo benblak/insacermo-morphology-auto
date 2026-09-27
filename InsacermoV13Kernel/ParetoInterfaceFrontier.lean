@@ -201,13 +201,13 @@ open ContextMessageTradeoffWitness
 theorem no_zero_summary_budget (m : Nat) :
     ¬ ContextMessageBudget available admissible 0 m := by
   rintro ⟨summary, hprotocol⟩
-  exact Fin.elim0 (summary a0)
+  exact Fin.elim0 (summary ContextMessageTradeoffWitness.Context.a0)
 
 /-- With an inhabited local world, zero local messages are impossible. -/
 theorem no_zero_message_budget (q : Nat) :
     ¬ ContextMessageBudget available admissible q 0 := by
   rintro ⟨summary, encode, decode, havail, hcert⟩
-  exact Fin.elim0 (encode a0 ())
+  exact Fin.elim0 (encode ContextMessageTradeoffWitness.Context.a0 ())
 
 /-- (2,1) is not only feasible but Pareto-minimal. -/
 theorem budget_two_one_pareto :
