@@ -21,33 +21,39 @@ jobs:
             -o train.zip \
             https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/train.zip/content
           echo "6ba8fd0cd9c65b02ca5319e99a6fa002  train.zip" | md5sum -c -
-      - name: Install parquet reader
-        run: python -m pip install --quiet pyarrow
+      - name: Install schema readers
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq 7zip
+          python -m pip install --quiet pyarrow
       - name: Read one Parquet schema only
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
-          import zipfile, tempfile, pathlib, json, pyarrow.parquet as pq
+          ENTRY=$(python - <<'PY'
+          import zipfile
           with zipfile.ZipFile("train.zip") as z:
               names=[n for n in z.namelist() if n.endswith(".parquet")]
               assert names, "no parquet"
-              n=names[0]
-              p=pathlib.Path("sample.parquet")
-              with z.open(n) as src, p.open("wb") as dst:
-                  while True:
-                      b=src.read(1024*1024)
-                      if not b: break
-                      dst.write(b)
+              zi=z.getinfo(names[0])
+              print(names[0])
+              print("ZIP_METHOD", zi.compress_type, file=__import__("sys").stderr)
+          PY
+          )
+          echo "ENTRY=$ENTRY"
+          7zz e -so train.zip "$ENTRY" > sample.parquet
+          python - <<'PY'
+          import pathlib, json, pyarrow.parquet as pq
           schema=pq.read_schema("sample.parquet")
-          print("ENTRY",n)
           print("N_COLUMNS",len(schema.names))
           print("COLUMNS_JSON",json.dumps(schema.names))
           print("SCHEMA")
           print(schema)
           pathlib.Path("metroat_v1").mkdir(exist_ok=True)
           pathlib.Path("metroat_v1/PARQUET_SCHEMA_RECEIPT.json").write_text(
-              json.dumps({"entry":n,"n_columns":len(schema.names),"columns":schema.names,
+              json.dumps({"n_columns":len(schema.names),"columns":schema.names,
                           "types":[str(schema.field(i).type) for i in range(len(schema.names))]},indent=2))
           PY
       - uses: actions/upload-artifact@v4
