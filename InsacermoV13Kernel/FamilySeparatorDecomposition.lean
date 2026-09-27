@@ -68,11 +68,13 @@ theorem globalSafe_family_separator_iff
     intro x
     let base : I → World :=
       fun _ => Classical.choice (inferInstance : Nonempty World)
-    let xv : I → World := Function.update base i x
+    let xv : I → World :=
+      fun j => if h : j = i then h ▸ x else base j
     rcases hglobal (k, xv) with ⟨a, ha, hall⟩
     refine ⟨a i, ha i, ?_⟩
     intro y hy
-    let yv : I → World := Function.update base i y
+    let yv : I → World :=
+      fun j => if h : j = i then h ▸ y else base j
     have hobs :
         FamilySeparatorObs obs (k, yv) =
           FamilySeparatorObs obs (k, xv) := by
@@ -85,7 +87,9 @@ theorem globalSafe_family_separator_iff
     have hAdm :
         FamilySeparatorAdmissible admissible (k, yv) a :=
       hall hobs
-    simpa [FamilySeparatorAdmissible, yv] using hAdm i
+    have hi : yv i = y := by
+      simp [yv]
+    simpa [FamilySeparatorAdmissible, hi] using hAdm i
   · intro hlocal
     intro x
     have hcert :
@@ -96,10 +100,20 @@ theorem globalSafe_family_separator_iff
               admissible i x.1 y a := by
       intro i
       exact hlocal x.1 i (x.2 i)
-    choose a ha hall using hcert
+    let a : I → Action :=
+      fun i => Classical.choose (hcert i)
+    have ha :
+        ∀ i, available i (a i) := by
+      intro i
+      exact (Classical.choose_spec (hcert i)).1
+    have hall :
+        ∀ i ⦃y : World⦄,
+          obs i x.1 y = obs i x.1 (x.2 i) →
+            admissible i x.1 y (a i) := by
+      intro i y hy
+      exact (Classical.choose_spec (hcert i)).2 hy
     refine ⟨a, ?_, ?_⟩
-    · intro i
-      exact ha i
+    · exact ha
     · intro y hy
       have hk : y.1 = x.1 :=
         familySeparatorObs_eq_implies_context_eq hy
@@ -173,7 +187,7 @@ theorem globalSafe_singleton_family_iff
   · intro h k
     exact h k 0
   · intro h k i
-    have hi : i = (0 : Fin 1) := Fin.eq_zero i
+    have hi : i = (0 : Fin 1) := Subsingleton.elim i 0
     simpa [hi] using h k
 
 end InsacermoV13Kernel
