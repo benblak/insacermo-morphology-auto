@@ -153,7 +153,11 @@ theorem budget_one_one_impossible :
 theorem budget_points_incomparable :
     ¬ ContextMessageLe (2, 1) (1, 2) ∧
     ¬ ContextMessageLe (1, 2) (2, 1) := by
-  constructor <;> decide
+  constructor
+  · intro h
+    exact Nat.not_succ_le_zero 1 (Nat.le_trans h.1 (Nat.le_refl 1))
+  · intro h
+    exact Nat.not_succ_le_zero 1 (Nat.le_trans h.2 (Nat.le_refl 1))
 
 /-- Exact finite witness of a non-scalar context/message tradeoff:
     (2,1) is feasible, (1,2) is feasible, but their common lower-left point
