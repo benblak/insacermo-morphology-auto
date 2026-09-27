@@ -1,0 +1,36 @@
+name: MetroAT V1 TRAIN Diagnostics
+
+on:
+  push:
+    branches: [insacermo-metroat-prospective-v1]
+    paths:
+      - 'metroat_v1/run_train_diagnostics.py'
+      - '.github/workflows/metroat-v1-train-diagnostics.yml'
+  workflow_dispatch:
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download official TRAIN
+        run: |
+          curl -L --fail --retry 3 --retry-delay 5 --progress-bar -o train.zip https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/train.zip/content
+          echo "6ba8fd0cd9c65b02ca5319e99a6fa002  train.zip" | md5sum -c -
+      - name: Install readers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq 7zip
+          python -m pip install --quiet pandas pyarrow
+      - name: Extract TRAIN
+        run: |
+          mkdir train_data
+          7z x -y -otrain_data train.zip >/dev/null
+      - name: Diagnose TRAIN semantics and continuity
+        run: python metroat_v1/run_train_diagnostics.py train_data/train metroat_train_diagnostics
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metroat-v1-train-diagnostics
+          path: metroat_train_diagnostics/
+          retention-days: 30
