@@ -1,0 +1,58 @@
+name: MetroAT V1 Official TEST Holdout
+
+on:
+  push:
+    branches: [insacermo-metroat-prospective-v1]
+    paths:
+      - 'metroat_v1/run_test_holdout.py'
+      - '.github/workflows/metroat-v1-test.yml'
+  workflow_dispatch:
+
+jobs:
+  holdout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      actions: read
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frozen TRAIN artifact only
+        run: |
+          mkdir frozen_train
+          gh run download 36322103082 -n metroat-v1-train-mechanics -D frozen_train
+          test -f frozen_train/TRAIN_THRESHOLDS.json
+          test -f frozen_train/FEATURE_ORDER.json
+          echo "Frozen TRAIN artifact loaded; no TEST fitting permitted."
+
+      - name: Download official TEST
+        run: |
+          curl -L --fail --retry 3 --retry-delay 5 --progress-bar -o test.zip https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/test.zip/content
+          echo "e5638ac4ced34231223015f1bfcb29d2  test.zip" | md5sum -c -
+
+      - name: Install readers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq 7zip
+          python -m pip install --quiet pandas numpy pyarrow
+
+      - name: Extract official TEST
+        run: |
+          mkdir test_data
+          7z x -y -otest_data test.zip >/dev/null
+          n=$(find test_data -type f -name '*.parquet' | wc -l)
+          echo "TEST_PARQUET_FILES=$n"
+          test "$n" -eq 136
+
+      - name: Run frozen official TEST holdout
+        run: |
+          python metroat_v1/run_test_holdout.py --root test_data --frozen-train frozen_train --out metroat_test_results
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metroat-v1-official-test-holdout
+          path: metroat_test_results/
+          retention-days: 30
