@@ -125,8 +125,7 @@ theorem globalSafe_iff_avoidsObstructedFibers
     exact (fiberSafe_iff_commonAction_fiber).mp (h x)
   · intro h x
     apply (fiberSafe_iff_commonAction_fiber).mpr
-    by_contra hcommon
-    exact h x hcommon
+    exact Classical.byContradiction (fun hcommon => h x hcommon)
 
 /-- Exact obstruction bridge: safe n-symbol encodings are exactly n-colorings
     whose realized color classes contain no contractual obstruction. -/
