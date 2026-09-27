@@ -11,3 +11,4 @@ import InsacermoV13Kernel.InterfaceMessages
 import InsacermoV13Kernel.SeparatorMessages
 import InsacermoV13Kernel.ContextSummary
 import InsacermoV13Kernel.ContextMessageFrontier
+import InsacermoV13Kernel.ParetoInterfaceFrontier
