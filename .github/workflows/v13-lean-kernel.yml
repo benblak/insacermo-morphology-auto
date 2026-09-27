@@ -1,9 +1,9 @@
-name: INSACERMO V1.3 Lean Kernel
+name: INSACERMO Information-Capability Frontier Kernel
 
 on:
   push:
     branches:
-      - insacermo-v1-3-lean-kernel
+      - insacermo-info-capability-frontier-kernel-v1
   workflow_dispatch:
 
 jobs:
