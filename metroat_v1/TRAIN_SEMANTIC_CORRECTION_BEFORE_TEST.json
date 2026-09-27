@@ -1,0 +1,29 @@
+{
+  "status": "FROZEN_TRAIN_SEMANTIC_CORRECTION_BEFORE_TEST",
+  "date": "2026-09-27",
+  "basis_run": 36318874905,
+  "test_data_opened": false,
+  "observed_train_semantics": {
+    "failure_normal_type": "No Failure",
+    "maintenance_normal_type": "No Revision",
+    "failure_cross_table_consistent": true,
+    "maintenance_cross_table_consistent": true,
+    "max_contiguous_segment_minutes": 1379
+  },
+  "correction": {
+    "TRAIN_FAILURE_TYPE": "active iff stripped value is neither empty nor 'No Failure'",
+    "TRAIN_MAINTENANCE_TYPE": "active iff stripped value is neither empty nor 'No Revision'"
+  },
+  "unchanged": [
+    "official split",
+    "horizons",
+    "q2/q4",
+    "feature order",
+    "prefixes",
+    "current setting",
+    "ACT/PROBE/REFUSE semantics",
+    "no repair",
+    "no TEST retuning"
+  ],
+  "long_horizon_policy": "24h/72h/7d remain valid preregistered endpoints but are reported UNSUPPORTED_BY_CONTINUITY when no eligible states exist; horizons are not replaced or shortened."
+}
