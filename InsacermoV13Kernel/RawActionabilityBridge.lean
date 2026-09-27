@@ -1,6 +1,6 @@
 namespace InsacermoV13Kernel
 
-universe u v w
+universe u v w z
 
 /-- `fine` refines `coarse` when equality at the fine observation level
     always implies equality at the coarse level. -/
@@ -17,7 +17,7 @@ def FiberSafe {World : Type u} {Obs : Type v} {Action : Type w}
 
 /-- Refinement cannot destroy an already valid common-action certificate. -/
 theorem fiberSafe_of_refinement
-    {World : Type u} {Coarse : Type v} {Fine : Type w} {Action : Type*}
+    {World : Type u} {Coarse : Type v} {Fine : Type w} {Action : Type z}
     {coarse : World → Coarse} {fine : World → Fine}
     {available : Action → Prop} {admissible : World → Action → Prop}
     {x : World}
@@ -31,7 +31,7 @@ theorem fiberSafe_of_refinement
 
 /-- Refinement is transitive. -/
 theorem Refines.trans
-    {World : Type u} {A : Type v} {B : Type w} {C : Type*}
+    {World : Type u} {A : Type v} {B : Type w} {C : Type z}
     {rA : World → A} {rB : World → B} {rC : World → C}
     (hAB : Refines rA rB) (hBC : Refines rB rC) : Refines rA rC := by
   intro x y hC
@@ -65,7 +65,7 @@ theorem not_fiberSafe_of_alias_conflict
 
 /-- A probe/refinement cannot turn a certified-safe fiber into an unsafe one. -/
 theorem no_safe_to_unsafe_under_probe
-    {World : Type u} {Coarse : Type v} {Fine : Type w} {Action : Type*}
+    {World : Type u} {Coarse : Type v} {Fine : Type w} {Action : Type z}
     {coarse : World → Coarse} {fine : World → Fine}
     {available : Action → Prop} {admissible : World → Action → Prop}
     {x : World}
