@@ -1,4 +1,4 @@
-import InsacermoV13Kernel.FrontierUniversality
+import InsacermoV13Kernel.FrontierFactorization
 
 #print axioms InsacermoV13Kernel.generatedUpper_upward
 #print axioms InsacermoV13Kernel.generatedUpper_iff_of_upperClosed
@@ -8,3 +8,10 @@ import InsacermoV13Kernel.FrontierUniversality
 #print axioms InsacermoV13Kernel.minimal_generated_equiv_seed
 #print axioms InsacermoV13Kernel.antichain_frontier_representation
 #print axioms InsacermoV13Kernel.strict_synergy_not_submodular
+
+#print axioms InsacermoV13Kernel.globalSafe_product_iff
+#print axioms InsacermoV13Kernel.productRegion_upperClosed
+#print axioms InsacermoV13Kernel.generatedUpper_product_iff
+#print axioms InsacermoV13Kernel.minimalGenerated_product_iff
+#print axioms InsacermoV13Kernel.additiveCost_product_optimal
+#print axioms InsacermoV13Kernel.factorized_upper_region_realizable
