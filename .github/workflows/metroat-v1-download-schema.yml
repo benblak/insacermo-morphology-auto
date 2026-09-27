@@ -1,0 +1,72 @@
+name: MetroAT V1 Download Hash Schema Gate
+
+on:
+  push:
+    branches: [insacermo-metroat-prospective-v1]
+    paths:
+      - '.github/workflows/metroat-v1-download-schema.yml'
+  workflow_dispatch:
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Disk before
+        run: df -h
+      - name: Download official archives
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p metroat_data
+          curl -L --fail --retry 3 --retry-delay 5 --progress-bar \
+            -o metroat_data/train.zip \
+            https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/train.zip/content
+          curl -L --fail --retry 3 --retry-delay 5 --progress-bar \
+            -o metroat_data/test.zip \
+            https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581/files/test.zip/content
+      - name: Verify frozen MD5
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "6ba8fd0cd9c65b02ca5319e99a6fa002  metroat_data/train.zip" | md5sum -c -
+          echo "e5638ac4ced34231223015f1bfcb29d2  metroat_data/test.zip" | md5sum -c -
+          stat -c '%n %s bytes' metroat_data/train.zip metroat_data/test.zip
+      - name: Schema-only inspection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import zipfile, csv, io, json, os
+          out={}
+          for split in ("train","test"):
+              zp=f"metroat_data/{split}.zip"
+              with zipfile.ZipFile(zp) as z:
+                  names=[n for n in z.namelist() if not n.endswith("/")]
+                  print("SPLIT",split,"FILES",len(names))
+                  print("FIRST_FILES",names[:20])
+                  entry=None
+                  for n in names:
+                      if n.lower().endswith((".csv",".txt",".tsv")):
+                          entry=n; break
+                  if entry is None:
+                      print("NO_TEXT_TABLE_FOUND")
+                      out[split]={"files":names[:100],"table":None}
+                      continue
+                  with z.open(entry) as f:
+                      raw=f.readline().decode("utf-8-sig",errors="replace").rstrip("\r\n")
+                  delim=";" if raw.count(";")>raw.count(",") else ","
+                  cols=next(csv.reader([raw],delimiter=delim))
+                  print("TABLE",entry)
+                  print("HEADER",json.dumps(cols))
+                  out[split]={"files":names[:100],"table":entry,"columns":cols}
+          os.makedirs("metroat_schema",exist_ok=True)
+          with open("metroat_schema/schema_receipt.json","w") as f:
+              json.dump(out,f,indent=2)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: metroat-v1-schema-receipt
+          path: metroat_schema/schema_receipt.json
+          retention-days: 30
