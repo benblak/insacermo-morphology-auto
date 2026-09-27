@@ -14,3 +14,4 @@ import InsacermoV13Kernel.ContextMessageFrontier
 import InsacermoV13Kernel.ParetoInterfaceFrontier
 import InsacermoV13Kernel.TreeMessagePassing
 import InsacermoV13Kernel.RecursiveTreeCertificates
+import InsacermoV13Kernel.TreeContextCongruence
