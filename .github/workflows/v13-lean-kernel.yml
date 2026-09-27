@@ -1,9 +1,9 @@
-name: INSACERMO Actionability Geometry Kernel
+name: INSACERMO Frontier Universality Kernel
 
 on:
   push:
     branches:
-      - insacermo-actionability-geometry-kernel-v1
+      - insacermo-frontier-universality-kernel-v1
   workflow_dispatch:
 
 jobs:
