@@ -156,6 +156,7 @@ theorem treeCertified_context_equivalence
 namespace TreeContextCongruenceWitness
 
 open RecursiveTreeWitness
+open RecursiveTreeWitness.World
 
 def deepContext : TreeContext World :=
   .left one
@@ -182,12 +183,6 @@ theorem hiddenLeft₁_certified :
 
 theorem hiddenLeft₂_certified :
     TreeCertified available admissible encode decode hiddenLeft₂ := by
-  have hall :=
-    (recursiveTree_all_nodes_certified local_rule_certified).2
-  rcases recursiveTree_all_nodes_certified local_rule_certified with
-    ⟨enc, dec, hcert⟩
-  -- The witness protocol is definitionally the explicit encode/decode pair,
-  -- so prove the concrete tree directly.
   simp [hiddenLeft₂, TreeCertified, treeMessage,
     encode, decode, admissible, available]
 
