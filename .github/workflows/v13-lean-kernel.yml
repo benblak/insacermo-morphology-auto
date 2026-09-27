@@ -1,9 +1,9 @@
-name: INSACERMO Frontier Universality Kernel
+name: INSACERMO Frontier Factorization Kernel
 
 on:
   push:
     branches:
-      - insacermo-frontier-universality-kernel-v1
+      - insacermo-frontier-factorization-kernel-v1
   workflow_dispatch:
 
 jobs:
