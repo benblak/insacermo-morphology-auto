@@ -1,0 +1,45 @@
+{
+  "name": "INSACERMO METROAT PROSPECTIVE INFORMATION-DESTRUCTION TEST V1",
+  "date": "2026-09-27",
+  "status": "FROZEN_BEFORE_DATA_VALUES",
+  "dataset": {
+    "doi": "10.48436/9ja0q-bq581",
+    "train_md5": "6ba8fd0cd9c65b02ca5319e99a6fa002",
+    "test_md5": "e5638ac4ced34231223015f1bfcb29d2"
+  },
+  "decision_interval_seconds": 60,
+  "past_window_seconds": 60,
+  "feature_order": "ascending SHA256(feature_name)",
+  "prefix_k": [
+    4,
+    8,
+    16,
+    32,
+    64,
+    128,
+    "ALL"
+  ],
+  "quantization": [
+    "q2",
+    "q4"
+  ],
+  "current_setting": {
+    "q": "q2",
+    "k": 16
+  },
+  "horizons_seconds": [
+    3600,
+    21600,
+    86400,
+    259200,
+    604800
+  ],
+  "primary_verdicts": [
+    "ACT",
+    "PROBE",
+    "REFUSE"
+  ],
+  "repair_primary": false,
+  "test_retuning_allowed": false,
+  "negative_results_retained": true
+}
