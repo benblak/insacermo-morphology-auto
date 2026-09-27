@@ -242,7 +242,7 @@ theorem certifiedProtocol_product
 theorem interfaceWitness_minCertifiedMessages_two :
     IsMinCertifiedMessages interfaceWitnessAvailable
       interfaceWitnessAdmissible 2 := by
-  letI : Nonempty InterfaceWitnessWorld := ⟨left⟩
+  letI : Nonempty InterfaceWitnessWorld := ⟨InterfaceWitnessWorld.left⟩
   exact
     isMinCertifiedMessages_iff_isMinSafeSymbols.mpr
       interfaceWitness_minSafeSymbols_two
