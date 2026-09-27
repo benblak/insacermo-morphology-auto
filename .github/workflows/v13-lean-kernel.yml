@@ -1,9 +1,9 @@
-name: INSACERMO Context Message Frontier Kernel
+name: INSACERMO Pareto Interface Frontier Kernel
 
 on:
   push:
     branches:
-      - insacermo-context-message-frontier-kernel-v1
+      - insacermo-pareto-interface-frontier-kernel-v1
   workflow_dispatch:
 
 jobs:
