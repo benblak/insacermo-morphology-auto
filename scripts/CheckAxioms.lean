@@ -1,4 +1,4 @@
-import InsacermoV13Kernel.DiscoveryDialect
+import InsacermoV13Kernel.UnboundedEmergentOrder
 
 #print axioms InsacermoV13Kernel.generatedUpper_upward
 #print axioms InsacermoV13Kernel.generatedUpper_iff_of_upperClosed
