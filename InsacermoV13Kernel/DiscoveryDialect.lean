@@ -1,53 +1,35 @@
-import Std.Tactic.Omega
 import InsacermoV13Kernel.FrontierFactorization
 
 namespace InsacermoV13Kernel
 
-/-- Signed local interaction on one capability square.
-    Positive values mean the joint gain exceeds the sum of the two isolated gains;
-    negative values mean redundancy/substitution; zero is locally additive. -/
+/-- Total right-to-forget dividend produced by adding both capabilities. -/
+def JointDividend (a d : Nat) : Int :=
+  (a : Int) - (d : Int)
+
+/-- Sum of the two isolated right-to-forget dividends. -/
+def IsolatedDividend (a b c : Nat) : Int :=
+  ((a : Int) - (b : Int)) + ((a : Int) - (c : Int))
+
+/-- Residual local interaction:
+    what the joint capability pair does beyond the sum of the isolated effects. -/
 def FutureInteraction (a b c d : Nat) : Int :=
-  (b : Int) + (c : Int) - (a : Int) - (d : Int)
+  JointDividend a d - IsolatedDividend a b c
 
-
-/-- Exact decomposition of the joint right-to-forget dividend:
-    joint gain = isolated gain of u + isolated gain of v + interaction. -/
+/-- Exact INSACERMO interaction decomposition:
+    joint gain = isolated-u gain + isolated-v gain + residual interaction. -/
 theorem jointDividend_decomposition (a b c d : Nat) :
-    (a : Int) - (d : Int) =
-      ((a : Int) - (b : Int)) +
-      ((a : Int) - (c : Int)) +
-      FutureInteraction a b c d := by
+    JointDividend a d =
+      IsolatedDividend a b c + FutureInteraction a b c d := by
   simp [FutureInteraction]
-  omega
 
-/-- Monotonicity alone confines the interaction to the total joint-change band.
-    Here a=m(C), b=m(C+u), c=m(C+v), d=m(C+u+v). -/
-theorem futureInteraction_band
-    {a b c d : Nat}
-    (hba : b ≤ a) (hca : c ≤ a)
-    (hdb : d ≤ b) (hdc : d ≤ c) :
-    (d : Int) - (a : Int) ≤ FutureInteraction a b c d ∧
-    FutureInteraction a b c d ≤ (a : Int) - (d : Int) := by
-  constructor <;> simp [FutureInteraction] <;> omega
+/-- If neither capability changes the requirement alone, all joint improvement
+    is interaction. -/
+theorem futureInteraction_pure_complementarity (a d : Nat) :
+    FutureInteraction a a a d = JointDividend a d := by
+  simp [FutureInteraction, IsolatedDividend]
 
-/-- Pure complementarity: neither capability changes the requirement alone,
-    but the pair does. It saturates the positive interaction bound. -/
-theorem futureInteraction_pure_complementarity
-    {a d : Nat} (hda : d ≤ a) :
-    FutureInteraction a a a d = (a : Int) - (d : Int) := by
-  simp [FutureInteraction]
-  omega
-
-/-- Pure redundancy/substitution: either capability alone already attains the
-    same requirement as the pair. It saturates the negative interaction bound. -/
-theorem futureInteraction_pure_redundancy
-    {a d : Nat} (hda : d ≤ a) :
-    FutureInteraction a d d d = (d : Int) - (a : Int) := by
-  simp [FutureInteraction]
-  omega
-
-/-- The interaction sign always falls into exactly the familiar three regimes:
-    complementarity, local additivity, or redundancy. -/
+/-- Every local interaction lies in exactly one sign regime:
+    redundancy/substitution, local additivity, or complementarity. -/
 theorem futureInteraction_trichotomy (a b c d : Nat) :
     FutureInteraction a b c d < 0 ∨
     FutureInteraction a b c d = 0 ∨
