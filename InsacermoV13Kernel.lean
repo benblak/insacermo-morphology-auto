@@ -8,3 +8,4 @@ import InsacermoV13Kernel.SeparatorDecomposition
 import InsacermoV13Kernel.FamilySeparatorDecomposition
 import InsacermoV13Kernel.InterfaceQuotient
 import InsacermoV13Kernel.InterfaceMessages
+import InsacermoV13Kernel.SeparatorMessages
