@@ -1,0 +1,32 @@
+name: INSACERMO Sigma0 Semantic Symmetry V1
+
+on:
+  push:
+    branches:
+      - insacermo-sigma0-semantic-symmetry-v1
+    paths:
+      - 'sigma0_semantic_symmetry_v1/**'
+      - 'insacermo_actionability_engine_v1.py'
+      - '.github/workflows/sigma0-semantic-symmetry-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  sigma0:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f sigma0_semantic_symmetry_v1/PREREG_FROZEN.md
+          test -f sigma0_semantic_symmetry_v1/structures.json
+          git diff --exit-code
+      - name: Engine regression
+        run: PYTHONPATH=. python audits/test_actionability_engine_v1.py
+      - name: Run Sigma0 frozen experiment
+        run: PYTHONPATH=. python sigma0_semantic_symmetry_v1/run_sigma0.py
+      - name: Show results
+        run: |
+          cat sigma0_semantic_symmetry_v1/RESULTS.md
+          cat sigma0_semantic_symmetry_v1/results.json
