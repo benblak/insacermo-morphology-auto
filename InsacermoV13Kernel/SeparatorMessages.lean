@@ -35,7 +35,7 @@ theorem indexed_of_uniform
     {available : Action → Prop}
     {admissible : K → World → Action → Prop}
     (h : UniformCertifiedProtocol Message available admissible) :
-    IndexedCertifiedProtocol (Fin 1) available admissible := by
+    IndexedCertifiedProtocol Message available admissible := by
   rcases h with ⟨encode, decode, havail, hcert⟩
   exact
     ⟨encode,
@@ -262,7 +262,7 @@ def localDecode : Context → Fin 1 → Action
   | right, _ => beta
 
 theorem indexed_one_local_message :
-    IndexedCertifiedProtocol Message available admissible := by
+    IndexedCertifiedProtocol (Fin 1) available admissible := by
   refine ⟨localEncode, localDecode, ?_, ?_⟩
   · intro k m
     trivial
