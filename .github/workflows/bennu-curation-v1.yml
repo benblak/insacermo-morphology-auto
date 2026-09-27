@@ -1,0 +1,32 @@
+name: INSACERMO Bennu Curation V1
+
+on:
+  push:
+    branches:
+      - insacermo-bennu-curation-v1
+    paths:
+      - 'bennu_curation_v1/**'
+      - 'insacermo_actionability_engine_v1.py'
+      - '.github/workflows/bennu-curation-v1.yml'
+  workflow_dispatch:
+
+jobs:
+  bennu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f bennu_curation_v1/PREREG_FROZEN.md
+          test -f bennu_curation_v1/cases.json
+          git diff --exit-code
+      - name: Engine regression tests
+        run: python -m unittest audits/test_actionability_engine_v1.py
+      - name: Run frozen Bennu curation experiment
+        run: python bennu_curation_v1/run_bennu_curation_v1.py
+      - name: Show results
+        run: |
+          cat bennu_curation_v1/RESULTS.md
+          cat bennu_curation_v1/results.json
