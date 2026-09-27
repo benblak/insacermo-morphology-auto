@@ -1,9 +1,9 @@
-name: INSACERMO Interface Quotient Kernel
+name: INSACERMO Interface Message Kernel
 
 on:
   push:
     branches:
-      - insacermo-interface-quotient-kernel-v1
+      - insacermo-interface-message-kernel-v1
   workflow_dispatch:
 
 jobs:
