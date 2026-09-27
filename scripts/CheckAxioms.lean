@@ -1,10 +1,14 @@
-import InsacermoV13Kernel.FrontierUniversality
+import InsacermoV13Kernel.SeparatorDecomposition
 
-#print axioms InsacermoV13Kernel.generatedUpper_upward
-#print axioms InsacermoV13Kernel.generatedUpper_iff_of_upperClosed
-#print axioms InsacermoV13Kernel.FrontierRealization.globalSafe_iff_generatedUpper
-#print axioms InsacermoV13Kernel.FrontierRealization.arbitrary_upper_region_realizable
-#print axioms InsacermoV13Kernel.antichain_seed_is_minimal
-#print axioms InsacermoV13Kernel.minimal_generated_equiv_seed
-#print axioms InsacermoV13Kernel.antichain_frontier_representation
-#print axioms InsacermoV13Kernel.strict_synergy_not_submodular
+#print axioms InsacermoV13Kernel.globalSafe_product_iff
+#print axioms InsacermoV13Kernel.productRegion_upperClosed
+#print axioms InsacermoV13Kernel.generatedUpper_product_iff
+#print axioms InsacermoV13Kernel.minimalGenerated_product_iff
+#print axioms InsacermoV13Kernel.additiveCost_product_optimal
+#print axioms InsacermoV13Kernel.factorized_upper_region_realizable
+#print axioms InsacermoV13Kernel.separatorObs_eq_implies_context_eq
+#print axioms InsacermoV13Kernel.globalSafe_separator_iff
+#print axioms InsacermoV13Kernel.globalSafe_fin_separator_iff
+#print axioms InsacermoV13Kernel.globalSafe_single_separator_iff
+#print axioms InsacermoV13Kernel.separatorRegion_upperClosed
+#print axioms InsacermoV13Kernel.generatedUpper_separator_iff
