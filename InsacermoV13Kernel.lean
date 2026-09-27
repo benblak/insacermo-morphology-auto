@@ -7,3 +7,4 @@ import InsacermoV13Kernel.FrontierFactorization
 import InsacermoV13Kernel.SeparatorDecomposition
 import InsacermoV13Kernel.FamilySeparatorDecomposition
 import InsacermoV13Kernel.InterfaceQuotient
+import InsacermoV13Kernel.InterfaceMessages
