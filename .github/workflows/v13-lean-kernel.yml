@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - insacermo-total-closure-kernel-v1
+      - insacermo-concrete-adapter-soundness-kernel-v1
   workflow_dispatch:
 
 jobs:
