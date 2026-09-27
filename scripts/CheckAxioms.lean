@@ -16,6 +16,6 @@ import InsacermoV13Kernel.DiscoveryDialect
 #print axioms InsacermoV13Kernel.additiveCost_product_optimal
 #print axioms InsacermoV13Kernel.factorized_upper_region_realizable
 
-#print axioms InsacermoV13Kernel.jointDividend_decomposition
-#print axioms InsacermoV13Kernel.futureInteraction_pure_complementarity
-#print axioms InsacermoV13Kernel.futureInteraction_trichotomy
+#print axioms InsacermoV13Kernel.futureInteraction_definition
+#print axioms InsacermoV13Kernel.futureInteraction_strict_synergy_witness
+#print axioms InsacermoV13Kernel.futureInteraction_redundancy_witness
