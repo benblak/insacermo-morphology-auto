@@ -1,9 +1,9 @@
-name: INSACERMO Separator Message Kernel
+name: INSACERMO Context Summary Kernel
 
 on:
   push:
     branches:
-      - insacermo-separator-message-kernel-v1
+      - insacermo-context-summary-kernel-v1
   workflow_dispatch:
 
 jobs:
