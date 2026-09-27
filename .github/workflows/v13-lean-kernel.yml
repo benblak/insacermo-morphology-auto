@@ -1,9 +1,9 @@
-name: INSACERMO Family Separator Kernel
+name: INSACERMO Interface Quotient Kernel
 
 on:
   push:
     branches:
-      - insacermo-family-separator-kernel-v1
+      - insacermo-interface-quotient-kernel-v1
   workflow_dispatch:
 
 jobs:
