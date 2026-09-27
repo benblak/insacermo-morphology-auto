@@ -75,15 +75,18 @@ theorem globalSafe_family_separator_iff
     intro y hy
     let yv : I → World :=
       fun j => if j = i then y else base j
-    have hobs :
-        FamilySeparatorObs obs (k, yv) =
-          FamilySeparatorObs obs (k, xv) := by
-      apply Prod.ext rfl
+    have hfun :
+        (fun j => obs j k (yv j)) =
+          (fun j => obs j k (xv j)) := by
       funext j
       by_cases hji : j = i
       · subst j
-        simp [FamilySeparatorObs, xv, yv, hy]
-      · simp [FamilySeparatorObs, xv, yv, hji]
+        simp [xv, yv, hy]
+      · simp [xv, yv, hji]
+    have hobs :
+        FamilySeparatorObs obs (k, yv) =
+          FamilySeparatorObs obs (k, xv) := by
+      exact congrArg (fun f => (k, f)) hfun
     have hAdm :
         FamilySeparatorAdmissible admissible (k, yv) a :=
       hall hobs
