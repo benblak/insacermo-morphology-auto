@@ -1,0 +1,39 @@
+{
+  "status": "TEST_OPENING_FROZEN",
+  "date": "2026-09-27",
+  "train_reference": {
+    "run_id": 36322103082,
+    "artifact_name": "metroat-v1-train-mechanics",
+    "artifact_id": 10933077707,
+    "artifact_zip_sha256": "7d166e80b15ac766a499d6675d1e7901f73754fda4fe6e321b9b6733c0920a6e",
+    "implementation_commit": "88903abf6d9607dcb1c513b1ac27124c7bb974e3"
+  },
+  "official_test": {
+    "source": "TU Wien Research Data MetroAT v1",
+    "file": "test.zip",
+    "expected_md5": "e5638ac4ced34231223015f1bfcb29d2",
+    "expected_parquet_files": 136
+  },
+  "locked_rules": {
+    "thresholds": "load TRAIN_THRESHOLDS.json from frozen TRAIN artifact; never fit on TEST",
+    "feature_order": "load FEATURE_ORDER.json from frozen TRAIN artifact; never reorder from TEST",
+    "current": "q2,k16",
+    "horizons_hours": [
+      1,
+      6,
+      24,
+      72,
+      168
+    ],
+    "repair": false,
+    "retuning": false,
+    "outputs": [
+      "ACT",
+      "PROBE",
+      "REFUSE",
+      "D_info",
+      "destruction_vs_q4_ALL",
+      "monotonicity"
+    ]
+  }
+}
