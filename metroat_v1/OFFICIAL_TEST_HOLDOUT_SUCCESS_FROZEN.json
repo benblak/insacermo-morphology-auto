@@ -1,0 +1,59 @@
+{
+  "status": "OFFICIAL_TEST_HOLDOUT_SUCCESS_FROZEN",
+  "date": "2026-09-27",
+  "train_reference_run": 36322103082,
+  "test_run": 36324520031,
+  "test_job": 108634573931,
+  "retuned_on_test": false,
+  "train_thresholds_sha256": "980c95f2cdbdea6ac8c7840d25b9a8e020ffbf18df80a9c4dc00c5a7888fea09",
+  "train_feature_order_sha256": "1c7f643034d3fd6d76154bd49d5a874ae08c0141f12620a81edb5f9ad5557d5d",
+  "test_schema_feature_set_matches_train": true,
+  "n_minutes": 136900,
+  "n_features": 276,
+  "horizons": {
+    "1h": {
+      "support_status": "SUPPORTED",
+      "eligible": 88872,
+      "ACT": 12263,
+      "PROBE": 76609,
+      "REFUSE": 0,
+      "finite_D_info": 88872,
+      "INF_D_info": 0,
+      "destruction_vs_q4_ALL": {
+        "4": 88171,
+        "8": 67258,
+        "16": 28445,
+        "32": 4587,
+        "64": 23,
+        "128": 0
+      },
+      "monotonicity_violations_total": 0
+    },
+    "6h": {
+      "support_status": "SUPPORTED",
+      "eligible": 41953,
+      "ACT": 5635,
+      "PROBE": 36318,
+      "REFUSE": 0,
+      "finite_D_info": 41953,
+      "INF_D_info": 0,
+      "destruction_vs_q4_ALL": {
+        "4": 40972,
+        "8": 29900,
+        "16": 10433,
+        "32": 1532,
+        "64": 8,
+        "128": 0
+      },
+      "monotonicity_violations_total": 0
+    },
+    "24h": "UNSUPPORTED_BY_CONTINUITY",
+    "72h": "UNSUPPORTED_BY_CONTINUITY",
+    "168h": "UNSUPPORTED_BY_CONTINUITY"
+  },
+  "artifact": {
+    "name": "metroat-v1-official-test-holdout",
+    "id": 10933604514,
+    "zip_sha256": "534d7f219edd5b619f9d3272b8698945782c00c706462b524a9204f17bf32899"
+  }
+}
