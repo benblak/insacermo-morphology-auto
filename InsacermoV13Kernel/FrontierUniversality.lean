@@ -167,6 +167,7 @@ theorem strict_synergy_not_submodular :
       (ForgetDividend 2 2)
       (ForgetDividend 2 2)
       (ForgetDividend 2 1) := by
-  decide
+  change ¬ (1 ≤ 0)
+  exact Nat.not_succ_le_zero 0
 
 end InsacermoV13Kernel
