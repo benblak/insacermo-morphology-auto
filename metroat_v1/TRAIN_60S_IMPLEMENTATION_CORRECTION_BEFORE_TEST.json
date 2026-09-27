@@ -1,0 +1,31 @@
+{
+  "status": "FROZEN_IMPLEMENTATION_CORRECTION_BEFORE_TEST",
+  "date": "2026-09-27",
+  "reason": "The preregistered representation uses one-minute decision states with trailing 60-second features. The first TRAIN implementation mistakenly applied 60-row rolling operations after minute aggregation, i.e. approximately 60 minutes.",
+  "test_data_opened": false,
+  "correction": {
+    "continuous_and_aggregated": {
+      "current": "last non-null raw observation inside the calendar minute",
+      "trailing_60s_mean": "mean of raw observations inside that calendar minute",
+      "delta_60s": "last non-null minus first non-null raw observation inside that calendar minute"
+    },
+    "binary_and_operational": {
+      "current": "last non-null raw observation inside the calendar minute",
+      "changed_within_60s": "1 iff at least two distinct non-null raw values occur inside that calendar minute"
+    }
+  },
+  "unchanged": [
+    "official TRAIN/TEST split",
+    "event semantics",
+    "horizons",
+    "q2/q4 fit on TRAIN only",
+    "SHA256 feature order",
+    "prefixes",
+    "current q2,k16",
+    "ACT/PROBE/REFUSE",
+    "no REPAIR",
+    "continuity gate",
+    "no TEST retuning"
+  ],
+  "prior_train_run_36319409392": "diagnostic only; superseded for scientific endpoints because of 60-minute implementation error"
+}
