@@ -1,0 +1,22 @@
+name: INSACERMO Black Tablet V1
+on:
+  push:
+    branches: [insacermo-black-tablet-v1]
+    paths:
+      - 'black_tablet_v1/**'
+      - 'insacermo_actionability_engine_v1.py'
+      - '.github/workflows/black-tablet-v1.yml'
+  workflow_dispatch:
+jobs:
+  tablet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Engine regression
+        run: PYTHONPATH=. python audits/test_actionability_engine_v1.py
+      - name: Run Black Tablet
+        run: PYTHONPATH=. python black_tablet_v1/run_black_tablet.py
+      - name: Show artifact
+        run: |
+          cat black_tablet_v1/BLACK_TABLET.txt
+          cat black_tablet_v1/results.json
