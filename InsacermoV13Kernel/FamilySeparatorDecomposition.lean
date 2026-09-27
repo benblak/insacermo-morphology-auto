@@ -69,12 +69,12 @@ theorem globalSafe_family_separator_iff
     let base : I → World :=
       fun _ => Classical.choice (inferInstance : Nonempty World)
     let xv : I → World :=
-      fun j => if h : j = i then h ▸ x else base j
+      fun j => if j = i then x else base j
     rcases hglobal (k, xv) with ⟨a, ha, hall⟩
     refine ⟨a i, ha i, ?_⟩
     intro y hy
     let yv : I → World :=
-      fun j => if h : j = i then h ▸ y else base j
+      fun j => if j = i then y else base j
     have hobs :
         FamilySeparatorObs obs (k, yv) =
           FamilySeparatorObs obs (k, xv) := by
@@ -89,7 +89,8 @@ theorem globalSafe_family_separator_iff
       hall hobs
     have hi : yv i = y := by
       simp [yv]
-    simpa [FamilySeparatorAdmissible, hi] using hAdm i
+    have hlocal : admissible i k (yv i) (a i) := hAdm i
+    simpa [hi] using hlocal
   · intro hlocal
     intro x
     have hcert :
