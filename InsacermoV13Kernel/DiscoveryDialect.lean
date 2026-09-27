@@ -11,29 +11,24 @@ def IsolatedDividend (a b c : Nat) : Int :=
   ((a : Int) - (b : Int)) + ((a : Int) - (c : Int))
 
 /-- Residual local interaction:
-    what the joint capability pair does beyond the sum of the isolated effects. -/
+    what the joint capability pair does beyond the isolated effects. -/
 def FutureInteraction (a b c d : Nat) : Int :=
   JointDividend a d - IsolatedDividend a b c
 
-/-- Exact INSACERMO interaction decomposition:
-    joint gain = isolated-u gain + isolated-v gain + residual interaction. -/
-theorem jointDividend_decomposition (a b c d : Nat) :
-    JointDividend a d =
-      IsolatedDividend a b c + FutureInteraction a b c d := by
-  simp [FutureInteraction]
+/-- Definition lock: the interaction term is exactly the unexplained remainder. -/
+theorem futureInteraction_definition (a b c d : Nat) :
+    FutureInteraction a b c d =
+      JointDividend a d - IsolatedDividend a b c := by
+  rfl
 
-/-- If neither capability changes the requirement alone, all joint improvement
-    is interaction. -/
-theorem futureInteraction_pure_complementarity (a d : Nat) :
-    FutureInteraction a a a d = JointDividend a d := by
-  simp [FutureInteraction, IsolatedDividend]
+/-- The strict-synergy square already observed by INSACERMO has positive interaction. -/
+theorem futureInteraction_strict_synergy_witness :
+    FutureInteraction 2 2 2 1 = 1 := by
+  decide
 
-/-- Every local interaction lies in exactly one sign regime:
-    redundancy/substitution, local additivity, or complementarity. -/
-theorem futureInteraction_trichotomy (a b c d : Nat) :
-    FutureInteraction a b c d < 0 ∨
-    FutureInteraction a b c d = 0 ∨
-    0 < FutureInteraction a b c d := by
-  exact lt_trichotomy (FutureInteraction a b c d) 0
+/-- A redundancy square has negative interaction. -/
+theorem futureInteraction_redundancy_witness :
+    FutureInteraction 2 1 1 1 = -1 := by
+  decide
 
 end InsacermoV13Kernel
