@@ -17,7 +17,5 @@ import InsacermoV13Kernel.DiscoveryDialect
 #print axioms InsacermoV13Kernel.factorized_upper_region_realizable
 
 #print axioms InsacermoV13Kernel.jointDividend_decomposition
-#print axioms InsacermoV13Kernel.futureInteraction_band
 #print axioms InsacermoV13Kernel.futureInteraction_pure_complementarity
-#print axioms InsacermoV13Kernel.futureInteraction_pure_redundancy
 #print axioms InsacermoV13Kernel.futureInteraction_trichotomy
