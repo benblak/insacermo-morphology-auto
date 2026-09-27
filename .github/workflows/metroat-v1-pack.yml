@@ -1,0 +1,62 @@
+name: MetroAT V1 Final Evidence Pack
+
+on:
+  push:
+    branches: [insacermo-metroat-prospective-v1]
+    paths:
+      - 'metroat_v1/README_FINAL_RESULTS.md'
+      - '.github/workflows/metroat-v1-pack.yml'
+  workflow_dispatch:
+
+jobs:
+  pack:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble evidence directory
+        run: |
+          set -euo pipefail
+          mkdir -p INSACERMO_METROAT_V1_FINAL_EVIDENCE/artefacts
+          cp -a metroat_v1 INSACERMO_METROAT_V1_FINAL_EVIDENCE/
+          mkdir -p INSACERMO_METROAT_V1_FINAL_EVIDENCE/workflows
+          cp .github/workflows/metroat-v1*.yml INSACERMO_METROAT_V1_FINAL_EVIDENCE/workflows/ || true
+
+          mkdir -p /tmp/train /tmp/test
+          gh run download 36322103082 -n metroat-v1-train-mechanics -D /tmp/train
+          gh run download 36324520031 -n metroat-v1-official-test-holdout -D /tmp/test
+
+          (cd /tmp/train && zip -qr "$GITHUB_WORKSPACE/INSACERMO_METROAT_V1_FINAL_EVIDENCE/artefacts/metroat-v1-train-mechanics.zip" .)
+          (cd /tmp/test && zip -qr "$GITHUB_WORKSPACE/INSACERMO_METROAT_V1_FINAL_EVIDENCE/artefacts/metroat-v1-official-test-holdout.zip" .)
+
+          cat > INSACERMO_METROAT_V1_FINAL_EVIDENCE/RUNS_AND_COMMITS.txt <<'EOF'
+          TRAIN final run: 36322103082
+          TRAIN implementation commit: 88903abf6d9607dcb1c513b1ac27124c7bb974e3
+          TRAIN freeze receipt commit: 73188d4875de8c59cf7edb6b5a8e960d013f54d0
+          TEST official holdout run: 36324520031
+          TEST opening workflow commit: 2997bf6407ccf0f0f6caaff798eaf26b77d063d9
+          TEST final freeze commit: 05c5523b5ffb701579dfc9bea6d6d41a0a1fe92e
+          Branch: insacermo-metroat-prospective-v1
+          EOF
+
+          cd INSACERMO_METROAT_V1_FINAL_EVIDENCE
+          find . -type f ! -name SHA256SUMS.txt -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS.txt
+          cd ..
+          zip -qr INSACERMO_METROAT_V1_FINAL_EVIDENCE_2026-09-27.zip INSACERMO_METROAT_V1_FINAL_EVIDENCE
+          sha256sum INSACERMO_METROAT_V1_FINAL_EVIDENCE_2026-09-27.zip > FINAL_PACK_SHA256.txt
+
+      - name: Show pack hash
+        run: cat FINAL_PACK_SHA256.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: insacermo-metroat-v1-final-evidence-pack
+          path: |
+            INSACERMO_METROAT_V1_FINAL_EVIDENCE_2026-09-27.zip
+            FINAL_PACK_SHA256.txt
+          retention-days: 90
