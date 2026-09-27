@@ -1,4 +1,4 @@
-import Mathlib
+import Std.Tactic.Omega
 import InsacermoV13Kernel.FrontierFactorization
 
 namespace InsacermoV13Kernel
@@ -18,7 +18,7 @@ theorem jointDividend_decomposition (a b c d : Nat) :
       ((a : Int) - (c : Int)) +
       FutureInteraction a b c d := by
   simp [FutureInteraction]
-  ring
+  omega
 
 /-- Monotonicity alone confines the interaction to the total joint-change band.
     Here a=m(C), b=m(C+u), c=m(C+v), d=m(C+u+v). -/
