@@ -1,9 +1,9 @@
-name: INSACERMO Recursive Tree Certificate Kernel
+name: INSACERMO Tree Context Congruence Kernel
 
 on:
   push:
     branches:
-      - insacermo-recursive-tree-certificate-kernel-v1
+      - insacermo-tree-context-congruence-kernel-v1
   workflow_dispatch:
 
 jobs:
