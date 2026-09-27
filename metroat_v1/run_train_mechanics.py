@@ -51,9 +51,9 @@ def minute_table(dayfile, cont, binary, op, agg):
         out[c+"__current"]=g[c].agg(last_nonnull)
     # event flags over raw 1Hz rows inside minute
     out["EV_FAIL"]=g["TRAIN_IS_IN_FAILURE"].agg(lambda s: bool(pd.Series(s).fillna(False).astype(bool).any()))
-    out["EV_FAILTYPE"]=g["TRAIN_FAILURE_TYPE"].agg(lambda s: bool((pd.Series(s).dropna().astype(str).str.strip().ne("")) & (pd.Series(s).dropna().astype(str).str.strip().ne("No Failure"))).any())
+    out["EV_FAILTYPE"]=g["TRAIN_FAILURE_TYPE"].agg(lambda s: bool(((pd.Series(s).dropna().astype(str).str.strip().ne("")) & (pd.Series(s).dropna().astype(str).str.strip().ne("No Failure"))).any()))
     out["EV_MAINT"]=g["TRAIN_IS_IN_MAINTENANCE"].agg(lambda s: bool(pd.Series(s).fillna(False).astype(bool).any()))
-    out["EV_MAINTTYPE"]=g["TRAIN_MAINTENANCE_TYPE"].agg(lambda s: bool((pd.Series(s).dropna().astype(str).str.strip().ne("")) & (pd.Series(s).dropna().astype(str).str.strip().ne("No Revision"))).any())
+    out["EV_MAINTTYPE"]=g["TRAIN_MAINTENANCE_TYPE"].agg(lambda s: bool(((pd.Series(s).dropna().astype(str).str.strip().ne("")) & (pd.Series(s).dropna().astype(str).str.strip().ne("No Revision"))).any()))
     return out
 
 def build_split(root):
