@@ -1,0 +1,39 @@
+name: MetroAT V1 Metadata Gate
+
+on:
+  push:
+    branches: [insacermo-metroat-prospective-v1]
+  workflow_dispatch:
+
+jobs:
+  metadata:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Query official TU Wien record API
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, urllib.request
+          urls=[
+            "https://researchdata.tuwien.ac.at/api/records/9ja0q-bq581",
+            "https://researchdata.tuwien.at/api/records/9ja0q-bq581",
+          ]
+          last=None
+          for u in urls:
+              try:
+                  print("TRY",u)
+                  with urllib.request.urlopen(u, timeout=60) as r:
+                      data=json.load(r)
+                  print("API_OK",u)
+                  files=data.get("files",{}).get("entries",{})
+                  for k,v in files.items():
+                      print("FILE",k,"size",v.get("size"),"checksum",v.get("checksum"))
+                      print("CONTENT",v.get("links",{}).get("content"))
+                  break
+              except Exception as e:
+                  print("API_FAIL",u,repr(e)); last=e
+          else:
+              raise SystemExit(f"No official API endpoint worked: {last}")
+          PY
