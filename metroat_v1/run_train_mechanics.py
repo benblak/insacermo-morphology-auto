@@ -45,15 +45,37 @@ def minute_table(dayfile, cont, binary, op, agg):
     df=df.sort_values("TIMESTAMP")
     df["MINUTE"]=df["TIMESTAMP"].dt.floor("min")
     g=df.groupby("MINUTE", sort=True)
-    out=pd.DataFrame(index=g.size().index)
-    # current values: last non-null observed in minute
-    for c in cont+agg+binary+op:
-        out[c+"__current"]=g[c].agg(last_nonnull)
-    # event flags over raw 1Hz rows inside minute
+
+    parts=[]
+    ca=cont+agg
+    bo=binary+op
+
+    # Continuous/aggregate 60-second features from raw samples within each calendar minute.
+    if ca:
+        last=g[ca].agg(last_nonnull).add_suffix("__current")
+        mean=g[ca].mean(numeric_only=True).add_suffix("__mean60s")
+        first=g[ca].agg(lambda s: (lambda x: x.iloc[0] if len(x) else np.nan)(s.dropna()))
+        last_raw=g[ca].agg(last_nonnull)
+        delta=(last_raw-first).add_suffix("__delta60s")
+        parts.extend([last,mean,delta])
+
+    # Binary/operational current + within-minute change indicator.
+    if bo:
+        lastbo=g[bo].agg(last_nonnull).add_suffix("__current")
+        changed=g[bo].nunique(dropna=True).gt(1).astype(float).add_suffix("__changed60s")
+        parts.extend([lastbo,changed])
+
+    out=pd.concat(parts,axis=1)
+
+    # Event channels are future labels only, never predictors.
     out["EV_FAIL"]=g["TRAIN_IS_IN_FAILURE"].agg(lambda s: bool(pd.Series(s).fillna(False).astype(bool).any()))
-    out["EV_FAILTYPE"]=g["TRAIN_FAILURE_TYPE"].agg(lambda s: bool(((pd.Series(s).dropna().astype(str).str.strip().ne("")) & (pd.Series(s).dropna().astype(str).str.strip().ne("No Failure"))).any()))
+    out["EV_FAILTYPE"]=g["TRAIN_FAILURE_TYPE"].agg(
+        lambda s: bool(((pd.Series(s).dropna().astype(str).str.strip().ne("")) &
+                        (pd.Series(s).dropna().astype(str).str.strip().ne("No Failure"))).any()))
     out["EV_MAINT"]=g["TRAIN_IS_IN_MAINTENANCE"].agg(lambda s: bool(pd.Series(s).fillna(False).astype(bool).any()))
-    out["EV_MAINTTYPE"]=g["TRAIN_MAINTENANCE_TYPE"].agg(lambda s: bool(((pd.Series(s).dropna().astype(str).str.strip().ne("")) & (pd.Series(s).dropna().astype(str).str.strip().ne("No Revision"))).any()))
+    out["EV_MAINTTYPE"]=g["TRAIN_MAINTENANCE_TYPE"].agg(
+        lambda s: bool(((pd.Series(s).dropna().astype(str).str.strip().ne("")) &
+                        (pd.Series(s).dropna().astype(str).str.strip().ne("No Revision"))).any()))
     return out
 
 def build_split(root):
@@ -67,15 +89,6 @@ def build_split(root):
         if i%25==0: print("DAYS",i,"/",len(files),flush=True)
     m=pd.concat(chunks).sort_index()
     m=m[~m.index.duplicated(keep="last")]
-    # trailing features on minute grid; gaps remain gaps
-    for c in cont+agg:
-        cur=m[c+"__current"]
-        m[c+"__mean60"]=cur.rolling(window=60,min_periods=1).mean()
-        m[c+"__delta60"]=cur-cur.shift(60)
-    for c in binary+op:
-        cur=m[c+"__current"]
-        # any change in last 60 observed minute states
-        m[c+"__changed60"]=cur.ne(cur.shift()).rolling(window=60,min_periods=1).max().astype(float)
     derived=[c for c in m.columns if "__" in c]
     derived=feature_order(derived)
     return m,derived,{"continuous":cont,"binary":binary,"operational":op,"aggregated":agg}
@@ -131,27 +144,71 @@ def homogeneous_flags(code,sig,k):
 def train_report(m,features,thresholds):
     report={"n_minutes":len(m),"n_features":len(features),"horizons":{}}
     codes={q:encode(m,features,thresholds,q) for q in ["q2","q4"]}
-    settings=[]
-    for q in ["q2","q4"]:
-        for k in PREFIXES+["ALL"]:
-            settings.append((q,k))
+    kvals=PREFIXES+["ALL"]
+    settings=[(q,k) for q in ["q2","q4"] for k in kvals]
+
     for Hh in HOURS:
         sig=future_bits(m,Hh*60)
         flags={(q,str(k)):homogeneous_flags(codes[q],sig,k) for q,k in settings}
-        current=flags[("q2","16")]
-        # probe if any later frozen refinement resolves
-        resolver=np.zeros(len(m),dtype=bool)
-        for q,k in settings:
-            if q=="q2" and k in [4,8,16]: continue
-            resolver |= flags[(q,str(k))]
         valid=~pd.isna(sig).to_numpy()
+
+        current=flags[("q2","16")]
+        # Legal refinements from current: larger prefix at q2, or q4 at k>=16.
+        legal=[("q2","32"),("q2","64"),("q2","128"),("q2","ALL"),
+               ("q4","16"),("q4","32"),("q4","64"),("q4","128"),("q4","ALL")]
+        resolver=np.zeros(len(m),dtype=bool)
+        for key in legal: resolver |= flags[key]
+
         act=current & valid
         probe=(~current)&resolver&valid
         refuse=(~current)&(~resolver)&valid
+
+        # Minimal information frontier in the 2D partial order (q2<q4, k increasing).
+        finite=np.zeros(len(m),dtype=bool)
+        frontier_counts={}
+        for qi,q in enumerate(["q2","q4"]):
+            for ki,k in enumerate(kvals):
+                key=(q,str(k))
+                h=flags[key] & valid
+                dominated=np.zeros(len(m),dtype=bool)
+                for qj,q0 in enumerate(["q2","q4"]):
+                    for kj,k0 in enumerate(kvals):
+                        if qj<=qi and kj<=ki and (qj<qi or kj<ki):
+                            dominated |= flags[(q0,str(k0))] & valid
+                minimal=h & (~dominated)
+                if minimal.any():
+                    frontier_counts[f"{q},k={k}"]=int(minimal.sum())
+                finite |= h
+        inf=valid & (~finite)
+
+        # Information destruction relative to intact q4,ALL.
+        intact=flags[("q4","ALL")] & valid
+        destruction={}
+        for k in [4,8,16,32,64,128]:
+            destroyed=intact & (~flags[("q4",str(k))])
+            destruction[str(k)]=int(destroyed.sum())
+
+        # Refinement monotonicity: homogeneous coarse state may not become heterogeneous finer.
+        violations={}
+        edges=[]
+        for q in ["q2","q4"]:
+            for a,b in zip(kvals[:-1],kvals[1:]):
+                edges.append(((q,str(a)),(q,str(b))))
+        for k in kvals:
+            edges.append((("q2",str(k)),("q4",str(k))))
+        for a,b in edges:
+            v=flags[a] & (~flags[b]) & valid
+            violations[f"{a}->{b}"]=int(v.sum())
+
         report["horizons"][str(Hh)]={
             "support_status":"SUPPORTED" if int(valid.sum())>0 else "UNSUPPORTED_BY_CONTINUITY",
             "eligible":int(valid.sum()),
             "ACT":int(act.sum()),"PROBE":int(probe.sum()),"REFUSE":int(refuse.sum()),
+            "finite_D_info":int((finite & valid).sum()),
+            "INF_D_info":int(inf.sum()),
+            "minimal_frontier_counts":frontier_counts,
+            "destruction_vs_q4_ALL":destruction,
+            "monotonicity_violations":violations,
             "event_signature_counts":{str(k):int(v) for k,v in pd.Series(sig.dropna().astype(int)).value_counts().sort_index().items()}
         }
     return report
