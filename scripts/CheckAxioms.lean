@@ -1,7 +1,10 @@
-import InsacermoV13Kernel.ActionabilityGeometry
+import InsacermoV13Kernel.FrontierUniversality
 
-#print axioms InsacermoV13Kernel.globalSafe_three_axis_monotonicity
-#print axioms InsacermoV13Kernel.safeEncoding_three_axis_monotonicity
-#print axioms InsacermoV13Kernel.feasible_of_dominance
-#print axioms InsacermoV13Kernel.StrictSynergyWitness.strict_nonadditive_right_to_forget
-#print axioms InsacermoV13Kernel.FrontierBranchWitness.incomparable_safe_branches
+#print axioms InsacermoV13Kernel.generatedUpper_upward
+#print axioms InsacermoV13Kernel.generatedUpper_iff_of_upperClosed
+#print axioms InsacermoV13Kernel.FrontierRealization.globalSafe_iff_generatedUpper
+#print axioms InsacermoV13Kernel.FrontierRealization.arbitrary_upper_region_realizable
+#print axioms InsacermoV13Kernel.antichain_seed_is_minimal
+#print axioms InsacermoV13Kernel.minimal_generated_equiv_seed
+#print axioms InsacermoV13Kernel.antichain_frontier_representation
+#print axioms InsacermoV13Kernel.strict_synergy_not_submodular
