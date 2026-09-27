@@ -1,9 +1,9 @@
-name: INSACERMO Separator Decomposition Kernel
+name: INSACERMO Family Separator Kernel
 
 on:
   push:
     branches:
-      - insacermo-separator-decomposition-kernel-v1
+      - insacermo-family-separator-kernel-v1
   workflow_dispatch:
 
 jobs:
