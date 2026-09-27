@@ -7,7 +7,8 @@ universe uK uW uA uM uL uR uAL uAR uML uMR
 /-- Context-dependent protocol semantics: each separator context may use its
     own encoder and decoder. -/
 def IndexedCertifiedProtocol
-    {K : Type uK} {World : Type uW} {Action : Type uA} {Message : Type uM}
+    {K : Type uK} {World : Type uW} {Action : Type uA}
+    (Message : Type uM)
     (available : Action → Prop)
     (admissible : K → World → Action → Prop) : Prop :=
   ∃ encode : K → World → Message,
@@ -19,7 +20,8 @@ def IndexedCertifiedProtocol
     is shared across all contexts. Thus a message means the same certified
     action everywhere. -/
 def UniformCertifiedProtocol
-    {K : Type uK} {World : Type uW} {Action : Type uA} {Message : Type uM}
+    {K : Type uK} {World : Type uW} {Action : Type uA}
+    (Message : Type uM)
     (available : Action → Prop)
     (admissible : K → World → Action → Prop) : Prop :=
   ∃ encode : K → World → Message,
@@ -32,8 +34,8 @@ theorem indexed_of_uniform
     {K : Type uK} {World : Type uW} {Action : Type uA} {Message : Type uM}
     {available : Action → Prop}
     {admissible : K → World → Action → Prop}
-    (h : UniformCertifiedProtocol available admissible) :
-    IndexedCertifiedProtocol available admissible := by
+    (h : UniformCertifiedProtocol Message available admissible) :
+    IndexedCertifiedProtocol Message available admissible := by
   rcases h with ⟨encode, decode, havail, hcert⟩
   exact
     ⟨encode,
@@ -55,7 +57,7 @@ theorem uniformProtocol_forgets_context
     {K : Type uK} {World : Type uW} {Action : Type uA} {Message : Type uM}
     {available : Action → Prop}
     {admissible : K → World → Action → Prop}
-    (h : UniformCertifiedProtocol available admissible) :
+    (h : UniformCertifiedProtocol Message available admissible) :
     CertifiedProtocol
       available
       (ContextLiftAdmissible admissible)
@@ -75,7 +77,7 @@ theorem indexedProtocol_carries_context
     {K : Type uK} {World : Type uW} {Action : Type uA} {Message : Type uM}
     {available : Action → Prop}
     {admissible : K → World → Action → Prop}
-    (h : IndexedCertifiedProtocol available admissible) :
+    (h : IndexedCertifiedProtocol Message available admissible) :
     CertifiedProtocol
       available
       (ContextLiftAdmissible admissible)
@@ -102,8 +104,8 @@ theorem indexedSeparatorProtocols_compose
     {availableR : ActionR → Prop}
     {admissibleL : K → Left → ActionL → Prop}
     {admissibleR : K → Right → ActionR → Prop}
-    (hL : IndexedCertifiedProtocol availableL admissibleL)
-    (hR : IndexedCertifiedProtocol availableR admissibleR) :
+    (hL : IndexedCertifiedProtocol MessageL availableL admissibleL)
+    (hR : IndexedCertifiedProtocol MessageR availableR admissibleR) :
     CertifiedProtocol
       (ProductAvailable availableL availableR)
       (SeparatorAdmissible admissibleL admissibleR)
@@ -139,8 +141,8 @@ theorem uniformSeparatorProtocols_forget_context
     {availableR : ActionR → Prop}
     {admissibleL : K → Left → ActionL → Prop}
     {admissibleR : K → Right → ActionR → Prop}
-    (hL : UniformCertifiedProtocol availableL admissibleL)
-    (hR : UniformCertifiedProtocol availableR admissibleR) :
+    (hL : UniformCertifiedProtocol MessageL availableL admissibleL)
+    (hR : UniformCertifiedProtocol MessageR availableR admissibleR) :
     CertifiedProtocol
       (ProductAvailable availableL availableR)
       (SeparatorAdmissible admissibleL admissibleR)
@@ -260,7 +262,7 @@ def localDecode : Context → Fin 1 → Action
   | right, _ => beta
 
 theorem indexed_one_local_message :
-    IndexedCertifiedProtocol available admissible := by
+    IndexedCertifiedProtocol Message available admissible := by
   refine ⟨localEncode, localDecode, ?_, ?_⟩
   · intro k m
     trivial
@@ -270,8 +272,7 @@ theorem indexed_one_local_message :
 /-- But one uniform message is impossible because its decoded action would
     need to work in both contexts. -/
 theorem no_uniform_one_local_message :
-    ¬ UniformCertifiedProtocol
-      (Message := Fin 1) available admissible := by
+    ¬ UniformCertifiedProtocol (Fin 1) available admissible := by
   rintro ⟨encode, decode, havail, hcert⟩
   have hsame :
       encode left () = encode right () :=
@@ -292,8 +293,8 @@ theorem no_uniform_one_local_message :
     information: one local message per context suffices if context is carried,
     but one context-free message cannot suffice globally. -/
 theorem context_can_be_irreducible :
-    IndexedCertifiedProtocol available admissible ∧
-    ¬ UniformCertifiedProtocol (Message := Fin 1) available admissible ∧
+    IndexedCertifiedProtocol Message available admissible ∧
+    ¬ UniformCertifiedProtocol (Fin 1) available admissible ∧
     IsMinSafeSymbols available (ContextLiftAdmissible admissible) 2 := by
   exact
     ⟨indexed_one_local_message,
