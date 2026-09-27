@@ -35,7 +35,7 @@ theorem indexed_of_uniform
     {available : Action → Prop}
     {admissible : K → World → Action → Prop}
     (h : UniformCertifiedProtocol Message available admissible) :
-    IndexedCertifiedProtocol Message available admissible := by
+    IndexedCertifiedProtocol (Fin 1) available admissible := by
   rcases h with ⟨encode, decode, havail, hcert⟩
   exact
     ⟨encode,
@@ -293,7 +293,7 @@ theorem no_uniform_one_local_message :
     information: one local message per context suffices if context is carried,
     but one context-free message cannot suffice globally. -/
 theorem context_can_be_irreducible :
-    IndexedCertifiedProtocol Message available admissible ∧
+    IndexedCertifiedProtocol (Fin 1) available admissible ∧
     ¬ UniformCertifiedProtocol (Fin 1) available admissible ∧
     IsMinSafeSymbols available (ContextLiftAdmissible admissible) 2 := by
   exact
