@@ -31,7 +31,33 @@ def bn(v,c):
 def apply(rows,C):
     return [dict(r,z=[bn(v,C[j]) for j,v in enumerate(r["x"])]) for r in rows]
 def l1(a,b):return sum(abs(x-y) for x,y in zip(a,b))
-def mindist(z,pts):return min(l1(z,p) for p in pts)
+
+class KD:
+    __slots__=("p","axis","left","right","mn","mx")
+    def __init__(self,points,depth=0):
+        axis=depth%5; points=sorted(points,key=lambda p:p[axis]); m=len(points)//2
+        self.p=points[m]; self.axis=axis
+        self.left=KD(points[:m],depth+1) if m else None
+        self.right=KD(points[m+1:],depth+1) if m+1<len(points) else None
+        self.mn=list(self.p); self.mx=list(self.p)
+        for c in (self.left,self.right):
+            if c:
+                for j in range(5):
+                    self.mn[j]=min(self.mn[j],c.mn[j]); self.mx[j]=max(self.mx[j],c.mx[j])
+def bboxdist(z,n):
+    s=0
+    for j in range(5):
+        if z[j]<n.mn[j]:s+=n.mn[j]-z[j]
+        elif z[j]>n.mx[j]:s+=z[j]-n.mx[j]
+    return s
+def mindist_kd(z,n,best=10**18):
+    if n is None or bboxdist(z,n)>=best:return best
+    d=l1(z,n.p)
+    if d<best:best=d
+    first,second=(n.left,n.right) if z[n.axis]<=n.p[n.axis] else (n.right,n.left)
+    best=mindist_kd(z,first,best)
+    return mindist_kd(z,second,best)
+
 def unique_train(rows):
     m={}
     for r in rows:
@@ -43,6 +69,7 @@ def unique_train(rows):
 train_raw=parse(fetch("datatraining.txt")); future_raw=parse(fetch("datatest2.txt"))
 B=512;C=cuts(train_raw,B);train=apply(train_raw,C);future=apply(future_raw,C);worlds=unique_train(train)
 bad0={a:[w["z"] for w in worlds if w["y"]!=a] for a in ("0","1")}
+bad0_kd={a:KD(bad0[a]) for a in ("0","1")}
 contract_hash=h({"task":"occupancy","actions":["0","1"]})
 observer_hash=h({"B":B,"features":["Temperature","Humidity","Light","CO2","HumidityRatio"],"cuts":C})
 byday=defaultdict(list)
@@ -62,12 +89,12 @@ for day,rows in sorted(byday.items()):
     D={}
     for a in ("0","1"):
         current_bad=[r for r in rows if r["y"]!=a]
-        D[a]=max([mindist(r["z"],bad0[a]) for r in current_bad],default=0)
+        D[a]=max([mindist_kd(r["z"],bad0_kd[a]) for r in current_bad],default=0)
     counts={"n":len(rows),"act":0,"correct":0,"wrong":0,"refuse":0,"ambiguous":0}
     for r in rows:
         admiss=[]
         for a in ("0","1"):
-            rho=mindist(r["z"],bad0[a])
+            rho=mindist_kd(r["z"],bad0_kd[a])
             if rho>D[a]:admiss.append(a)
         if len(admiss)==1:
             counts["act"]+=1
@@ -89,7 +116,7 @@ for day,rows in sorted(byday.items()):
         delayed.append({"day":day,"status":"NO_PRIOR_DEBT"}); prev=oracle_days[0]["debt"]; continue
     c={"n":len(rows),"act":0,"correct":0,"wrong":0,"refuse":0,"ambiguous":0}
     for r in rows:
-        admiss=[a for a in ("0","1") if mindist(r["z"],bad0[a])>prev[a]]
+        admiss=[a for a in ("0","1") if mindist_kd(r["z"],bad0_kd[a])>prev[a]]
         if len(admiss)==1:
             c["act"]+=1;c["correct"]+=admiss[0]==r["y"];c["wrong"]+=admiss[0]!=r["y"]
         elif len(admiss)==0:c["refuse"]+=1
