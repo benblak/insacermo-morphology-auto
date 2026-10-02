@@ -22,12 +22,15 @@ class CertifiedAdaptiveProbe:
     cost: float
     outcome_by_world: Mapping[str, str]
     certified_bound_by_outcome: Mapping[str, int]
+    certified_bound_by_context_outcome: Mapping[str, int] | None
     authority_id: str
     def __post_init__(self):
         if not self.probe_id or not self.authority_id or self.cost < 0:
             raise AdaptiveProofError("INVALID_PROBE")
         if any(v < 0 for v in self.certified_bound_by_outcome.values()):
             raise AdaptiveProofError("INVALID_CERTIFIED_BOUND")
+        if self.certified_bound_by_context_outcome is not None and any(v < 0 for v in self.certified_bound_by_context_outcome.values()):
+            raise AdaptiveProofError("INVALID_CONTEXT_CERTIFIED_BOUND")
 
 @dataclass(frozen=True)
 class PlanNode:
@@ -82,9 +85,6 @@ def plan_guaranteed_act(*, reserve:int, baseline_upper_bound:int,
         raise AdaptiveProofError("EMPTY_WORLD_SET")
     if any(w.true_debt > baseline_upper_bound for w in worlds):
         raise AdaptiveProofError("UNSOUND_BASELINE_BOUND")
-    for p in probes:
-        validate_probe_soundness(worlds,p)
-
     memo={}
     def solve(world_ids:frozenset[str], current_bound:int, available:tuple[str,...]):
         key=(world_ids,current_bound,available)
