@@ -49,7 +49,7 @@ theorem same_debt_two_certificates_sound
     (h₂ : D ≤ U₂)
     (hact : Nat.min U₁ U₂ < rho) :
     D < rho := by
-  have hm : D ≤ Nat.min U₁ U₂ := Nat.le_min h₁ h₂
+  have hm : D ≤ Nat.min U₁ U₂ := (Nat.le_min).2 ⟨h₁, h₂⟩
   omega
 
 theorem additive_component_certificates_sound
