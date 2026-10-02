@@ -37,6 +37,17 @@ class PlanNode:
     probe_id: str | None = None
     branches: Mapping[str, "PlanNode"] | None = None
 
+def _ctx_key(worlds, outcome):
+    ids=",".join(sorted(w.world_id for w in worlds))
+    return ids+"::"+outcome
+
+def _bound_for_context(worlds, probe, outcome):
+    if probe.certified_bound_by_context_outcome is not None:
+        key=_ctx_key(worlds,outcome)
+        if key in probe.certified_bound_by_context_outcome:
+            return probe.certified_bound_by_context_outcome[key]
+    return probe.certified_bound_by_outcome.get(outcome)
+
 def validate_probe_soundness(worlds: Iterable[FiniteWorld], probe: CertifiedAdaptiveProbe) -> None:
     ws=list(worlds)
     ids={w.world_id for w in ws}
@@ -46,11 +57,12 @@ def validate_probe_soundness(worlds: Iterable[FiniteWorld], probe: CertifiedAdap
     for w in ws:
         out=probe.outcome_by_world[w.world_id]
         groups.setdefault(out,[]).append(w)
-    if set(groups) - set(probe.certified_bound_by_outcome):
-        raise AdaptiveProofError("MISSING_OUTCOME_CERTIFICATE")
     for out,g in groups.items():
+        bound=_bound_for_context(ws,probe,out)
+        if bound is None:
+            continue
         true_max=max(w.true_debt for w in g)
-        if true_max > probe.certified_bound_by_outcome[out]:
+        if true_max > bound:
             raise AdaptiveProofError("UNSOUND_OUTCOME_CERTIFICATE")
 
 def _possible_outcomes(worlds, probe):
@@ -95,7 +107,13 @@ def plan_guaranteed_act(*, reserve:int, baseline_upper_bound:int,
             remaining=tuple(x for x in available if x!=pid)
             for out in outcomes:
                 sw=_subworlds(current_worlds,p,out)
-                cert=p.certified_bound_by_outcome[out]
+                cert=_bound_for_context(current_worlds,p,out)
+                if cert is None:
+                    feasible=False
+                    break
+                true_max=max(w.true_debt for w in sw)
+                if true_max > cert:
+                    raise AdaptiveProofError("UNSOUND_CONTEXT_CERTIFICATE")
                 post=min(current_bound,cert)
                 child=solve(frozenset(w.world_id for w in sw),post,remaining)
                 if child is None:
