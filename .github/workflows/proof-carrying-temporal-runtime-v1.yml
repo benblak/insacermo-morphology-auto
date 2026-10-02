@@ -1,0 +1,40 @@
+name: proof-carrying-temporal-runtime-v1
+
+on:
+  push:
+    branches:
+      - insacermo-temporal-validity-kernel-v1
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Unit tests
+        run: |
+          python temporal_runtime/test_runtime_v1.py
+      - name: Occupancy oracle theorem audit
+        run: |
+          python temporal_runtime/occupancy_oracle_audit.py | tee temporal_runtime/OCCUPANCY_ORACLE_AUDIT.txt
+      - name: Runtime source audit
+        run: |
+          set -e
+          ! grep -nE 'eval\(|exec\(|pickle|subprocess' temporal_runtime/temporal_runtime_v1.py
+      - name: SHA256 manifest
+        run: |
+          sha256sum temporal_runtime/temporal_runtime_v1.py temporal_runtime/test_runtime_v1.py temporal_runtime/occupancy_oracle_audit.py temporal_runtime/OCCUPANCY_ORACLE_AUDIT.json temporal_runtime/OCCUPANCY_ORACLE_AUDIT.txt > temporal_runtime/SHA256SUMS.txt
+      - name: Upload runtime artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_PROOF_CARRYING_TEMPORAL_RUNTIME_V1
+          path: |
+            temporal_runtime/temporal_runtime_v1.py
+            temporal_runtime/test_runtime_v1.py
+            temporal_runtime/occupancy_oracle_audit.py
+            temporal_runtime/OCCUPANCY_ORACLE_AUDIT.json
+            temporal_runtime/OCCUPANCY_ORACLE_AUDIT.txt
+            temporal_runtime/SHA256SUMS.txt
