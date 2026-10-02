@@ -127,7 +127,7 @@ def score_day(rows,bounds):
 def aggregate(day_records):
     t={"n":0,"act":0,"correct":0,"wrong":0,"refuse":0,"ambiguous":0}
     for rec in day_records:
-        if rec.get("status")=="NO_CERTIFIED_CURRENT_BOUND":
+        if rec.get("status") in {"NO_CERTIFIED_CURRENT_BOUND","NO_EMPIRICAL_GROWTH_HISTORY","NO_PRIOR_DEBT"}:
             t["n"]+=rec["n"]; t["refuse"]+=rec["n"]
             continue
         for k in t: t[k]+=rec[k]
