@@ -16,7 +16,7 @@ theorem verified_bound_plus_runtime_gate_is_safe
     (hgate : RuntimeGate b) :
     b.trueDebt < b.reserve := by
   unfold RuntimeGate at hgate
-  omega
+  exact Nat.lt_of_le_of_lt b.sound hgate
 
 theorem equality_never_passes_strict_gate
     (U rho : Nat)
