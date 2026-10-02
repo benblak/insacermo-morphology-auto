@@ -32,3 +32,11 @@ submodularity, ECD/DRD). This implementation does not claim those generic ideas 
 
 The INSACERMO-specific object being tested is a fail-closed contingent tree whose ACT leaves must carry
 sound proof-carrying debt bounds satisfying the pre-existing temporal gate.
+
+
+## Context-certified outcomes
+
+A later probe may have no globally valid useful certificate but acquire one after previous outcomes have
+reduced the version space. V2 therefore supports certificates bound to the already-certified finite context
+plus the new outcome. The planner may use such a certificate only in that exact context and rechecks its
+soundness against the compatible worlds. This prevents treating correlated probe outcomes as independent.
