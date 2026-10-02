@@ -1,5 +1,3 @@
-import Std.Tactic.Omega
-
 namespace INSACERMO.TemporalValidityV1
 
 /--
@@ -30,7 +28,7 @@ theorem safe_of_directed_debt
   intro hx
   obtain ⟨b0, hb0, hclose⟩ := hdebt x hx
   have hfar : D < d x b0 := hreserve b0 hb0
-  omega
+  exact (Nat.not_lt_of_ge hclose) hfar
 
 /--
 FILTRATION / ANTITONICITY THEOREM.
@@ -49,7 +47,7 @@ theorem safe_antitone_debt
     Safe bad0 d D1 x := by
   intro b0 hb0
   have h2 : D2 < d x b0 := hsafe b0 hb0
-  omega
+  exact Nat.lt_of_le_of_lt hD h2
 
 /--
 OBSERVER FRACTURE THEOREM.
