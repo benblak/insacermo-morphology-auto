@@ -28,7 +28,7 @@ jobs:
           ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
       - name: Lean kernel check
         run: |
-          set -e
+          set -euo pipefail
           mkdir -p temporal_validity_kernel/build
           lean temporal_validity_kernel/TemporalValidityKernelV1.lean 2>&1 | tee temporal_validity_kernel/build/lean_output.txt
       - name: Require all theorem axiom reports
