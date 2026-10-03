@@ -102,7 +102,7 @@ Decision rule:
 - otherwise: REFUSE
 -/
 def decideProbe (rho0 debt price : Nat) : ProbeDecision :=
-  if h : ProbeAffordable rho0 debt price then
+  if h : debt + price < rho0 then
     if price = 0 then .probe else .repairProbe
   else
     .refuse
