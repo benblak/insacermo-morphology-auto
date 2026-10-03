@@ -159,16 +159,16 @@ theorem decision_complete
       ProbeAffordable rho0 debt price ∧ price ≠ 0) ∨
     (decideProbe rho0 debt price = .refuse ∧
       ¬ ProbeAffordable rho0 debt price) := by
-  unfold decideProbe
-  split
-  next ha =>
-    split
-    next hp =>
-      simp [ha, hp]
-    next hp =>
-      simp [ha, hp]
-  next ha =>
-    simp [ha]
+  by_cases ha : debt + price < rho0
+  · by_cases hp : price = 0
+    · left
+      simp [decideProbe, ha, hp, ProbeAffordable]
+    · right
+      left
+      simp [decideProbe, ha, hp, ProbeAffordable]
+  · right
+    right
+    simp [decideProbe, ha, ProbeAffordable]
 
 #print axioms zero_price_iff_existing_safe
 #print axioms affordable_implies_existing_safe
