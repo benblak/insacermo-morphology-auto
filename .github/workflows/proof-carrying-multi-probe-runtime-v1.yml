@@ -45,3 +45,19 @@ jobs:
             grep -q "$T" "$OUT"
           done
           ! grep -q "sorryAx" "$OUT"
+
+      - name: Python multi-probe runtime V2 tests
+        run: |
+          python -m proof_carrying_multi_probe_runtime_v1.test_multi_probe_runtime_v2
+
+      - name: Python regression temporal runtime V1
+        run: |
+          PYTHONPATH=temporal_runtime python temporal_runtime/test_runtime_v1.py
+
+      - name: Python regression certified online debt V1
+        run: |
+          PYTHONPATH=certified_online_debt_v1 python certified_online_debt_v1/test_online_debt_v1.py
+
+      - name: Python regression final integration V1
+        run: |
+          PYTHONPATH=final_integration_v1:certified_online_debt_v1:minimum_proof_acquisition_v1:temporal_runtime python final_integration_v1/test_final_integration_v1.py
