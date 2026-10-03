@@ -12,7 +12,7 @@ permissions:
 jobs:
   split-probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -25,77 +25,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install elan
+      - name: Install Lean 4.33.1
         run: |
           curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-
-      - name: Install Lean 4.33.1
-        run: |
-          elan toolchain install leanprover/lean4:v4.33.1
-          elan default leanprover/lean4:v4.33.1
-          lean --version
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
 
       - name: Generate split theorem
-        env:
-          SCENARIO: ${{ matrix.scenario }}
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import os
-
-          src = Path("erdos302_f736_bv_kernel/Erdos302F736BV.lean").read_text()
-          prefix = "\n".join(src.splitlines()[:770]) + "\n"
-          scenario = os.environ["SCENARIO"]
-
-          assumptions = {
-              "off736": ["(h736 : x.getLsbD 735 = false)"],
-              "miss207_224": ["(h207 : x.getLsbD 206 = false)", "(h224 : x.getLsbD 223 = false)"],
-              "miss207_322": ["(h207 : x.getLsbD 206 = false)", "(h322 : x.getLsbD 321 = false)"],
-              "miss288_224": ["(h288 : x.getLsbD 287 = false)", "(h224 : x.getLsbD 223 = false)"],
-              "miss288_322": ["(h288 : x.getLsbD 287 = false)", "(h322 : x.getLsbD 321 = false)"],
-          }[scenario]
-
-          thm = "split_probe_" + scenario
-          extra = "\n    ".join(assumptions)
-          body = f"""
-theorem {thm} (x : BitVec 736)
-    (h : admissible736Bits x = true)
-    {extra} :
-    x.cpop < (610#736) := by
-  simp only [admissible736Bits, tripleOK] at h
-  bv_decide (config := {{ timeout := 600 }})
-
-#print axioms {thm}
-
-end Erdos302F736BV
-"""
-          Path("erdos302_f736_bv_kernel/SplitProbe.lean").write_text(prefix + body)
-          PY
+        run: python3 erdos302_f736_bv_kernel/generate_split_probe.py "${{ matrix.scenario }}"
 
       - name: Reject sorry admit custom axiom
         run: |
-          set -e
-          FILE=erdos302_f736_bv_kernel/SplitProbe.lean
-          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
-          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' erdos302_f736_bv_kernel/SplitProbe.lean
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' erdos302_f736_bv_kernel/SplitProbe.lean
 
       - name: Lean split BV/LRAT check
         run: |
           set -euo pipefail
-          lean erdos302_f736_bv_kernel/SplitProbe.lean 2>&1 | tee split-output.txt
+          $HOME/.elan/bin/lean erdos302_f736_bv_kernel/SplitProbe.lean 2>&1 | tee split-output.txt
 
       - name: Require theorem and no sorryAx
         run: |
-          set -e
           grep -q "split_probe_" split-output.txt
           ! grep -q "sorryAx" split-output.txt
-
-      - name: Upload split audit
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: f736-split-${{ matrix.scenario }}
-          path: |
-            erdos302_f736_bv_kernel/SplitProbe.lean
-            split-output.txt
