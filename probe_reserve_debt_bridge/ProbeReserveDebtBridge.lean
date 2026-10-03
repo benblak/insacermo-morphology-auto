@@ -162,13 +162,22 @@ theorem decision_complete
   by_cases ha : debt + price < rho0
   · by_cases hp : price = 0
     · left
-      simp [decideProbe, ha, hp, ProbeAffordable]
+      refine ⟨?_, ?_, hp⟩
+      · simp [decideProbe, ha, hp]
+      · unfold ProbeAffordable
+        simpa [hp] using ha
     · right
       left
-      simp [decideProbe, ha, hp, ProbeAffordable]
+      refine ⟨?_, ?_, hp⟩
+      · simp [decideProbe, ha, hp]
+      · unfold ProbeAffordable
+        exact ha
   · right
     right
-    simp [decideProbe, ha, ProbeAffordable]
+    refine ⟨?_, ?_⟩
+    · simp [decideProbe, ha]
+    · unfold ProbeAffordable
+      exact ha
 
 #print axioms zero_price_iff_existing_safe
 #print axioms affordable_implies_existing_safe
