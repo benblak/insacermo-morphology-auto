@@ -60,4 +60,4 @@ jobs:
 
       - name: Python regression final integration V1
         run: |
-          PYTHONPATH=final_integration_v1:certified_online_debt_v1:minimum_proof_acquisition_v1:temporal_runtime python final_integration_v1/test_final_integration_v1.py
+          PYTHONPATH=. python final_integration_v1/test_final_integration_v1.py
