@@ -55,6 +55,7 @@ theorem affordable_cons_decomposes
     InsacermoProbeReserveDebt.ProbeAffordable rho0 debt price ∧
     PlanAffordable rho0 (debt + price) rest := by
   unfold PlanAffordable debtAfterPlan at h
+  simp only [List.sum_cons] at h
   constructor
   · unfold InsacermoProbeReserveDebt.ProbeAffordable
     omega
