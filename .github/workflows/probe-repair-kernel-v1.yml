@@ -40,3 +40,16 @@ jobs:
             grep -q "$T" "$OUT"
           done
           ! grep -q "sorryAx" "$OUT"
+
+      - name: Upload checkpoint ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_SAFE_PROBE_REPAIR_KERNEL_V1
+          if-no-files-found: error
+          path: |
+            costly_probe_minimal/**
+            safe_probe_theorem/**
+            probe_repair_kernel/**
+            .github/workflows/costly-probe-minimal-v1.yml
+            .github/workflows/safe-probe-theorem-v1.yml
+            .github/workflows/probe-repair-kernel-v1.yml
