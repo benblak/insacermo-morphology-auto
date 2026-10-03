@@ -162,8 +162,10 @@ theorem decision_complete
   by_cases ha : debt + price < rho0
   · by_cases hp : price = 0
     · left
+      have hdebt : debt < rho0 := by
+        simpa [hp] using ha
       refine ⟨?_, ?_, hp⟩
-      · simp [decideProbe, ha, hp]
+      · simp [decideProbe, hp, hdebt]
       · unfold ProbeAffordable
         simpa [hp] using ha
     · right
