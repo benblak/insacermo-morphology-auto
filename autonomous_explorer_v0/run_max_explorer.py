@@ -8,7 +8,7 @@ HERE = Path(__file__).resolve().parent
 fx = json.loads((HERE / "fixtures" / "erdos302_frontier_734.json").read_text())
 
 ex = FreeExplorer(fx["exact_n"], fx["exact_k"], set(fx["witness"]))
-out = ex.run(max_frontier_steps=6)
+out = ex.run(max_frontier_steps=10)
 assert verify_run(out)
 
 (HERE / "autonomous_max_run.json").write_text(
@@ -25,6 +25,7 @@ print(json.dumps({
             "operator": e["operator"],
             "status": e["status"],
             "k": e["details"].get("new_exact_k"),
+            "decision_bit": e["details"].get("decision_bit"),
             "proof_status": e["details"].get("proof_status"),
         }
         for e in out["trace"] if e["phase"] == "ACT"

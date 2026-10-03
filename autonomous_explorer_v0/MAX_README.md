@@ -1,29 +1,33 @@
-# INSACERMO Autonomous Explorer — MAX experiment
+# INSACERMO Autonomous Explorer — MAX feasibility experiment
 
-This branch does **not** replace or rewrite the frozen INSACERMO core.
+The previous MAX attempts exposed the wrong question.
 
-The first MAX attempt deliberately tried explicit 1/2/3/4-swap enumeration.
-That experiment hit the expected combinatorial explosion and timed out. The
-lesson is now part of the policy: when local symbolic repair ceases to be an
-efficient certificate route, the explorer may autonomously escalate to an
-external **exact combinatorial solver**.
+At an exact frontier `f(n)=k`, the next value automatically lies in
 
-Current operator policy:
+`k <= f(n+1) <= k+1`.
 
-1. choose the next unresolved frontier point;
-2. enumerate its new constraints exactly;
-3. try a structural SAFE_ADD;
-4. if blocked, escalate to a minimum hitting-set computation;
-5. cross-check the optimum with a second SAT backend;
-6. replay the returned witness against every forbidden triple;
-7. resolve either GROWTH (k+1) or PLATEAU (k);
-8. REFUSE on solver disagreement, replay failure, or a value outside the
-   inherited band f(n-1) <= f(n) <= f(n-1)+1.
+So the explorer must **not** solve a new global optimization problem. It only
+needs one bit:
 
-The exact SAT backend is **not machine learning** and is not described as an
-INSACERMO/Lean proof. It is an external exact search operator selected by the
-autonomous loop. Results from this layer are labelled
-`EXACT_COMPUTATIONAL_CROSSCHECK_NOT_LEAN` until separately formalized.
+> Does an admissible witness of size `k+1` exist?
 
-"MAX freedom" here means freedom to choose among auditable strategies while
-preserving the rule: no ACT without a replayable witness/certificate path.
+This branch implements that information-minimal policy.
+
+For the reciprocal-triple problem the query is encoded as a cardinality SAT
+instance: choose at most `(n+1)-(k+1)` removed vertices that hit every forbidden
+triple. Two different SAT backends answer the same feasibility question.
+
+- both SAT + both witnesses replay globally -> **GROWTH**;
+- both UNSAT -> **PLATEAU**;
+- disagreement or failed replay -> **REFUSE**.
+
+A direct structural SAFE_ADD is still tried first because it is cheaper and
+more transparent than SAT.
+
+This is intentionally not labelled Lean verification. SAT results are recorded
+as `EXACT_COMPUTATIONAL_CROSSCHECK_NOT_LEAN` until a separate formal
+certificate layer is added.
+
+The experiment tests a core INSACERMO principle:
+
+> compute only the information needed to decide the next certified action.
