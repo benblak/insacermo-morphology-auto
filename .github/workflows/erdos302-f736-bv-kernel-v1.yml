@@ -10,21 +10,13 @@ permissions:
   contents: read
 
 jobs:
-  endpoint-pair-probe:
+  hard-core:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        scenario:
-          - m294__m207_m224
-          - m294__m207_m322
-          - m294__m288_m224
-          - m294__m288_m322
-          - p294__m207_m224
-          - p294__m207_m322
-          - p294__m288_m224
-          - p294__m288_m322
+        scenario: [omit224, omit322]
     steps:
       - uses: actions/checkout@v4
       - name: Install Lean 4.33.1
@@ -33,17 +25,17 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
           $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
           $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
-      - name: Generate critical endpoint-pair theorem
-        run: python3 erdos302_f736_bv_kernel/generate_split_probe.py "${{ matrix.scenario }}"
+      - name: Generate exact 342-vertex core theorem
+        run: python3 erdos302_f736_bv_kernel/generate_core342.py "${{ matrix.scenario }}"
       - name: Reject sorry admit custom axiom
         run: |
-          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' erdos302_f736_bv_kernel/SplitProbe.lean
-          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' erdos302_f736_bv_kernel/SplitProbe.lean
-      - name: Lean endpoint-pair BV/LRAT check
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' erdos302_f736_bv_kernel/Core342.lean
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' erdos302_f736_bv_kernel/Core342.lean
+      - name: Lean hard-core BV/LRAT check
         run: |
           set -euo pipefail
-          $HOME/.elan/bin/lean erdos302_f736_bv_kernel/SplitProbe.lean 2>&1 | tee split-output.txt
+          $HOME/.elan/bin/lean erdos302_f736_bv_kernel/Core342.lean 2>&1 | tee core-output.txt
       - name: Require theorem and no sorryAx
         run: |
-          grep -q "endpoint_pair_probe_" split-output.txt
-          ! grep -q "sorryAx" split-output.txt
+          grep -q "core342_" core-output.txt
+          ! grep -q "sorryAx" core-output.txt
