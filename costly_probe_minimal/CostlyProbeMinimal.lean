@@ -98,8 +98,8 @@ every world has exactly one feasible action.
 -/
 theorem local_capacity_is_preserved :
     ∀ w : World,
-      (∃! a : Action, beforeFeasible w a) ∧
-      (∃! a : Action, afterFeasible w a) := by
+      (∃ a : Action, beforeFeasible w a ∧ ∀ b : Action, beforeFeasible w b → b = a) ∧
+      (∃ a : Action, afterFeasible w a ∧ ∀ b : Action, afterFeasible w b → b = a) := by
   intro w
   constructor
   · refine ⟨false, rfl, ?_⟩
@@ -134,8 +134,8 @@ theorem minimal_costly_probe_witness :
     (∃ a : Action, ∀ w : World, beforeFeasible w a) ∧
     (probeObservation (0 : World) ≠ probeObservation (1 : World)) ∧
     (∀ w : World,
-      (∃! a : Action, beforeFeasible w a) ∧
-      (∃! a : Action, afterFeasible w a)) ∧
+      (∃ a : Action, beforeFeasible w a ∧ ∀ b : Action, beforeFeasible w b → b = a) ∧
+      (∃ a : Action, afterFeasible w a ∧ ∀ b : Action, afterFeasible w b → b = a)) ∧
     ¬ ∃ policy : Observation → Action,
         ∀ w : World, afterFeasible w (policy (probeObservation w)) := by
   exact ⟨before_is_actionable,
