@@ -1,0 +1,40 @@
+name: safe-probe-theorem-v1
+
+on:
+  push:
+    branches:
+      - insacermo-safe-probe-theorem-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          FILE=safe_probe_theorem/SafeProbeTheorem.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean safe_probe_theorem/SafeProbeTheorem.lean 2>&1 | tee safe_probe_theorem/lean_output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          OUT=safe_probe_theorem/lean_output.txt
+          for T in safe_probe_iff_fiber_common_action unsafe_of_bad_fiber free_information_safe minimal_witness_exhibits_bad_fiber minimal_witness_unsafe_by_general_theorem
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"
