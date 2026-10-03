@@ -1,0 +1,40 @@
+name: costly-probe-minimal-v1
+
+on:
+  push:
+    branches:
+      - insacermo-costly-probe-minimal-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          FILE=costly_probe_minimal/CostlyProbeMinimal.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean costly_probe_minimal/CostlyProbeMinimal.lean 2>&1 | tee costly_probe_minimal/lean_output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          OUT=costly_probe_minimal/lean_output.txt
+          for T in free_information_cannot_hurt one_action_cannot_fail two_worlds_strict_information_cannot_fail before_is_actionable probe_is_strictly_informative local_capacity_is_preserved after_probe_not_guaranteed minimal_costly_probe_witness
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"
