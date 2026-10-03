@@ -1,0 +1,50 @@
+name: erdos302-f736-bv-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-erdos302-f736-bv-kernel-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lean 4.33.1
+        run: |
+          elan toolchain install leanprover/lean4:v4.33.1
+          elan default leanprover/lean4:v4.33.1
+          lean --version
+      - name: Reject sorry admit custom axiom
+        run: |
+          set -e
+          FILE=erdos302_f736_bv_kernel/Erdos302F736BV.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean BV/LRAT kernel check
+        run: |
+          set -euo pipefail
+          mkdir -p erdos302_f736_bv_kernel/build
+          lean erdos302_f736_bv_kernel/Erdos302F736BV.lean 2>&1 | tee erdos302_f736_bv_kernel/build/lean_output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          set -e
+          OUT=erdos302_f736_bv_kernel/build/lean_output.txt
+          grep -q "upper736_bits" "$OUT"
+          ! grep -q "sorryAx" "$OUT"
+      - name: Upload Lean audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ERDOS302_F736_BV_LEAN_KERNEL_V1
+          path: |
+            erdos302_f736_bv_kernel/Erdos302F736BV.lean
+            erdos302_f736_bv_kernel/build/lean_output.txt
