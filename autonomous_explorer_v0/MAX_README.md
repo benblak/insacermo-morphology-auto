@@ -2,23 +2,28 @@
 
 This branch does **not** replace or rewrite the frozen INSACERMO core.
 
-It tests a stronger external autonomy loop: the system receives a certified
-frontier, a relation, and an operator grammar. It is not given the next target
-or a hand-written plan.
+The first MAX attempt deliberately tried explicit 1/2/3/4-swap enumeration.
+That experiment hit the expected combinatorial explosion and timed out. The
+lesson is now part of the policy: when local symbolic repair ceases to be an
+efficient certificate route, the explorer may autonomously escalate to an
+external **exact combinatorial solver**.
 
-At each unresolved frontier point it autonomously chooses among:
+Current operator policy:
 
-1. exact endpoint probing;
-2. safe extension;
-3. certified 1-swap repair;
-4. certified 2-swap repair;
-5. certified 3-swap repair;
-6. certified 4-swap repair;
-7. REFUSE if none survives a full global replay.
+1. choose the next unresolved frontier point;
+2. enumerate its new constraints exactly;
+3. try a structural SAFE_ADD;
+4. if blocked, escalate to a minimum hitting-set computation;
+5. cross-check the optimum with a second SAT backend;
+6. replay the returned witness against every forbidden triple;
+7. resolve either GROWTH (k+1) or PLATEAU (k);
+8. REFUSE on solver disagreement, replay failure, or a value outside the
+   inherited band f(n-1) <= f(n) <= f(n-1)+1.
 
-Every ACT candidate is replayed against **all** forbidden triples before it is
-accepted. A failed search is not treated as a proof of impossibility.
+The exact SAT backend is **not machine learning** and is not described as an
+INSACERMO/Lean proof. It is an external exact search operator selected by the
+autonomous loop. Results from this layer are labelled
+`EXACT_COMPUTATIONAL_CROSSCHECK_NOT_LEAN` until separately formalized.
 
-"MAX freedom" here therefore means maximum freedom inside the current explicit,
-auditable symbolic operator grammar. It does not mean unbounded or magical
-scientific autonomy.
+"MAX freedom" here means freedom to choose among auditable strategies while
+preserving the rule: no ACT without a replayable witness/certificate path.
