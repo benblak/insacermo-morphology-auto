@@ -39,10 +39,11 @@ jobs:
         run: |
           set -e
           OUT=erdos302_f735_kernel/build/lean_output.txt
-          for T in witness_nodup witness_count witness_triple_check witness_admissible upper_735_from_734 exact_735_from_upper_734
+          for T in endpoint735_check new_triples_with_735 add735_admissible upper_735_from_734 exact_735_from_734
           do
             grep -q "$T" "$OUT"
           done
+          ! grep -q "sorryAx" "$OUT"
       - name: Independent Python witness verifier
         run: python3 erdos302_f735_kernel/verify_f735.py
       - name: Upload audit
