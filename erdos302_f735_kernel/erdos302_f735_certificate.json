@@ -1,8 +1,10 @@
 {
   "problem": "Erdos Problem 302 finite frontier",
+  "definition": "f(n)=maximum size of A subset {1,...,n} with no distinct a,b,c in A satisfying 1/a = 1/b + 1/c",
   "n": 735,
+  "candidate_value": 609,
+  "premise_from_current_public_source": "f(734)=608",
   "lower_bound_witness_size": 609,
-  "external_upper_bound_premise": "Every admissible subset of {1,...,734} has size <= 608.",
   "witness": [
     1,
     2,
@@ -308,7 +310,6 @@
     413,
     414,
     415,
-    416,
     417,
     418,
     419,
@@ -351,6 +352,7 @@
     457,
     458,
     459,
+    460,
     461,
     463,
     464,
@@ -378,6 +380,7 @@
     487,
     488,
     489,
+    490,
     491,
     492,
     493,
@@ -465,6 +468,7 @@
     577,
     578,
     579,
+    580,
     581,
     582,
     583,
@@ -525,7 +529,6 @@
     641,
     642,
     643,
-    644,
     645,
     646,
     647,
@@ -612,5 +615,12 @@
     733,
     734,
     735
-  ]
+  ],
+  "verification": {
+    "forbidden_triples_checked": 740,
+    "violations": 0,
+    "contains_735": true,
+    "restriction_to_734_size": 608
+  },
+  "deduction": "Witness gives f(735)>=609. Any subset of [735] loses at most one element when restricted to [734], so f(735)<=f(734)+1=609. Hence f(735)=609, conditional only on the established premise f(734)=608."
 }
