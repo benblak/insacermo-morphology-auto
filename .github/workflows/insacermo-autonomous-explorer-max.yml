@@ -1,0 +1,28 @@
+name: insacermo-autonomous-explorer-max
+
+on:
+  push:
+    branches:
+      - insacermo-autonomous-explorer-max
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Autonomous MAX regression tests
+        working-directory: autonomous_explorer_v0
+        run: python3 test_max_explorer.py
+      - name: Autonomous MAX Erdős run
+        working-directory: autonomous_explorer_v0
+        run: python3 run_max_explorer.py
+      - name: Upload autonomous trace
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_AUTONOMOUS_EXPLORER_MAX
+          path: autonomous_explorer_v0/autonomous_max_run.json
