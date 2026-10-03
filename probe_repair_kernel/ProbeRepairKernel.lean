@@ -120,7 +120,9 @@ theorem minimal_witness_repair_false_for_action_false :
       false
       false
       (2 : InsacermoCostlyProbeMinimal.World) := by
-  constructor <;> decide
+  constructor
+  · rfl
+  · simp [InsacermoCostlyProbeMinimal.afterFeasible]
 
 theorem minimal_witness_repair_false_for_action_true :
     RepairSet
@@ -129,7 +131,9 @@ theorem minimal_witness_repair_false_for_action_true :
       false
       true
       (0 : InsacermoCostlyProbeMinimal.World) := by
-  constructor <;> decide
+  constructor
+  · rfl
+  · simp [InsacermoCostlyProbeMinimal.afterFeasible]
 
 #print axioms repairset_suffices
 #print axioms repairset_is_minimal
