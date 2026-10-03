@@ -1,33 +1,31 @@
-# INSACERMO Autonomous Explorer — MAX feasibility experiment
+# INSACERMO Autonomous Explorer — MAX MIP experiment
 
-The previous MAX attempts exposed the wrong question.
+The SAT feasibility experiment still timed out at the first hard UNSAT frontier.
+That is a computational failure, not a mathematical conclusion.
 
-At an exact frontier `f(n)=k`, the next value automatically lies in
+This revision preserves the same information-minimal question:
 
-`k <= f(n+1) <= k+1`.
+> from exact f(n)=k, does an admissible witness of size k+1 exist at n+1?
 
-So the explorer must **not** solve a new global optimization problem. It only
-needs one bit:
+It changes only the external exact-search operator.
 
-> Does an admissible witness of size `k+1` exist?
+The query is now solved in two equivalent binary MILP formulations:
 
-This branch implements that information-minimal policy.
+- KEEP form: every forbidden triple has at most two kept vertices and at least
+  k+1 vertices are kept;
+- REMOVED form: every forbidden triple has at least one removed vertex and at
+  most n-(k+1) vertices are removed.
 
-For the reciprocal-triple problem the query is encoded as a cardinality SAT
-instance: choose at most `(n+1)-(k+1)` removed vertices that hit every forbidden
-triple. Two different SAT backends answer the same feasibility question.
+Both are solved by HiGHS through scipy.optimize.milp, and any feasible witnesses
+are replayed against every forbidden triple before ACT.
 
-- both SAT + both witnesses replay globally -> **GROWTH**;
-- both UNSAT -> **PLATEAU**;
-- disagreement or failed replay -> **REFUSE**.
+This is a cross-check of two formulations using the same MIP backend, so it is
+explicitly labelled:
 
-A direct structural SAFE_ADD is still tried first because it is cheaper and
-more transparent than SAT.
+`EXACT_COMPUTATIONAL_MIP_CROSSCHECK_NOT_LEAN`
 
-This is intentionally not labelled Lean verification. SAT results are recorded
-as `EXACT_COMPUTATIONAL_CROSSCHECK_NOT_LEAN` until a separate formal
-certificate layer is added.
+It is not a Lean theorem and not an independently checkable proof certificate.
 
-The experiment tests a core INSACERMO principle:
-
-> compute only the information needed to decide the next certified action.
+The INSACERMO point of the experiment is unchanged: the controller is allowed
+to abandon an unproductive proof/search operator while preserving the contract,
+the exact question, and the refusal discipline.

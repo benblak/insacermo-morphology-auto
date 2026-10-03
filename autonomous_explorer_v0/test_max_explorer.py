@@ -7,7 +7,7 @@ HERE = Path(__file__).resolve().parent
 fx = json.loads((HERE / "fixtures" / "erdos302_frontier_734.json").read_text())
 
 
-def test_frontier_735_then_binary_736():
+def test_frontier_through_736():
     ex = FreeExplorer(fx["exact_n"], fx["exact_k"], set(fx["witness"]))
     out = ex.run(max_frontier_steps=2)
     assert verify_run(out)
@@ -17,10 +17,11 @@ def test_frontier_735_then_binary_736():
     acts = [e for e in out["trace"] if e["phase"] == "ACT"]
     assert acts[0]["n"] == 735
     assert acts[0]["operator"] == "SAFE_ADD"
-    assert acts[-1]["n"] == 736
 
-    if acts[-1]["operator"] == "TARGET_FEASIBILITY":
-        assert acts[-1]["details"]["proof_status"] == "EXACT_COMPUTATIONAL_CROSSCHECK_NOT_LEAN"
+    last = acts[-1]
+    assert last["n"] == 736
+    if last["operator"] == "MIP_TARGET_FEASIBILITY":
+        assert last["details"]["proof_status"] == "EXACT_COMPUTATIONAL_MIP_CROSSCHECK_NOT_LEAN"
 
 
 def test_generic_witness_replay():
@@ -30,6 +31,6 @@ def test_generic_witness_replay():
 
 
 if __name__ == "__main__":
-    test_frontier_735_then_binary_736()
+    test_frontier_through_736()
     test_generic_witness_replay()
-    print("AUTONOMOUS_FEASIBILITY_TESTS_OK")
+    print("AUTONOMOUS_MIP_TESTS_OK")
