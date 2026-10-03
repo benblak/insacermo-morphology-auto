@@ -29,7 +29,8 @@ jobs:
       - name: Lean kernel check
         run: |
           set -euo pipefail
-          $HOME/.elan/bin/lean safe_probe_theorem/SafeProbeTheorem.lean 2>&1 | tee safe_probe_theorem/lean_output.txt
+          $HOME/.elan/bin/lean -o costly_probe_minimal/CostlyProbeMinimal.olean costly_probe_minimal/CostlyProbeMinimal.lean
+          LEAN_PATH=costly_probe_minimal $HOME/.elan/bin/lean safe_probe_theorem/SafeProbeTheorem.lean 2>&1 | tee safe_probe_theorem/lean_output.txt
       - name: Require theorem and no sorryAx
         run: |
           OUT=safe_probe_theorem/lean_output.txt
