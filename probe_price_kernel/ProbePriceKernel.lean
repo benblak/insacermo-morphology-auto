@@ -23,11 +23,12 @@ no more expensive than any sufficient single-action repair whatsoever.
 namespace InsacermoProbePrice
 
 /-- Monotonicity of a repair cost under set inclusion. -/
-def MonotoneRepairCost {W C : Type} [Preorder C]
+def MonotoneRepairCost {W C : Type}
+    (le : C → C → Prop)
     (cost : (W → Prop) → C) : Prop :=
   ∀ R S : W → Prop,
     (∀ w : W, R w → S w) →
-    cost R ≤ cost S
+    le (cost R) (cost S)
 
 /--
 For a fixed candidate action, the exact structural RepairSet is cost-minimal
@@ -36,17 +37,17 @@ for every monotone repair cost.
 theorem repairset_is_cost_minimal_for_action
     {W A O C : Type}
     [DecidableEq O]
-    [Preorder C]
+    (le : C → C → Prop)
     (feasible : W → A → Prop)
     (observe : W → O)
     (o : O)
     (a : A)
     (cost : (W → Prop) → C)
-    (hcost : MonotoneRepairCost cost)
+    (hcost : MonotoneRepairCost le cost)
     (R : W → Prop)
     (hR : ∀ w : W, observe w = o →
       InsacermoProbeRepair.RepairedFeasible feasible R a w a) :
-    cost (InsacermoProbeRepair.RepairSet feasible observe o a) ≤ cost R := by
+    le (cost (InsacermoProbeRepair.RepairSet feasible observe o a)) (cost R) := by
   apply hcost
   exact InsacermoProbeRepair.repairset_is_minimal feasible observe o a R hR
 
@@ -57,15 +58,16 @@ is no larger than the repair-set cost for any other action.
 def OptimalRepairAction
     {W A O C : Type}
     [DecidableEq O]
-    [Preorder C]
+    (le : C → C → Prop)
     (feasible : W → A → Prop)
     (observe : W → O)
     (o : O)
     (cost : (W → Prop) → C)
     (aStar : A) : Prop :=
   ∀ a : A,
-    cost (InsacermoProbeRepair.RepairSet feasible observe o aStar) ≤
-    cost (InsacermoProbeRepair.RepairSet feasible observe o a)
+    le
+      (cost (InsacermoProbeRepair.RepairSet feasible observe o aStar))
+      (cost (InsacermoProbeRepair.RepairSet feasible observe o a))
 
 /--
 Global single-action optimality:
@@ -75,21 +77,25 @@ for aStar costs no more than any sufficient repair R for any candidate action a.
 theorem optimal_action_gives_global_single_action_minimum
     {W A O C : Type}
     [DecidableEq O]
-    [Preorder C]
+    (le : C → C → Prop)
+    (htrans : ∀ x y z : C, le x y → le y z → le x z)
     (feasible : W → A → Prop)
     (observe : W → O)
     (o : O)
     (cost : (W → Prop) → C)
-    (hcost : MonotoneRepairCost cost)
+    (hcost : MonotoneRepairCost le cost)
     (aStar a : A)
-    (hopt : OptimalRepairAction feasible observe o cost aStar)
+    (hopt : OptimalRepairAction le feasible observe o cost aStar)
     (R : W → Prop)
     (hR : ∀ w : W, observe w = o →
       InsacermoProbeRepair.RepairedFeasible feasible R a w a) :
-    cost (InsacermoProbeRepair.RepairSet feasible observe o aStar) ≤ cost R := by
-  exact le_trans
+    le (cost (InsacermoProbeRepair.RepairSet feasible observe o aStar)) (cost R) := by
+  exact htrans
+    (cost (InsacermoProbeRepair.RepairSet feasible observe o aStar))
+    (cost (InsacermoProbeRepair.RepairSet feasible observe o a))
+    (cost R)
     (hopt a)
-    (repairset_is_cost_minimal_for_action feasible observe o a cost hcost R hR)
+    (repairset_is_cost_minimal_for_action le feasible observe o a cost hcost R hR)
 
 /--
 If the candidate action is already common on the fiber, its exact RepairSet is empty,
