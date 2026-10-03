@@ -1,0 +1,120 @@
+name: erdos302-f736-split-probe-v1
+
+on:
+  push:
+    branches:
+      - insacermo-erdos302-f736-split-probe-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  split-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - off736
+          - miss207_224
+          - miss207_322
+          - miss288_224
+          - miss288_322
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Install Lean 4.33.1
+        run: |
+          elan toolchain install leanprover/lean4:v4.33.1
+          elan default leanprover/lean4:v4.33.1
+          lean --version
+
+      - name: Generate split theorem
+        env:
+          CASE: ${{ matrix.case }}
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os
+
+          src = Path("erdos302_f736_bv_kernel/Erdos302F736BV.lean").read_text()
+          lines = src.splitlines()
+          # Keep definitions and all forbidden triples, drop the monolithic theorem.
+          prefix = "\n".join(lines[:770]) + "\n"
+
+          case = os.environ["CASE"]
+          assumptions = {
+              "off736": [
+                  "(h736 : x.getLsbD 735 = false)",
+              ],
+              "miss207_224": [
+                  "(h207 : x.getLsbD 206 = false)",
+                  "(h224 : x.getLsbD 223 = false)",
+              ],
+              "miss207_322": [
+                  "(h207 : x.getLsbD 206 = false)",
+                  "(h322 : x.getLsbD 321 = false)",
+              ],
+              "miss288_224": [
+                  "(h288 : x.getLsbD 287 = false)",
+                  "(h224 : x.getLsbD 223 = false)",
+              ],
+              "miss288_322": [
+                  "(h288 : x.getLsbD 287 = false)",
+                  "(h322 : x.getLsbD 321 = false)",
+              ],
+          }[case]
+
+          thm = "split_probe_" + case
+          extra = "\n    ".join(assumptions)
+          body = f"""
+/-- Split SAT probe for the f(736) <= 609 upper bound. -/
+theorem {thm} (x : BitVec 736)
+    (h : admissible736Bits x = true)
+    {extra} :
+    x.cpop < (610#736) := by
+  simp only [admissible736Bits, tripleOK] at h
+  bv_decide (config := {{ timeout := 600 }})
+
+#print axioms {thm}
+
+end Erdos302F736BV
+"""
+          out = Path(f"erdos302_f736_bv_kernel/SplitProbe_{case}.lean")
+          out.write_text(prefix + body)
+          print(out)
+          PY
+
+      - name: Lean split check
+        env:
+          CASE: ${{ matrix.case }}
+        run: |
+          set -euo pipefail
+          FILE="erdos302_f736_bv_kernel/SplitProbe_${CASE}.lean"
+          OUT="erdos302_f736_bv_kernel/split_${CASE}.txt"
+          lean "$FILE" 2>&1 | tee "$OUT"
+
+      - name: Require no sorryAx
+        env:
+          CASE: ${{ matrix.case }}
+        run: |
+          set -e
+          OUT="erdos302_f736_bv_kernel/split_${CASE}.txt"
+          grep -q "split_probe_${CASE}" "$OUT"
+          ! grep -q "sorryAx" "$OUT"
+
+      - name: Upload split audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: f736-split-${{ matrix.case }}
+          path: |
+            erdos302_f736_bv_kernel/SplitProbe_${{ matrix.case }}.lean
+            erdos302_f736_bv_kernel/split_${{ matrix.case }}.txt
