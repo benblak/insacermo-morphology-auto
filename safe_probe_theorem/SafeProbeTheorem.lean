@@ -32,7 +32,7 @@ def FiberCommonAction {W A O : Type}
 Main theorem: a probe is safe exactly when each observable fiber has a common action.
 -/
 theorem safe_probe_iff_fiber_common_action
-    {W A O : Type}
+    {W A O : Type} [Nonempty W]
     (feasible : W → A → Prop)
     (observe : W → O) :
     SafeProbe feasible observe ↔ FiberCommonAction feasible observe := by
@@ -44,27 +44,26 @@ theorem safe_probe_iff_fiber_common_action
     simpa [hw] using hp w
   · intro hf
     classical
-    choose witness hWitness using fun o : O =>
-      Classical.propComplete (∃ w : W, observe w = o)
+    let w0 : W := Classical.choice (inferInstance : Nonempty W)
+    have hocc0 : ∃ w : W, observe w = observe w0 := ⟨w0, rfl⟩
+    let a0 : A := Classical.choose (hf (observe w0) hocc0)
     let policy : O → A := fun o =>
       if ho : ∃ w : W, observe w = o then
         Classical.choose (hf o ho)
       else
-        Classical.choice (show Nonempty A from ?_)
-    · refine ⟨policy, ?_⟩
-      intro w
-      have ho : ∃ u : W, observe u = observe w := ⟨w, rfl⟩
-      simp only [policy, dif_pos ho]
-      exact Classical.choose_spec (hf (observe w) ho) w rfl
-    · rcases hf (observe w) ⟨w, rfl⟩ with ⟨a, _⟩
-      exact ⟨a⟩
+        a0
+    refine ⟨policy, ?_⟩
+    intro w
+    have ho : ∃ u : W, observe u = observe w := ⟨w, rfl⟩
+    simp only [policy, dif_pos ho]
+    exact Classical.choose_spec (hf (observe w) ho) w rfl
 
 /--
 Equivalent failure criterion: a probe is unsafe iff no contingent policy works.
 This exposes the obstruction as an observation fiber with no common feasible action.
 -/
 theorem unsafe_of_bad_fiber
-    {W A O : Type}
+    {W A O : Type} [Nonempty W]
     (feasible : W → A → Prop)
     (observe : W → O)
     (o : O)
