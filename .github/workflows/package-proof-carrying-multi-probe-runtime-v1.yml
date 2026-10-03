@@ -1,0 +1,98 @@
+name: package-proof-carrying-multi-probe-runtime-v1
+
+on:
+  push:
+    branches:
+      - insacermo-proof-carrying-multi-probe-runtime-v1-package-2026-10-04
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact tested checkpoint
+        uses: actions/checkout@v4
+        with:
+          ref: a24bd8841a6b507dc82758cf68ac2c8aa523e3e1
+
+      - name: Write checkpoint manifest
+        run: |
+          cat > CHECKPOINT_MANIFEST.md <<'EOF'
+          # INSACERMO PROOF-CARRYING MULTI-PROBE RUNTIME V1 — FREEZE
+
+          Date: 2026-10-04
+
+          ## Exact tested checkpoint
+
+          - Repository: benblak/insacermo-morphology-auto
+          - Source commit: a24bd8841a6b507dc82758cf68ac2c8aa523e3e1
+          - Full validation run: 37159682461
+          - Lean: 4.33.1
+          - Freeze branch: insacermo-proof-carrying-multi-probe-runtime-v1-freeze-2026-10-04
+
+          ## Full CI status
+
+          SUCCESS:
+          - Lean kernel check
+          - no sorry / admit / custom axiom
+          - no sorryAx in required theorem set
+          - Python multi-probe runtime V2 tests
+          - temporal runtime V1 regression
+          - Certified Online Debt V1 regression
+          - Final Integration V1 regression
+
+          ## Certified chain
+
+          Safe PROBE
+          -> exact structural REPAIR set
+          -> minimal REPAIR price in the declared single-action edge-addition model
+          -> strict reserve/debt bridge
+          -> multi-PROBE cumulative budget
+          -> minimum-price contract planner
+          -> proof-carrying finite audited-candidate runtime
+
+          Strict reserve rule:
+              D_t + sum(Pi_i) < rho_0
+
+          Equality with rho_0 is refused.
+
+          ## Runtime certificate scope
+
+          EXECUTE certifies the chosen audited plan respects the strict reserve rule.
+
+          REFUSE certifies that no plan in the finite, contract-bound candidate set
+          embedded and hash-bound in the certificate is affordable.
+
+          It does NOT claim that no conceivable plan outside that audited candidate
+          set exists.
+
+          ## Important proof boundary
+
+          Lean kernel verifies the mathematical theorem layer and certificate
+          invariants listed above. It does not prove the entire Python application.
+
+          Python runtime behavior is covered here by the successful integration and
+          regression tests in run 37159682461.
+          EOF
+
+      - name: Build source archive and digest
+        run: |
+          set -euo pipefail
+          ZIP=INSACERMO_PROOF_CARRYING_MULTI_PROBE_RUNTIME_V1_FREEZE_2026-10-04.zip
+          zip -rq "/tmp/$ZIP" . -x ".git/*"
+          sha256sum "/tmp/$ZIP" | tee "/tmp/$ZIP.sha256"
+          cp CHECKPOINT_MANIFEST.md /tmp/CHECKPOINT_MANIFEST.md
+
+      - name: Upload exact checkpoint archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_PROOF_CARRYING_MULTI_PROBE_RUNTIME_V1_FREEZE_2026-10-04
+          path: |
+            /tmp/INSACERMO_PROOF_CARRYING_MULTI_PROBE_RUNTIME_V1_FREEZE_2026-10-04.zip
+            /tmp/INSACERMO_PROOF_CARRYING_MULTI_PROBE_RUNTIME_V1_FREEZE_2026-10-04.zip.sha256
+            /tmp/CHECKPOINT_MANIFEST.md
+          if-no-files-found: error
+          retention-days: 90
