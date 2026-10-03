@@ -773,7 +773,7 @@ theorem upper736_bits (x : BitVec 736)
     (h : admissible736Bits x = true) :
     x.cpop < (610#736) := by
   simp only [admissible736Bits, tripleOK] at h
-  bv_decide (config := { timeout := 600 })
+  bv_decide (config := { timeout := 2400 })
 
 #print axioms upper736_bits
 
