@@ -1,5 +1,5 @@
 import Std
-import costly_probe_minimal.CostlyProbeMinimal
+import CostlyProbeMinimal
 
 /-!
 INSACERMO — Safe Probe Theorem V1
