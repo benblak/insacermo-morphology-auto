@@ -85,7 +85,6 @@ theorem canonicalDigit_lt
       simp [canonicalCode, h]
     rw [hcode]
     simp
-    omega
 
 theorem all_code_digits_lt
     (probeCount outcomeBound : Nat)
@@ -159,17 +158,13 @@ theorem canonical_digit_zero_iff_no_assignment
     canonicalDigit history p = 0 ↔
       ¬ ∃ o, HistoryAssignment history p o := by
   classical
-  unfold canonicalDigit
   by_cases h : ∃ o, HistoryAssignment history p o
   · have hc : canonicalCode history p = some (Classical.choose h) := by
       simp [canonicalCode, h]
-    rw [hc]
-    simp
-    exact ⟨fun _, h, fun hn => False.elim (hn h)⟩
+    simp [canonicalDigit, hc, h]
   · have hc : canonicalCode history p = none := by
       simp [canonicalCode, h]
-    rw [hc]
-    simp [h]
+    simp [canonicalDigit, hc, h]
 
 theorem canonical_digit_succ_iff
     {W : Type}
@@ -200,13 +195,7 @@ theorem canonical_digit_succ_iff
       omega
   · have hc : canonicalCode history p = none := by
       simp [canonicalCode, h]
-    rw [hc]
-    simp
-    constructor
-    · intro hfalse
-      omega
-    · intro ha
-      exact False.elim (h ⟨o, ha⟩)
+    simp [canonicalDigit, hc, h]
 
 theorem finiteCanonicalCode_get
     (probeCount : Nat)
@@ -242,14 +231,15 @@ theorem raw_history_eq_decoded_canonical
     refine ⟨hB, ?_⟩
     intro p d hget
     have hp : p < probeCount := by
-      by_contra hnp
-      have hge : probeCount ≤ p := Nat.le_of_not_gt hnp
-      have hnone :
-          (finiteCanonicalCode probeCount history)[p]? = none := by
-        apply List.getElem?_eq_none
-        simpa [finiteCanonicalCode] using hge
-      rw [hnone] at hget
-      contradiction
+      by_cases hlt : p < probeCount
+      · exact hlt
+      · have hge : probeCount ≤ p := Nat.le_of_not_gt hlt
+        have hnone :
+            (finiteCanonicalCode probeCount history)[p]? = none := by
+          apply List.getElem?_eq_none
+          simpa [finiteCanonicalCode] using hge
+        rw [hnone] at hget
+        simp at hget
     have hcanon := finiteCanonicalCode_get probeCount history p hp
     rw [hcanon] at hget
     have hd : d = canonicalDigit history p := by
@@ -259,8 +249,9 @@ theorem raw_history_eq_decoded_canonical
     · exact Or.inl hz
     · right
       have hex : ∃ o, HistoryAssignment history p o := by
-        by_contra hno
-        exact hz ((canonical_digit_zero_iff_no_assignment history p).2 hno)
+        by_cases hyes : ∃ o, HistoryAssignment history p o
+        · exact hyes
+        · exact False.elim (hz ((canonical_digit_zero_iff_no_assignment history p).2 hyes))
       rcases hex with ⟨o, ha⟩
       have hdigit :
           canonicalDigit history p = o + 1 :=
