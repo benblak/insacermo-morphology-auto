@@ -1,0 +1,36 @@
+name: realdata-capability-vs-probes-v1
+
+on:
+  push:
+    branches:
+      - insacermo-realdata-capability-vs-probes-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact audit dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.26" "pandas>=2.1" "statsmodels==0.14.6"
+      - name: Run frozen real-data audit
+        run: |
+          python realdata_capability_vs_probes_v1/audit.py | tee realdata_capability_vs_probes_v1/output.txt
+      - name: Require exact endpoints
+        run: |
+          OUT=realdata_capability_vs_probes_v1/output.txt
+          grep -q "dataset_sha256 d2d72c1db440f8ffce01f58ed39fc1145569ec1703970dac1636c154fc01fd8e" "$OUT"
+          grep -q "rows 840" "$OUT"
+          grep -q "individuals 210" "$OUT"
+          grep -q "cohort_n 147" "$OUT"
+          grep -q "probe_family_size 45" "$OUT"
+          grep -q "base_zero_probe_repair_price 21" "$OUT"
+          grep -q "expanded_zero_probe_repair_price 2" "$OUT"
+          grep -q "VERDICT CAPABILITY_ZERO_PROBE_EQUALS_BEST_FOUR_PROBE_REPAIR_PRICE" "$OUT"
+          grep -q "^PASS$" "$OUT"
