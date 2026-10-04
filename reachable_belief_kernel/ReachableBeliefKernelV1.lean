@@ -269,8 +269,9 @@ theorem canonical_reachability_factorization
 noncomputable def canonicalCode
     {P O : Type}
     (history : List (Constraint P O))
-    (p : P) : Option O :=
-  if h : ∃ o, HistoryAssignment history p o then
+    (p : P) : Option O := by
+  classical
+  exact if h : ∃ o, HistoryAssignment history p o then
     some (Classical.choose h)
   else
     none
@@ -288,23 +289,20 @@ theorem canonicalCode_eq_some_iff
     canonicalCode history p = some o ↔
       HistoryAssignment history p o := by
   classical
-  unfold canonicalCode
-  split
-  · rename_i h
-    let chosen : O := Classical.choose h
+  by_cases h : ∃ x, HistoryAssignment history p x
+  · let chosen : O := Classical.choose h
     have hchosen : HistoryAssignment history p chosen :=
       Classical.choose_spec h
-    have heq : chosen = o ↔ HistoryAssignment history p o := by
+    have huniq : chosen = o ↔ HistoryAssignment history p o := by
       constructor
       · intro hco
         simpa [hco] using hchosen
       · intro ho
         exact hrealSingle p chosen o hchosen ho
-    simp [chosen, heq]
-  · rename_i h
-    constructor
-    · intro hs
-      simp at hs
+    simp [canonicalCode, h, chosen, huniq]
+  · constructor
+    · intro hc
+      simp [canonicalCode, h] at hc
     · intro ha
       exact False.elim (h ⟨o, ha⟩)
 
@@ -315,8 +313,9 @@ theorem canonicalCode_eq_none_iff
     canonicalCode history p = none ↔
       ¬ ∃ o, HistoryAssignment history p o := by
   classical
-  unfold canonicalCode
-  split <;> simp_all
+  by_cases h : ∃ o, HistoryAssignment history p o
+  · simp [canonicalCode, h]
+  · simp [canonicalCode, h]
 
 /--
 For realizable deterministic histories, equality of canonical option-valued
