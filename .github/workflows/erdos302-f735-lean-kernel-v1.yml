@@ -1,0 +1,57 @@
+name: erdos302-f735-lean-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-erdos302-f735-kernel-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lean 4.33.1
+        run: |
+          elan toolchain install leanprover/lean4:v4.33.1
+          elan default leanprover/lean4:v4.33.1
+          lean --version
+      - name: Reject sorry/admit/custom axiom
+        run: |
+          set -e
+          FILE=erdos302_f735_kernel/Erdos302F735.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          mkdir -p erdos302_f735_kernel/build
+          lean erdos302_f735_kernel/Erdos302F735.lean 2>&1 | tee erdos302_f735_kernel/build/lean_output.txt
+      - name: Require theorem axiom reports
+        run: |
+          set -e
+          OUT=erdos302_f735_kernel/build/lean_output.txt
+          for T in endpoint735_check new_triples_with_735 add735_admissible upper_735_from_734 exact_735_from_734
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"
+      - name: Independent Python witness verifier
+        run: python3 erdos302_f735_kernel/verify_f735.py
+      - name: Upload audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ERDOS302_F735_LEAN_KERNEL_V1
+          path: |
+            erdos302_f735_kernel/Erdos302F735.lean
+            erdos302_f735_kernel/verify_f735.py
+            erdos302_f735_kernel/erdos302_f735_certificate.json
+            erdos302_f735_kernel/build/lean_output.txt
