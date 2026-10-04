@@ -164,10 +164,11 @@ theorem canonical_digit_zero_iff_no_assignment
     simp [canonicalDigit, hc, h]
   · have hc : canonicalCode history p = none := by
       simp [canonicalCode, h]
-    have hno : ¬ HistoryAssignment history p o := by
-      intro ha
-      exact h ⟨o, ha⟩
-    simp [canonicalDigit, hc, hno]
+    constructor
+    · intro _
+      exact h
+    · intro _
+      simp [canonicalDigit, hc]
 
 theorem canonical_digit_succ_iff
     {W : Type}
@@ -198,7 +199,13 @@ theorem canonical_digit_succ_iff
       omega
   · have hc : canonicalCode history p = none := by
       simp [canonicalCode, h]
-    simp [canonicalDigit, hc, h]
+    constructor
+    · intro heq
+      have hz : (0 : Nat) = o + 1 := by
+        simpa [canonicalDigit, hc] using heq
+      exact False.elim (by omega)
+    · intro ha
+      exact False.elim (h ⟨o, ha⟩)
 
 theorem finiteCanonicalCode_get
     (probeCount : Nat)
