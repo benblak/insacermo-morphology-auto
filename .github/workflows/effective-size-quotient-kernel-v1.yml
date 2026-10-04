@@ -43,7 +43,7 @@ jobs:
           done
           ! grep -q "sorryAx" "$OUT"
           OUT2=effective_size_quotient_kernel/state_bound_output.txt
-          for T in belief_universe_card reachable_beliefs_le_two_pow depth_indexed_state_bound raw_multiplicity_absent_after_quotient memo_key_upper_bound
+          for T in bitBeliefs_length mem_bitBeliefs_of_length effective_belief_cover raw_multiplicity_absent_from_cover
           do
             grep -q "$T" "$OUT2"
           done
