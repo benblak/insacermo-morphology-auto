@@ -1,0 +1,39 @@
+name: occupancy-temporal-authority-v1
+
+on:
+  push:
+    branches:
+      - insacermo-occupancy-temporal-authority-v1
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run causal temporal authority audit
+        run: |
+          set -euo pipefail
+          python adaptive_proof_acquisition_v2/occupancy_temporal_authority_audit.py | tee adaptive_proof_acquisition_v2/OCCUPANCY_TEMPORAL_AUTHORITY_OUTPUT.txt
+      - name: Validate audit
+        run: |
+          python - <<'PY'
+          import json
+          d=json.load(open("adaptive_proof_acquisition_v2/OCCUPANCY_TEMPORAL_AUTHORITY_AUDIT.json"))
+          assert d["status"]=="PASS"
+          assert d["base"]["wrong"]==59
+          assert d["wrong_analysis"]["wrong_total"]==59
+          for g in d["causal_guards"].values():
+              assert g["correct"]+g["wrong"]==g["act"]
+              assert g["act"]+g["refuse"]==g["n"]
+          assert d["retrospective_DIAGNOSTIC_ONLY"]["blacklist_all_ever_bad_paths_from_start"]["wrong"]==0
+          print("OCCUPANCY_TEMPORAL_AUTHORITY_ASSERTIONS: PASS")
+          PY
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OCCUPANCY_TEMPORAL_AUTHORITY_V1
+          path: |
+            adaptive_proof_acquisition_v2/occupancy_temporal_authority_audit.py
+            adaptive_proof_acquisition_v2/OCCUPANCY_TEMPORAL_AUTHORITY_AUDIT.json
+            adaptive_proof_acquisition_v2/OCCUPANCY_TEMPORAL_AUTHORITY_OUTPUT.txt

@@ -1,0 +1,42 @@
+name: probe-repair-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-probe-repair-kernel-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          FILE=probe_repair_kernel/ProbeRepairKernel.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean -o costly_probe_minimal/CostlyProbeMinimal.olean costly_probe_minimal/CostlyProbeMinimal.lean
+          LEAN_PATH=costly_probe_minimal $HOME/.elan/bin/lean -o safe_probe_theorem/SafeProbeTheorem.olean safe_probe_theorem/SafeProbeTheorem.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem $HOME/.elan/bin/lean probe_repair_kernel/ProbeRepairKernel.lean 2>&1 | tee probe_repair_kernel/lean_output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          OUT=probe_repair_kernel/lean_output.txt
+          for T in repairset_suffices repairset_is_minimal repair_sufficient_iff_contains_repairset repairset_empty_when_common minimal_witness_repair_false_for_action_false minimal_witness_repair_false_for_action_true
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"

@@ -1,0 +1,42 @@
+name: occupancy-real-adaptive-v1
+
+on:
+  push:
+    branches:
+      - insacermo-occupancy-real-adaptive-v1
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run real adaptive Occupancy audit
+        run: |
+          set -euo pipefail
+          python adaptive_proof_acquisition_v2/occupancy_real_adaptive_audit.py | tee adaptive_proof_acquisition_v2/OCCUPANCY_REAL_ADAPTIVE_OUTPUT.txt
+      - name: Validate causal audit structure
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p="adaptive_proof_acquisition_v2/OCCUPANCY_REAL_ADAPTIVE_AUDIT.json"
+          d=json.load(open(p))
+          assert d["status"]=="PASS"
+          assert d["train_n"]==8143
+          assert d["future_n"]==9752
+          assert d["cost_model"].startswith("unit cost")
+          for r in d["results"]:
+              assert r["future"]["act"]+r["future"]["refuse"]==9752
+              assert r["future"]["correct"]+r["future"]["wrong"]==r["future"]["act"]
+              assert 0 <= r["future"]["avg_probes"] <= 5
+          print("OCCUPANCY_REAL_ADAPTIVE_AUDIT_STRUCTURE: PASS")
+          PY
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OCCUPANCY_REAL_ADAPTIVE_V1
+          path: |
+            adaptive_proof_acquisition_v2/occupancy_real_adaptive_audit.py
+            adaptive_proof_acquisition_v2/OCCUPANCY_REAL_ADAPTIVE_AUDIT.json
+            adaptive_proof_acquisition_v2/OCCUPANCY_REAL_ADAPTIVE_OUTPUT.txt

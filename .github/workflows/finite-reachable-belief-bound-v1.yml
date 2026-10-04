@@ -1,0 +1,46 @@
+name: finite-reachable-belief-bound-v1
+
+on:
+  push:
+    branches:
+      - insacermo-finite-reachable-belief-bound-v1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          for FILE in reachable_belief_kernel/ReachableBeliefKernelV1.lean finite_reachable_belief_bound/FiniteReachableBeliefBoundV1.lean
+          do
+            ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+            ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+          done
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean -o reachable_belief_kernel/ReachableBeliefKernelV1.olean reachable_belief_kernel/ReachableBeliefKernelV1.lean
+          LEAN_PATH=reachable_belief_kernel $HOME/.elan/bin/lean finite_reachable_belief_bound/FiniteReachableBeliefBoundV1.lean 2>&1 | tee finite_reachable_belief_bound/lean_output.txt
+      - name: Require theorems and no sorryAx
+        run: |
+          OUT=finite_reachable_belief_bound/lean_output.txt
+          for T in finiteCanonicalCode_length canonicalDigit_lt mem_partialCodes_of_length_all_lt finiteCanonicalCode_mem_catalogue canonical_digit_succ_iff raw_history_eq_decoded_canonical every_reachable_belief_has_catalogue_code finite_catalogue_length finite_reachable_belief_cover beliefCatalogue_length every_reachable_belief_mem_catalogue finite_reachable_belief_catalogue
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"

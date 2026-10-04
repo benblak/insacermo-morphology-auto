@@ -1,0 +1,58 @@
+name: adaptive-proof-acquisition-v2
+
+on:
+  push:
+    branches:
+      - insacermo-adaptive-proof-acquisition-v2
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lean 4.19.0
+        run: |
+          elan toolchain install leanprover/lean4:v4.19.0
+          elan default leanprover/lean4:v4.19.0
+          lean --version
+      - name: Reject sorry admit custom axiom
+        run: |
+          set -e
+          FILE=adaptive_proof_acquisition_v2/AdaptiveProofAcquisitionKernelV2.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          mkdir -p adaptive_proof_acquisition_v2/build
+          lean adaptive_proof_acquisition_v2/AdaptiveProofAcquisitionKernelV2.lean 2>&1 | tee adaptive_proof_acquisition_v2/build/lean_output.txt
+      - name: Require theorem reports
+        run: |
+          set -e
+          OUT=adaptive_proof_acquisition_v2/build/lean_output.txt
+          for T in proof_deficit_zero_iff binary_probe_guarantees_act_iff sound_tree_never_unsafe act_leaf_requires_true_safety coarse_sound_bound_may_block_act
+          do
+            grep -q "$T" "$OUT"
+          done
+      - name: Python adaptive planner tests
+        run: |
+          set -euo pipefail
+          cd adaptive_proof_acquisition_v2
+          python -m compileall -q .
+          python test_adaptive_proof_acquisition_v2.py | tee python_test_output.txt
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ADAPTIVE_PROOF_ACQUISITION_V2
+          path: |
+            adaptive_proof_acquisition_v2/AdaptiveProofAcquisitionKernelV2.lean
+            adaptive_proof_acquisition_v2/adaptive_proof_acquisition_v2.py
+            adaptive_proof_acquisition_v2/test_adaptive_proof_acquisition_v2.py
+            adaptive_proof_acquisition_v2/README.md
+            adaptive_proof_acquisition_v2/build/lean_output.txt
+            adaptive_proof_acquisition_v2/python_test_output.txt

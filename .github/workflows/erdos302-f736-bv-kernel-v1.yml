@@ -1,0 +1,41 @@
+name: erdos302-f736-bv-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-erdos302-f736-bv-kernel-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hard-core:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        scenario: [omit224, omit322]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Generate exact 342-vertex core theorem
+        run: python3 erdos302_f736_bv_kernel/generate_core342.py "${{ matrix.scenario }}"
+      - name: Reject sorry admit custom axiom
+        run: |
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' erdos302_f736_bv_kernel/Core342.lean
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' erdos302_f736_bv_kernel/Core342.lean
+      - name: Lean hard-core BV/LRAT check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean erdos302_f736_bv_kernel/Core342.lean 2>&1 | tee core-output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          grep -q "core342_" core-output.txt
+          ! grep -q "sorryAx" core-output.txt

@@ -1,0 +1,46 @@
+name: semantic-complexity-law-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-semantic-complexity-law-kernel-v1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          for FILE in effective_size_quotient_kernel/EffectiveStateBoundV1.lean semantic_complexity_kernel/SemanticComplexityLawKernelV1.lean
+          do
+            ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+            ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+          done
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean -o effective_size_quotient_kernel/EffectiveStateBoundV1.olean effective_size_quotient_kernel/EffectiveStateBoundV1.lean
+          LEAN_PATH=effective_size_quotient_kernel $HOME/.elan/bin/lean semantic_complexity_kernel/SemanticComplexityLawKernelV1.lean 2>&1 | tee semantic_complexity_kernel/lean_output.txt
+      - name: Require theorems and no sorryAx
+        run: |
+          OUT=semantic_complexity_kernel/lean_output.txt
+          for T in sum_map_le_length_mul treeWithin_nodeCount_le semantic_complexity_law plan_respects_prospective_ceiling semantic_cover_length ternary_depth8_node_ceiling ternary_depth8_leaf_positions
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"
