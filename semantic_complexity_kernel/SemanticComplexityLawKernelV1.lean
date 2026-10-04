@@ -73,7 +73,11 @@ theorem sum_map_le_length_mul
         exact h y (by simp [hy])
       have hi := ih htail
       simp only [List.map_cons, List.sum_cons, List.length_cons]
-      omega
+      calc
+        f x + (xs.map f).sum ≤ bound + xs.length * bound :=
+          Nat.add_le_add hx hi
+        _ = (xs.length + 1) * bound := by
+          simp [Nat.add_mul, Nat.add_comm]
 
 /--
 Prospective tree theorem: branching m and depth d alone bound the number of
@@ -127,8 +131,10 @@ def semanticCeiling (effectiveClasses : Nat) : Nat :=
 /-- The two independent ceilings combined conservatively. -/
 def combinedCeiling
     (effectiveClasses branching depth : Nat) : Nat :=
-  min (semanticCeiling effectiveClasses)
-      (prospectiveNodes branching depth)
+  if semanticCeiling effectiveClasses ≤ prospectiveNodes branching depth then
+    semanticCeiling effectiveClasses
+  else
+    prospectiveNodes branching depth
 
 /--
 Arithmetic composition law:
@@ -140,8 +146,10 @@ theorem semantic_complexity_law
     (hsemantic : K ≤ semanticCeiling effectiveClasses)
     (hprospective : K ≤ prospectiveNodes branching depth) :
     K ≤ combinedCeiling effectiveClasses branching depth := by
-  simp only [combinedCeiling, Nat.le_min_iff]
-  exact ⟨hsemantic, hprospective⟩
+  unfold combinedCeiling
+  split
+  · exact hsemantic
+  · exact hprospective
 
 /--
 Direct plan corollary for the prospective half of the law.
