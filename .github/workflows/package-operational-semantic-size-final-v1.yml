@@ -1,0 +1,82 @@
+name: package-operational-semantic-size-final-v1
+
+on:
+  push:
+    branches:
+      - insacermo-operational-semantic-size-kernel-v1
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write final checkpoint manifest
+        run: |
+          cat > INSACERMO_OPERATIONAL_SEMANTIC_SIZE_FINAL_2026-10-04.md <<'EOF'
+          # INSACERMO — Operational Semantic Size Final Checkpoint
+          Date: 2026-10-04
+
+          Final finite deterministic/passive composition layer.
+
+          ## Final green commit
+          ca36aefc520b9c6030f932882ce81e5db3932f78
+
+          ## Green runs on that commit
+          - Effective Size / Exact Quotient: 37238537018 — SUCCESS
+          - Semantic Complexity Law: 37238536905 — SUCCESS
+          - Reachable Belief Kernel: 37238536933 — SUCCESS
+          - Finite Reachable-Belief Bound: 37238536978 — SUCCESS
+          - Operational Semantic Size: 37238536998 — SUCCESS
+
+          ## Final operational semantic ceiling
+          For one certified count K of DISTINCT visited beliefs:
+
+            K <= 2^N_eff
+            K <= (M+1)^P
+            K <= 1 + M + ... + M^d
+
+          therefore:
+
+            K <= min(2^N_eff, (M+1)^P, 1 + M + ... + M^d)
+
+          with the exact recursive prospective bound G(M,0)=1,
+          G(M,d+1)=1+M*G(M,d).
+
+          ## Scope precision
+          This is a formal semantic/state-space result for the encoded finite
+          deterministic/passive regime. It is not a wall-clock runtime theorem,
+          not a proof of Python/JavaScript correctness, not a dataset-provenance
+          theorem, and not yet a universal theorem for stochastic/dynamic probes.
+
+          ## Lean hygiene
+          CI rejects sorry/admit/custom axioms. The final arithmetic composition
+          theorem operational_semantic_size_law itself has no axiomatic
+          dependencies reported by #print axioms. Supporting extensional
+          theorems use standard Lean foundations such as propext, Quot.sound,
+          and Classical.choice where needed.
+          EOF
+
+      - name: Remove transient outputs
+        run: |
+          find . -name '*.olean' -delete || true
+          find . -name 'lean_output.txt' -delete || true
+          find . -name 'state_bound_output.txt' -delete || true
+
+      - name: Upload final complete source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPERATIONAL_SEMANTIC_SIZE_FINAL_COMPLETE_2026-10-04
+          path: |
+            .
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
