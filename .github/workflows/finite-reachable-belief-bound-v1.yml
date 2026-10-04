@@ -39,7 +39,7 @@ jobs:
       - name: Require theorems and no sorryAx
         run: |
           OUT=finite_reachable_belief_bound/lean_output.txt
-          for T in finiteCanonicalCode_length canonicalDigit_lt mem_partialCodes_of_length_all_lt finiteCanonicalCode_mem_catalogue canonical_digit_succ_iff raw_history_eq_decoded_canonical every_reachable_belief_has_catalogue_code finite_catalogue_length finite_reachable_belief_cover
+          for T in finiteCanonicalCode_length canonicalDigit_lt mem_partialCodes_of_length_all_lt finiteCanonicalCode_mem_catalogue canonical_digit_succ_iff raw_history_eq_decoded_canonical every_reachable_belief_has_catalogue_code finite_catalogue_length finite_reachable_belief_cover beliefCatalogue_length every_reachable_belief_mem_catalogue finite_reachable_belief_catalogue
           do
             grep -q "$T" "$OUT"
           done
