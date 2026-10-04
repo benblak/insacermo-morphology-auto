@@ -155,7 +155,12 @@ theorem flatMap_const_length
       have ht : ∀ y ∈ xs, (f y).length = k := by
         intro y hy
         exact h y (by simp [hy])
-      simp [List.flatMap, hx, ih ht, Nat.add_mul]
+      calc
+        ((x :: xs).flatMap f).length
+            = (f x).length + (xs.flatMap f).length := by simp
+        _ = k + xs.length * k := by rw [hx, ih ht]
+        _ = (xs.length + 1) * k := by
+              simp [Nat.add_mul, Nat.add_comm]
 
 theorem partialCodes_length
     (alphabet : Nat) :
