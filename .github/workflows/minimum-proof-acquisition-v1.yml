@@ -1,0 +1,58 @@
+name: minimum-proof-acquisition-v1
+
+on:
+  push:
+    branches:
+      - insacermo-minimum-proof-acquisition-v1
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lean 4.19.0
+        run: |
+          elan toolchain install leanprover/lean4:v4.19.0
+          elan default leanprover/lean4:v4.19.0
+          lean --version
+      - name: Reject sorry admit custom axiom
+        run: |
+          set -e
+          FILE=minimum_proof_acquisition_v1/MinimumProofAcquisitionKernelV1.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          mkdir -p minimum_proof_acquisition_v1/build
+          lean minimum_proof_acquisition_v1/MinimumProofAcquisitionKernelV1.lean 2>&1 | tee minimum_proof_acquisition_v1/build/lean_output.txt
+      - name: Require theorem reports
+        run: |
+          set -e
+          OUT=minimum_proof_acquisition_v1/build/lean_output.txt
+          for T in proof_deficit_zero_iff proof_deficit_exact act_restored_of_gain_covers_deficit gain_cover_is_necessary same_debt_two_bound_collapse same_debt_two_certificates_sound additive_component_certificates_sound exact_component_tightening_restores_act insufficient_gain_cannot_restore
+          do
+            grep -q "$T" "$OUT"
+          done
+      - name: Python planner tests
+        run: |
+          set -euo pipefail
+          cd minimum_proof_acquisition_v1
+          python -m compileall -q .
+          python test_proof_acquisition_v1.py | tee python_test_output.txt
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_MINIMUM_PROOF_ACQUISITION_V1
+          path: |
+            minimum_proof_acquisition_v1/MinimumProofAcquisitionKernelV1.lean
+            minimum_proof_acquisition_v1/proof_acquisition_v1.py
+            minimum_proof_acquisition_v1/test_proof_acquisition_v1.py
+            minimum_proof_acquisition_v1/README.md
+            minimum_proof_acquisition_v1/build/lean_output.txt
+            minimum_proof_acquisition_v1/python_test_output.txt

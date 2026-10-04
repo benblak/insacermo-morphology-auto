@@ -1,0 +1,58 @@
+name: certified-online-debt-v1
+
+on:
+  push:
+    branches:
+      - insacermo-certified-online-debt-v1
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lean 4.19.0
+        run: |
+          elan toolchain install leanprover/lean4:v4.19.0
+          elan default leanprover/lean4:v4.19.0
+          lean --version
+      - name: Reject sorry admit custom axiom
+        run: |
+          set -e
+          FILE=certified_online_debt_v1/CertifiedOnlineDebtKernelV1.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          mkdir -p certified_online_debt_v1/build
+          lean certified_online_debt_v1/CertifiedOnlineDebtKernelV1.lean 2>&1 | tee certified_online_debt_v1/build/lean_output.txt
+      - name: Require theorem reports
+        run: |
+          set -e
+          OUT=certified_online_debt_v1/build/lean_output.txt
+          for T in safe_of_certified_upper_bound no_free_debt_observation_only observation_only_reuse_can_be_unsafe authority_bound_is_true_upper_bound same_debt_bounds_compose_by_tighter component_bounds_add iterated_growth_cap finite_no_free_debt_witness
+          do
+            grep -q "$T" "$OUT"
+          done
+      - name: Python verifier tests
+        run: |
+          set -euo pipefail
+          cd certified_online_debt_v1
+          python -m compileall -q .
+          python test_online_debt_v1.py | tee python_test_output.txt
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_CERTIFIED_ONLINE_DEBT_V1
+          path: |
+            certified_online_debt_v1/CertifiedOnlineDebtKernelV1.lean
+            certified_online_debt_v1/online_debt_v1.py
+            certified_online_debt_v1/test_online_debt_v1.py
+            certified_online_debt_v1/README.md
+            certified_online_debt_v1/build/lean_output.txt
+            certified_online_debt_v1/python_test_output.txt

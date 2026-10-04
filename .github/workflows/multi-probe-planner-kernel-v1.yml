@@ -1,0 +1,46 @@
+name: multi-probe-planner-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-multi-probe-planner-kernel-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          FILE=multi_probe_planner_kernel/MultiProbePlannerKernel.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean -o costly_probe_minimal/CostlyProbeMinimal.olean costly_probe_minimal/CostlyProbeMinimal.lean
+          LEAN_PATH=costly_probe_minimal $HOME/.elan/bin/lean -o safe_probe_theorem/SafeProbeTheorem.olean safe_probe_theorem/SafeProbeTheorem.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem $HOME/.elan/bin/lean -o probe_repair_kernel/ProbeRepairKernel.olean probe_repair_kernel/ProbeRepairKernel.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem:probe_repair_kernel $HOME/.elan/bin/lean -o probe_price_kernel/ProbePriceKernel.olean probe_price_kernel/ProbePriceKernel.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem:probe_repair_kernel:probe_price_kernel $HOME/.elan/bin/lean -o probe_reserve_debt_bridge/ProbeReserveDebtBridge.olean probe_reserve_debt_bridge/ProbeReserveDebtBridge.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem:probe_repair_kernel:probe_price_kernel:probe_reserve_debt_bridge $HOME/.elan/bin/lean -o multi_probe_budget_kernel/MultiProbeBudgetKernel.olean multi_probe_budget_kernel/MultiProbeBudgetKernel.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem:probe_repair_kernel:probe_price_kernel:probe_reserve_debt_bridge:multi_probe_budget_kernel $HOME/.elan/bin/lean multi_probe_planner_kernel/MultiProbePlannerKernel.lean 2>&1 | tee multi_probe_planner_kernel/lean_output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          OUT=multi_probe_planner_kernel/lean_output.txt
+          for T in lower_price_gives_lower_debt lower_price_preserves_affordability lower_price_preserves_more_reserve optimal_contract_plan_is_affordable_if_any_is optimal_contract_plan_maximizes_reserve_left optimal_unaffordable_implies_all_contract_plans_unaffordable planner_afford_or_refuse
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"

@@ -1,0 +1,40 @@
+name: occupancy-online-no-oracle-v1
+
+on:
+  push:
+    branches:
+      - insacermo-certified-online-debt-v1
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Occupancy online no-oracle audit
+        run: |
+          set -euo pipefail
+          python certified_online_debt_v1/occupancy_online_no_oracle_audit.py | tee certified_online_debt_v1/OCCUPANCY_ONLINE_NO_ORACLE_OUTPUT.txt
+      - name: Assert audit status and safety diagnostics
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          p="certified_online_debt_v1/OCCUPANCY_ONLINE_NO_ORACLE_AUDIT.json"
+          d=json.load(open(p))
+          assert d["status"]=="PASS"
+          assert d["strict_no_external_authority"]["total"]["wrong"]==0
+          assert d["strict_no_external_authority"]["total"]["act"]==0
+          assert d["observation_only_prefix_envelope"]["total"]["act"]==0
+          assert d["retrospective_required_external_growth_cap_DIAGNOSTIC_ONLY"]["total"]["wrong"]==0
+          assert d["retrospective_required_shared_growth_cap_DIAGNOSTIC_ONLY"]["total"]["wrong"]==0
+          print("OCCUPANCY_ONLINE_NO_ORACLE_ASSERTIONS: PASS")
+          PY
+      - name: Upload audit artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OCCUPANCY_ONLINE_NO_ORACLE_V1
+          path: |
+            certified_online_debt_v1/occupancy_online_no_oracle_audit.py
+            certified_online_debt_v1/OCCUPANCY_ONLINE_NO_ORACLE_AUDIT.json
+            certified_online_debt_v1/OCCUPANCY_ONLINE_NO_ORACLE_OUTPUT.txt
