@@ -386,7 +386,7 @@ theorem duplicate_worlds_preserve_exact_depth
     (B : Belief W) :
     ExactDepth
         (fun wi : W × I => feasible wi.1)
-        (fun p wi : W × I => observe p wi.1)
+        (fun (p : P) (wi : W × I) => observe p wi.1)
         d
         (fun wi : W × I => B wi.1)
       ↔
@@ -395,7 +395,7 @@ theorem duplicate_worlds_preserve_exact_depth
   let hq : ExactQuotient q
       (fun wi : W × I => feasible wi.1)
       feasible
-      (fun p wi : W × I => observe p wi.1)
+      (fun (p : P) (wi : W × I) => observe p wi.1)
       observe := by
     refine ⟨?_, ?_⟩
     · intro wi a
@@ -409,8 +409,10 @@ theorem duplicate_worlds_preserve_exact_depth
     funext w
     apply propext
     constructor
-    · rintro ⟨wi, hB, hqw⟩
-      simpa [q] using hB
+    · rintro ⟨⟨w', i⟩, hB, hqw⟩
+      dsimp [q] at hqw
+      subst w'
+      exact hB
     · intro hB
       let i0 : I := Classical.choice (inferInstance : Nonempty I)
       exact ⟨(w, i0), hB, rfl⟩
