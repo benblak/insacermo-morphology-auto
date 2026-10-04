@@ -1,0 +1,75 @@
+name: package-effective-complexity-checkpoint-v1
+
+on:
+  push:
+    branches:
+      - insacermo-finite-reachable-belief-bound-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write checkpoint manifest
+        run: |
+          cat > INSACERMO_EFFECTIVE_COMPLEXITY_CHECKPOINT_2026-10-04.md <<'EOF'
+          # INSACERMO — Effective / Semantic Complexity checkpoint
+          Date: 2026-10-04
+
+          This package freezes the source tree containing the October 4 exact-quotient,
+          effective-state, semantic-complexity, reachable-belief, canonical-history,
+          and finite reachable-belief catalogue kernels.
+
+          ## Verified runs before packaging
+          - Effective Size / Exact Quotient + Effective State Bound:
+            run 37237262675 — SUCCESS
+          - Semantic Complexity Law:
+            run 37237262667 — SUCCESS
+          - Reachable Belief / Canonical Reachability:
+            run 37237262752 — SUCCESS
+          - Finite Reachable-Belief Bound / explicit belief catalogue:
+            run 37237262640 — SUCCESS
+
+          ## Final source commit verified by those runs
+          b27be309b93bdd7876417603faab3884a52c7b9d
+
+          ## Core statements in scope
+          - exact semantic quotient preserves exact planning depth and exact budget
+          - duplicated semantically identical worlds preserve exact depth
+          - belief-signature cover size: 2^N_eff
+          - adaptive prospective node bound: 1 + m + ... + m^d
+          - canonical observation histories commute/idempotently collapse in passive deterministic setting
+          - canonical history code count: (M+1)^P
+          - every realizable bounded history is represented in an explicit decoded belief catalogue
+            of length (M+1)^P
+
+          ## Precision
+          These are mathematical/formal statements for the encoded deterministic/passive finite models.
+          They are not a proof of Python/JavaScript correctness, dataset provenance, wall-clock complexity,
+          or a universal complexity theorem for all INSACERMO extensions.
+
+          CI rejects sorry/admit/custom axioms. #print axioms reports only standard Lean foundations
+          such as propext, Quot.sound, and Classical.choice where used.
+          EOF
+
+      - name: Remove transient compiled outputs if present
+        run: |
+          find . -name '*.olean' -delete || true
+          find . -name 'lean_output.txt' -delete || true
+          find . -name 'state_bound_output.txt' -delete || true
+
+      - name: Upload complete source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_EFFECTIVE_SEMANTIC_COMPLEXITY_COMPLETE_2026-10-04
+          path: |
+            .
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 90
