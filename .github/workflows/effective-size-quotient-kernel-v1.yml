@@ -33,6 +33,7 @@ jobs:
         run: |
           set -euo pipefail
           $HOME/.elan/bin/lean effective_size_quotient_kernel/EffectiveSizeQuotientKernelV1.lean 2>&1 | tee effective_size_quotient_kernel/lean_output.txt
+          $HOME/.elan/bin/lean effective_size_quotient_kernel/EffectiveStateBoundV1.lean 2>&1 | tee effective_size_quotient_kernel/state_bound_output.txt
       - name: Require theorems and no sorryAx
         run: |
           OUT=effective_size_quotient_kernel/lean_output.txt
@@ -41,3 +42,9 @@ jobs:
             grep -q "$T" "$OUT"
           done
           ! grep -q "sorryAx" "$OUT"
+          OUT2=effective_size_quotient_kernel/state_bound_output.txt
+          for T in belief_universe_card reachable_beliefs_le_two_pow depth_indexed_state_bound raw_multiplicity_absent_after_quotient memo_key_upper_bound
+          do
+            grep -q "$T" "$OUT2"
+          done
+          ! grep -q "sorryAx" "$OUT2"
