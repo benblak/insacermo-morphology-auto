@@ -1,0 +1,49 @@
+name: temporal-validity-lean-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-temporal-validity-kernel-v1
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lean 4.19.0
+        run: |
+          elan toolchain install leanprover/lean4:v4.19.0
+          elan default leanprover/lean4:v4.19.0
+          lean --version
+      - name: Reject sorry/admit/custom axiom
+        run: |
+          set -e
+          FILE=temporal_validity_kernel/TemporalValidityKernelV1.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          mkdir -p temporal_validity_kernel/build
+          lean temporal_validity_kernel/TemporalValidityKernelV1.lean 2>&1 | tee temporal_validity_kernel/build/lean_output.txt
+      - name: Require all theorem axiom reports
+        run: |
+          set -e
+          OUT=temporal_validity_kernel/build/lean_output.txt
+          for T in             safe_of_directed_debt             safe_antitone_debt             observer_fracture_no_policy             observation_only_monitor_same_output             temporal_observation_only_no_common_correctness             occupancy_style_observer_fracture
+          do
+            grep -q "$T" "$OUT"
+          done
+      - name: Upload kernel audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_TEMPORAL_VALIDITY_LEAN_KERNEL_V1
+          path: |
+            temporal_validity_kernel/TemporalValidityKernelV1.lean
+            temporal_validity_kernel/README.md
+            temporal_validity_kernel/build/lean_output.txt
