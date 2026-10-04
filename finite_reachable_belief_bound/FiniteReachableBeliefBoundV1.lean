@@ -164,7 +164,10 @@ theorem canonical_digit_zero_iff_no_assignment
     simp [canonicalDigit, hc, h]
   · have hc : canonicalCode history p = none := by
       simp [canonicalCode, h]
-    simp [canonicalDigit, hc, h]
+    have hno : ¬ HistoryAssignment history p o := by
+      intro ha
+      exact h ⟨o, ha⟩
+    simp [canonicalDigit, hc, hno]
 
 theorem canonical_digit_succ_iff
     {W : Type}
