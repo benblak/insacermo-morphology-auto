@@ -199,7 +199,7 @@ def main():
 
     disc_mask = (df["time"] < DISCOVERY_END).to_numpy()
     # Exclude the last horizon from holdout so every label is fully observable inside snapshot.
-    hold_end = pd.Timestamp(END) - pd.Timedelta(days=HORIZON_DAYS)
+    hold_end = pd.Timestamp(END, tz="UTC") - pd.Timedelta(days=HORIZON_DAYS)
     hold_mask = ((df["time"] >= DISCOVERY_END) & (df["time"] < hold_end)).to_numpy()
 
     discovery = df.loc[disc_mask].reset_index(drop=True)
