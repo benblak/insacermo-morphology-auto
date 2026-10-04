@@ -265,6 +265,112 @@ theorem canonical_reachability_factorization
   · intro w
     exact runHistory_iff_assignment observe B history w
 
+/-- Canonical option-valued code extracted from an arbitrary history. -/
+noncomputable def canonicalCode
+    {P O : Type}
+    (history : List (Constraint P O))
+    (p : P) : Option O :=
+  if h : ∃ o, HistoryAssignment history p o then
+    some (Classical.choose h)
+  else
+    none
+
+theorem canonicalCode_eq_some_iff
+    {P O : Type}
+    (history : List (Constraint P O))
+    (hrealSingle :
+      ∀ p o₁ o₂,
+        HistoryAssignment history p o₁ →
+        HistoryAssignment history p o₂ →
+        o₁ = o₂)
+    (p : P)
+    (o : O) :
+    canonicalCode history p = some o ↔
+      HistoryAssignment history p o := by
+  classical
+  unfold canonicalCode
+  split
+  · rename_i h
+    let chosen : O := Classical.choose h
+    have hchosen : HistoryAssignment history p chosen :=
+      Classical.choose_spec h
+    have heq : chosen = o ↔ HistoryAssignment history p o := by
+      constructor
+      · intro hco
+        simpa [hco] using hchosen
+      · intro ho
+        exact hrealSingle p chosen o hchosen ho
+    simp [chosen, heq]
+  · rename_i h
+    constructor
+    · intro hs
+      simp at hs
+    · intro ha
+      exact False.elim (h ⟨o, ha⟩)
+
+theorem canonicalCode_eq_none_iff
+    {P O : Type}
+    (history : List (Constraint P O))
+    (p : P) :
+    canonicalCode history p = none ↔
+      ¬ ∃ o, HistoryAssignment history p o := by
+  classical
+  unfold canonicalCode
+  split <;> simp_all
+
+/--
+For realizable deterministic histories, equality of canonical option-valued
+codes implies equality of the induced partial assignment relation.
+-/
+theorem same_canonicalCode_same_assignment
+    {W P O : Type}
+    (observe : P → W → O)
+    (B : Belief W)
+    (h₁ h₂ : List (Constraint P O))
+    (hr₁ : RealizableHistory observe B h₁)
+    (hr₂ : RealizableHistory observe B h₂)
+    (hcode : canonicalCode h₁ = canonicalCode h₂) :
+    ∀ p o,
+      HistoryAssignment h₁ p o ↔ HistoryAssignment h₂ p o := by
+  have hs₁ := realizable_assignment_single_valued observe B h₁ hr₁
+  have hs₂ := realizable_assignment_single_valued observe B h₂ hr₂
+  intro p o
+  have hp : canonicalCode h₁ p = canonicalCode h₂ p := by
+    simpa using congrFun hcode p
+  constructor
+  · intro ha
+    have hc1 : canonicalCode h₁ p = some o :=
+      (canonicalCode_eq_some_iff h₁ hs₁ p o).2 ha
+    have hc2 : canonicalCode h₂ p = some o := by
+      rw [← hp]
+      exact hc1
+    exact (canonicalCode_eq_some_iff h₂ hs₂ p o).1 hc2
+  · intro ha
+    have hc2 : canonicalCode h₂ p = some o :=
+      (canonicalCode_eq_some_iff h₂ hs₂ p o).2 ha
+    have hc1 : canonicalCode h₁ p = some o := by
+      rw [hp]
+      exact hc2
+    exact (canonicalCode_eq_some_iff h₁ hs₁ p o).1 hc1
+
+/--
+Canonical-code factorization:
+two realizable raw histories with the same canonical code induce exactly the
+same reachable belief.
+-/
+theorem same_canonicalCode_same_belief
+    {W P O : Type}
+    (observe : P → W → O)
+    (B : Belief W)
+    (h₁ h₂ : List (Constraint P O))
+    (hr₁ : RealizableHistory observe B h₁)
+    (hr₂ : RealizableHistory observe B h₂)
+    (hcode : canonicalCode h₁ = canonicalCode h₂) :
+    runHistory observe B h₁ =
+      runHistory observe B h₂ := by
+  apply same_assignment_same_belief observe B h₁ h₂
+  exact same_canonicalCode_same_assignment observe B h₁ h₂ hr₁ hr₂ hcode
+
 /--
 Canonical syntactic code space.
 For each of n probes, a digit 0 means "not observed" and digits 1..m encode one
@@ -341,6 +447,10 @@ theorem canonical_history_code_count
 #print axioms realizable_assignment_single_valued
 #print axioms same_assignment_same_belief
 #print axioms canonical_reachability_factorization
+#print axioms canonicalCode_eq_some_iff
+#print axioms canonicalCode_eq_none_iff
+#print axioms same_canonicalCode_same_assignment
+#print axioms same_canonicalCode_same_belief
 #print axioms partialCodes_length
 #print axioms canonical_history_code_count
 
