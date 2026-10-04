@@ -1,0 +1,40 @@
+name: effective-size-quotient-kernel-v1
+
+on:
+  push:
+    branches:
+      - insacermo-effective-size-quotient-kernel-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          FILE=effective_size_quotient_kernel/EffectiveSizeQuotientKernelV1.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean effective_size_quotient_kernel/EffectiveSizeQuotientKernelV1.lean 2>&1 | tee effective_size_quotient_kernel/lean_output.txt
+      - name: Require theorems and no sorryAx
+        run: |
+          OUT=effective_size_quotient_kernel/lean_output.txt
+          for T in commonAction_iff_lift occurs_iff_lift lift_refine_eq canSolveAtDepth_iff_lift canSolveWithin_iff_lift exactDepth_iff_lift exactBudget_iff_lift duplicate_worlds_preserve_exact_depth
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"
