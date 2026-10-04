@@ -73,13 +73,13 @@ theorem history_adjacent_swap
     {W P O : Type}
     (observe : P → W → O)
     (B : Belief W)
-    (prefix suffix : List (Constraint P O))
+    (pre suffix : List (Constraint P O))
     (c₁ c₂ : Constraint P O) :
     runHistory observe B
-      (prefix ++ c₁ :: c₂ :: suffix) =
+      (pre ++ c₁ :: c₂ :: suffix) =
     runHistory observe B
-      (prefix ++ c₂ :: c₁ :: suffix) := by
-  induction prefix generalizing B with
+      (pre ++ c₂ :: c₁ :: suffix) := by
+  induction pre generalizing B with
   | nil =>
       simp [runHistory, applyConstraint_comm]
   | cons h t ih =>
@@ -90,13 +90,13 @@ theorem history_duplicate_adjacent
     {W P O : Type}
     (observe : P → W → O)
     (B : Belief W)
-    (prefix suffix : List (Constraint P O))
+    (pre suffix : List (Constraint P O))
     (c : Constraint P O) :
     runHistory observe B
-      (prefix ++ c :: c :: suffix) =
+      (pre ++ c :: c :: suffix) =
     runHistory observe B
-      (prefix ++ c :: suffix) := by
-  induction prefix generalizing B with
+      (pre ++ c :: suffix) := by
+  induction pre generalizing B with
   | nil =>
       simp only [List.nil_append, runHistory]
       rw [applyConstraint_idem]
@@ -140,6 +140,23 @@ def partialCodes (alphabet : Nat) : Nat → List (List Nat)
       (List.range alphabet).flatMap
         (fun a => (partialCodes alphabet n).map (fun xs => a :: xs))
 
+theorem flatMap_const_length
+    {α β : Type}
+    (xs : List α)
+    (f : α → List β)
+    (k : Nat)
+    (h : ∀ x ∈ xs, (f x).length = k) :
+    (xs.flatMap f).length = xs.length * k := by
+  induction xs with
+  | nil =>
+      simp
+  | cons x xs ih =>
+      have hx : (f x).length = k := h x (by simp)
+      have ht : ∀ y ∈ xs, (f y).length = k := by
+        intro y hy
+        exact h y (by simp [hy])
+      simp [List.flatMap, hx, ih ht, Nat.add_mul]
+
 theorem partialCodes_length
     (alphabet : Nat) :
     ∀ n : Nat,
@@ -149,7 +166,23 @@ theorem partialCodes_length
   | zero =>
       simp [partialCodes]
   | succ n ih =>
-      simp [partialCodes, ih, Nat.pow_succ, Nat.mul_comm]
+      let f : Nat → List (List Nat) :=
+        fun a => (partialCodes alphabet n).map (fun xs => a :: xs)
+      have hf :
+          ∀ a ∈ List.range alphabet,
+            (f a).length = alphabet ^ n := by
+        intro a ha
+        simp [f, ih]
+      calc
+        (partialCodes alphabet (n + 1)).length
+            = (List.range alphabet).length * (alphabet ^ n) := by
+                simpa [partialCodes, f] using
+                  flatMap_const_length (List.range alphabet) f
+                    (alphabet ^ n) hf
+        _ = alphabet * (alphabet ^ n) := by simp
+        _ = alphabet ^ (n + 1) := by
+              rw [Nat.pow_succ]
+              exact Nat.mul_comm _ _
 
 theorem canonical_history_code_count
     (probeCount outcomeBound : Nat) :
