@@ -1,0 +1,29 @@
+name: realdata-usgs-future-nearby-event-v1
+
+on:
+  push:
+    branches:
+      - insacermo-realdata-usgs-future-nearby-event-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install audit dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "numpy>=1.26" "pandas>=2.1"
+      - name: Run frozen USGS temporal audit
+        run: |
+          python realdata_usgs_future_v1/audit.py | tee realdata_usgs_future_v1/output.txt
+      - name: Require structural audit completion
+        run: |
+          OUT=realdata_usgs_future_v1/output.txt
+          grep -q "probe_family_size 24" "$OUT"
+          grep -q "^AUDIT_PASS$" "$OUT"
