@@ -162,7 +162,7 @@ theorem reachable_history_lands_in_operational_catalogue
     (history : List NatConstraint)
     (hreal : InsacermoReachableBelief.RealizableHistory observe B history)
     (hbound : BoundedHistory probeCount outcomeBound history) :
-    runHistory observe B history ∈
+    InsacermoReachableBelief.runHistory observe B history ∈
       beliefCatalogue observe B probeCount outcomeBound := by
   exact every_reachable_belief_mem_catalogue
     observe B probeCount outcomeBound history hreal hbound
