@@ -1,0 +1,44 @@
+name: probe-reserve-debt-bridge-v1
+
+on:
+  push:
+    branches:
+      - insacermo-probe-reserve-debt-bridge-v1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.33.1
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.33.1
+      - name: Reject sorry admit custom axiom
+        run: |
+          FILE=probe_reserve_debt_bridge/ProbeReserveDebtBridge.lean
+          ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+          ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+      - name: Lean kernel check
+        run: |
+          set -euo pipefail
+          $HOME/.elan/bin/lean -o costly_probe_minimal/CostlyProbeMinimal.olean costly_probe_minimal/CostlyProbeMinimal.lean
+          LEAN_PATH=costly_probe_minimal $HOME/.elan/bin/lean -o safe_probe_theorem/SafeProbeTheorem.olean safe_probe_theorem/SafeProbeTheorem.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem $HOME/.elan/bin/lean -o probe_repair_kernel/ProbeRepairKernel.olean probe_repair_kernel/ProbeRepairKernel.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem:probe_repair_kernel $HOME/.elan/bin/lean -o probe_price_kernel/ProbePriceKernel.olean probe_price_kernel/ProbePriceKernel.lean
+          LEAN_PATH=costly_probe_minimal:safe_probe_theorem:probe_repair_kernel:probe_price_kernel $HOME/.elan/bin/lean probe_reserve_debt_bridge/ProbeReserveDebtBridge.lean 2>&1 | tee probe_reserve_debt_bridge/lean_output.txt
+      - name: Require theorem and no sorryAx
+        run: |
+          OUT=probe_reserve_debt_bridge/lean_output.txt
+          for T in zero_price_iff_existing_safe affordable_implies_existing_safe equality_to_reserve_is_refused price_exhausting_margin_is_refused affordable_exactly_strict_post_debt decision_probe_sound decision_repair_probe_sound decision_refuse_sound decision_complete
+          do
+            grep -q "$T" "$OUT"
+          done
+          ! grep -q "sorryAx" "$OUT"

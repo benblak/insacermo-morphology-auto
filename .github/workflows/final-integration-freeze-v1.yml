@@ -1,0 +1,62 @@
+name: final-integration-freeze-v1
+
+on:
+  push:
+    branches:
+      - insacermo-final-integration-freeze-v1
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.19.0
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          $HOME/.elan/bin/elan toolchain install leanprover/lean4:v4.19.0
+          $HOME/.elan/bin/elan default leanprover/lean4:v4.19.0
+          $HOME/.elan/bin/lean --version
+      - name: Audit Lean source hygiene
+        run: |
+          set -e
+          for FILE in             minimum_proof_acquisition_v1/MinimumProofAcquisitionKernelV1.lean             adaptive_proof_acquisition_v2/AdaptiveProofAcquisitionKernelV2.lean             certified_online_debt_v1/CertifiedOnlineDebtKernelV1.lean             temporal_validity_kernel/TemporalValidityKernelV1.lean             final_integration_v1/FinalIntegrationKernelV1.lean
+          do
+            ! grep -nE '(^|[^A-Za-z])(sorry|admit)([^A-Za-z]|$)' "$FILE"
+            ! grep -nE '^[[:space:]]*(axiom|constant)[[:space:]]' "$FILE"
+          done
+      - name: Lean kernels
+        run: |
+          set -euo pipefail
+          mkdir -p final_integration_v1/build
+          for FILE in             minimum_proof_acquisition_v1/MinimumProofAcquisitionKernelV1.lean             adaptive_proof_acquisition_v2/AdaptiveProofAcquisitionKernelV2.lean             certified_online_debt_v1/CertifiedOnlineDebtKernelV1.lean             temporal_validity_kernel/TemporalValidityKernelV1.lean             final_integration_v1/FinalIntegrationKernelV1.lean
+          do
+            lean "$FILE"
+          done 2>&1 | tee final_integration_v1/build/all_lean_output.txt
+          grep -q "verified_bound_plus_runtime_gate_is_safe" final_integration_v1/build/all_lean_output.txt
+          grep -q "equality_never_passes_strict_gate" final_integration_v1/build/all_lean_output.txt
+          grep -q "fail_closed_non_act_is_safe" final_integration_v1/build/all_lean_output.txt
+      - name: Existing Python unit suites
+        run: |
+          set -euo pipefail
+          (cd minimum_proof_acquisition_v1 && python test_proof_acquisition_v1.py)
+          (cd adaptive_proof_acquisition_v2 && python test_adaptive_proof_acquisition_v2.py)
+          (cd certified_online_debt_v1 && python test_online_debt_v1.py)
+          (cd temporal_runtime && python test_runtime_v1.py)
+      - name: Final cross-layer integration test
+        run: |
+          set -euo pipefail
+          export PYTHONPATH="$GITHUB_WORKSPACE:$GITHUB_WORKSPACE/minimum_proof_acquisition_v1:$GITHUB_WORKSPACE/certified_online_debt_v1:$GITHUB_WORKSPACE/temporal_runtime"
+          python final_integration_v1/test_final_integration_v1.py | tee final_integration_v1/FINAL_INTEGRATION_TEST_OUTPUT.txt
+      - name: Upload freeze artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_FINAL_INTEGRATION_FREEZE_V1
+          path: |
+            final_integration_v1/
+            minimum_proof_acquisition_v1/
+            adaptive_proof_acquisition_v2/
+            certified_online_debt_v1/
+            temporal_runtime/
+            temporal_validity_kernel/
