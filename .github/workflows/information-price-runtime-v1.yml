@@ -1,0 +1,24 @@
+name: INSACERMO Information Price Runtime V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - information_price_runtime_v1.py
+      - test_information_price_runtime_v1.py
+      - smoke_test.py
+      - .github/workflows/information-price-runtime-v1.yml
+  workflow_dispatch:
+jobs:
+  runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Information-price runtime tests
+        run: python test_information_price_runtime_v1.py
+      - name: Existing engine smoke test
+        run: python smoke_test.py
