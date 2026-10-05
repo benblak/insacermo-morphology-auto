@@ -35,14 +35,17 @@ theorem certifiesAt_iff_hitsConflictsAt
     CertifiesAt observe act S x ↔ HitsConflictsAt observe act S x := by
   constructor
   · intro hcert y hdiff
-    by_contra hnone
+    apply Classical.byContradiction
+    intro hnone
     have hsame : SameOn observe S x y := by
       intro p hp
-      by_contra hsep
+      apply Classical.byContradiction
+      intro hsep
       exact hnone ⟨p, hp, hsep⟩
     exact hdiff (hcert y hsame)
   · intro hhit y hsame
-    by_contra hdiff
+    apply Classical.byContradiction
+    intro hdiff
     obtain ⟨p, hp, hsep⟩ := hhit y hdiff
     exact hsep (hsame p hp)
 
