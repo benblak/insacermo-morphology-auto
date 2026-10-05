@@ -1,0 +1,26 @@
+name: INSACERMO Fashion Min Information V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install numpy
+        run: python -m pip install --disable-pip-version-check numpy
+      - name: Run Fashion-MNIST minimum-information contract audit
+        run: python experiments/fashion_min_information_v1.py
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_FASHION_MIN_INFORMATION_CONTRACT_V1
+          path: FASHION_MIN_INFORMATION_CONTRACT_V1.json
+          if-no-files-found: error
