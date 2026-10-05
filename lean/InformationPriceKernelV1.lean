@@ -41,13 +41,13 @@ theorem certifiesAt_iff_hitsConflictsAt
       intro p hp
       apply Classical.byContradiction
       intro hsep
-      exact hnone ⟨p, hp, hsep⟩
+      exact hnone ⟨p, hp, fun hyx => hsep hyx.symm⟩
     exact hdiff (hcert y hsame)
   · intro hhit y hsame
     apply Classical.byContradiction
     intro hdiff
     obtain ⟨p, hp, hsep⟩ := hhit y hdiff
-    exact hsep (hsame p hp)
+    exact hsep (hsame p hp).symm
 
 /-- Adding probes cannot destroy an already valid certificate. -/
 theorem certifiesAt_mono
