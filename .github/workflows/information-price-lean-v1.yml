@@ -1,0 +1,31 @@
+name: INSACERMO Information Price Lean V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - lean/InformationPriceKernelV1.lean
+      - .github/workflows/information-price-lean-v1.yml
+  workflow_dispatch:
+
+jobs:
+  lean-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean version
+        run: lean --version
+      - name: Compile information-price kernel
+        run: lean lean/InformationPriceKernelV1.lean
+      - name: Audit forbidden placeholders
+        run: |
+          if grep -R -n -E '\b(sorry|admit)\b' lean/InformationPriceKernelV1.lean; then
+            echo "Forbidden placeholder found"
+            exit 1
+          fi
+          echo "ZERO_SORRY_ADMIT"
