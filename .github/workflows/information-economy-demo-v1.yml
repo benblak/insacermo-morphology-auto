@@ -1,0 +1,24 @@
+name: INSACERMO Information Economy Demo V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - experiments/information_economy_demo_v1.py
+      - .github/workflows/information-economy-demo-v1.yml
+  workflow_dispatch:
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python experiments/information_economy_demo_v1.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_INFORMATION_ECONOMY_DEMO_V1
+          path: INFORMATION_ECONOMY_DEMO_V1.json
+          if-no-files-found: error
