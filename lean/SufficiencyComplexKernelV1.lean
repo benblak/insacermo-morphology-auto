@@ -1966,4 +1966,63 @@ theorem realizedSafeProbe_iff_contingentAction
     obtain ⟨haC, hgood⟩ := hchoose o hreal
     exact ⟨choose o, haC, hgood⟩
 
+/-! ## Exact repair-information residual law -/
+
+def ResidualOutside
+    {World : Type u}
+    (B G : WSet World) : WSet World :=
+  fun x => B x ∧ ¬ G x
+
+/--
+EXACT REPAIR RESIDUAL LAW.
+After adding one capability b, the whole ambiguity B is individually
+serviceable exactly when the part of B not served by b was already
+individually serviceable by the old capabilities.
+
+This is the correct non-linear compensation law: one repair may cover
+arbitrarily many worlds at once; information cannot replace a genuinely
+unserviceable residual world.
+-/
+theorem pointwiseServiceable_addCapability_iff_residual
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (b : Action)
+    (B : WSet World) :
+    PointwiseServiceable good (AddCapability C b) B ↔
+      PointwiseServiceable good C
+        (ResidualOutside B (GoodRegion good b)) := by
+  constructor
+  · intro h x hx
+    obtain ⟨a, ha, hgood⟩ := h x hx.1
+    cases ha with
+    | inl haC =>
+        exact ⟨a, haC, hgood⟩
+    | inr hab =>
+        subst a
+        exact False.elim (hx.2 hgood)
+  · intro h x hx
+    by_cases hgb : GoodRegion good b x
+    · exact ⟨b, Or.inr rfl, hgb⟩
+    · obtain ⟨a, haC, hgood⟩ := h x ⟨hx, hgb⟩
+      exact ⟨a, Or.inl haC, hgood⟩
+
+/--
+FULL-INFORMATION + ONE-REPAIR LAW.
+With full information available, adding b rescues B exactly when every world
+outside b's service region was already individually serviceable.
+-/
+theorem identityProbeSafe_afterRepair_iff_residualServiceable
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (b : Action)
+    (B : WSet World) :
+    RealizedSafeProbe good (AddCapability C b) B (fun x => x) ↔
+      PointwiseServiceable good C
+        (ResidualOutside B (GoodRegion good b)) := by
+  rw [identityProbeSafe_iff_pointwiseServiceable]
+  exact pointwiseServiceable_addCapability_iff_residual good C b B
+
+
 end Insacermo
