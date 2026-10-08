@@ -790,4 +790,68 @@ theorem sufficient_batch_endpoint_extensional
     ⟩
 
 
+/-! ## Concrete endpoint/path separation witness -/
+
+inductive W3 where
+  | w0 | w1 | w2
+  deriving DecidableEq, Repr
+
+inductive A3 where
+  | a0 | a1 | a01
+  deriving DecidableEq, Repr
+
+def goodW3 : W3 → A3 → Prop
+  | W3.w0, A3.a0  => True
+  | W3.w1, A3.a0  => False
+  | W3.w2, A3.a0  => False
+  | W3.w0, A3.a1  => False
+  | W3.w1, A3.a1  => True
+  | W3.w2, A3.a1  => False
+  | W3.w0, A3.a01 => True
+  | W3.w1, A3.a01 => True
+  | W3.w2, A3.a01 => False
+
+def baseC3 : CapSet A3 := fun a => a = A3.a0
+
+def B01 : WSet W3 := fun x => x = W3.w0 ∨ x = W3.w1
+
+theorem path_witness_after_a1_not_actionable :
+    ¬ Actionable goodW3 (AddCapability baseC3 A3.a1) B01 := by
+  intro h
+  obtain ⟨a, ha, hgood⟩ := h
+  rcases ha with ha | ha
+  · subst a
+    have := hgood W3.w1 (Or.inr rfl)
+    simp [goodW3] at this
+  · subst a
+    have := hgood W3.w0 (Or.inl rfl)
+    simp [goodW3] at this
+
+theorem path_witness_after_a01_actionable :
+    Actionable goodW3 (AddCapability baseC3 A3.a01) B01 := by
+  refine ⟨A3.a01, Or.inr rfl, ?_⟩
+  intro x hx
+  rcases hx with rfl | rfl <;> simp [goodW3]
+
+/--
+Two repair orders have the same final actionability geometry, while their
+first intermediate geometries differ on B01. This is a concrete formal witness
+of endpoint/path separation in the static model.
+-/
+theorem endpoint_same_path_different_witness :
+    (¬ Actionable goodW3 (AddCapability baseC3 A3.a1) B01) ∧
+    Actionable goodW3 (AddCapability baseC3 A3.a01) B01 ∧
+    (∀ B : WSet W3,
+      Actionable goodW3 (AddCapabilities baseC3 [A3.a1, A3.a01]) B ↔
+      Actionable goodW3 (AddCapabilities baseC3 [A3.a01, A3.a1]) B) := by
+  constructor
+  · exact path_witness_after_a1_not_actionable
+  constructor
+  · exact path_witness_after_a01_actionable
+  · intro B
+    apply actionable_batch_endpoint_extensional
+    intro a
+    cases a <;> simp
+
+
 end Insacermo
