@@ -1,0 +1,30 @@
+name: INSACERMO Sufficiency Complex V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - lean/SufficiencyComplexKernelV1.lean
+      - experiments/sufficiency_complex_audit_v1.py
+      - .github/workflows/sufficiency-complex-v1.yml
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean4-action@v1
+        with:
+          auto-config: false
+          build: false
+      - run: lean lean/SufficiencyComplexKernelV1.lean
+      - run: |
+          if grep -R -n -E '\bsorry\b|\badmit\b' lean/SufficiencyComplexKernelV1.lean; then
+            echo "Forbidden placeholder found"; exit 1
+          fi
+          echo "ZERO_SORRY_ADMIT"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python experiments/sufficiency_complex_audit_v1.py
