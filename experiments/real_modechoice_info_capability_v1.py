@@ -2,7 +2,8 @@
 import json, math, statistics, functools
 from collections import Counter, defaultdict
 
-MODES=("air","train","bus","car")\nMODE_CODE={1:"air",2:"train",3:"bus",4:"car"}
+MODES=("air","train","bus","car")
+MODE_CODE={1:"air",2:"train",3:"bus",4:"car"}
 
 def load_data():
     import statsmodels.api as sm
