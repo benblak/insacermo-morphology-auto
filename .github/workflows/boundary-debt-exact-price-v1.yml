@@ -1,0 +1,24 @@
+name: INSACERMO Boundary Debt Exact Price V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - experiments/boundary_debt_exact_price_v1.py
+      - .github/workflows/boundary-debt-exact-price-v1.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python experiments/boundary_debt_exact_price_v1.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_BOUNDARY_DEBT_EXACT_PRICE_V1
+          path: BOUNDARY_DEBT_EXACT_PRICE_V1.json
+          if-no-files-found: error
