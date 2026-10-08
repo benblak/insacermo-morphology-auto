@@ -568,4 +568,48 @@ theorem insufficiency_requires_resource_upgrade
   exact hr (mono s r hsr hs)
 
 
+/-! ## Abstract rank-growth consequence -/
+
+def RankBounded
+    {Obj : Type u}
+    (rank : Obj → Nat)
+    (K : Obj → Prop)
+    (k : Nat) : Prop :=
+  ∀ x, K x → rank x ≤ k
+
+/--
+If one transformation can increase the rank of every newly admissible witness
+by at most one relative to some predecessor witness, then a chain of m such
+transformations increases the global bound by at most m.
+
+This abstract induction isolates the quantitative content of the one-step
+exposure law from any particular finite encoding.
+-/
+theorem iterated_one_step_rank_bound
+    {Obj : Type u}
+    (rank : Obj → Nat)
+    (K : Nat → Obj → Prop)
+    (k0 : Nat)
+    (h0 : RankBounded rank (K 0) k0)
+    (step :
+      ∀ n x, K (n+1) x →
+        K n x ∨
+        ∃ y, K n y ∧ rank x ≤ rank y + 1) :
+    ∀ m, RankBounded rank (K m) (k0 + m) := by
+  intro m
+  induction m with
+  | zero =>
+      simpa using h0
+  | succ n ih =>
+      intro x hx
+      rcases step n x hx with hold | hnew
+      · have hle : rank x ≤ k0 + n := ih x hold
+        exact Nat.le_trans hle (Nat.le_add_right (k0 + n) 1)
+      · obtain ⟨y, hy, hxy⟩ := hnew
+        have hyb : rank y ≤ k0 + n := ih y hy
+        have h1 : rank x ≤ (k0 + n) + 1 := by
+          exact Nat.le_trans hxy (Nat.add_le_add_right hyb 1)
+        simpa [Nat.add_assoc] using h1
+
+
 end Insacermo
