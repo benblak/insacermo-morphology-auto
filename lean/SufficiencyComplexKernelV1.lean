@@ -1431,7 +1431,16 @@ def ConsistentWith
     (T : Theory World)
     (q : WSet World)
     (answer : Bool) : Prop :=
-  if answer then T q else ¬ T q
+  match answer with
+  | true => T q
+  | false => ¬ T q
+
+noncomputable def AnswerOf
+    {World : Type u}
+    (T : Theory World)
+    (q : WSet World) : Bool := by
+  classical
+  exact if T q then true else false
 
 def VersionSpace
     {World : Type u} {Hyp : Type v}
@@ -1440,23 +1449,17 @@ def VersionSpace
     (h : Hyp) : Prop :=
   ∀ qa ∈ Obs, ConsistentWith (sem h) qa.1 qa.2
 
-def AnswerOf
-    {World : Type u}
-    (T : Theory World)
-    (q : WSet World) : Bool :=
-  if h : T q then true else false
-
 theorem answerOf_consistent
     {World : Type u}
     (T : Theory World)
     (q : WSet World) :
     ConsistentWith T q (AnswerOf T q) := by
-  unfold AnswerOf ConsistentWith
-  split <;> simp_all
+  classical
+  unfold AnswerOf
+  by_cases h : T q
+  · simp [h, ConsistentWith]
+  · simp [h, ConsistentWith]
 
-/--
-The true theory is never removed by appending its own observed answer.
--/
 theorem trueTheory_survives_observation
     {World : Type u} {Hyp : Type v}
     (sem : Hyp → Theory World)
@@ -1474,9 +1477,6 @@ theorem trueTheory_survives_observation
       subst qa
       exact answerOf_consistent (sem truth) q
 
-/--
-Version spaces only shrink when observations are appended.
--/
 theorem versionSpace_antitone_under_more_observations
     {World : Type u} {Hyp : Type v}
     (sem : Hyp → Theory World)
@@ -1491,64 +1491,46 @@ def Separates
     {World : Type u}
     (T₁ T₂ : Theory World)
     (q : WSet World) : Prop :=
-  T₁ q ↔ ¬ T₂ q
+  (T₁ q ∧ ¬ T₂ q) ∨ (¬ T₁ q ∧ T₂ q)
 
-/--
-A separating query guarantees that at least one of two competing theories is
-eliminated after observing the true answer.
--/
 theorem separating_query_eliminates_competitor
     {World : Type u}
     (Ttruth Tother : Theory World)
     (q : WSet World)
-    (hsep : Ttruth q ↔ ¬ Tother q) :
+    (hsep : Separates Ttruth Tother q) :
     ¬ ConsistentWith Tother q (AnswerOf Ttruth q) := by
-  unfold AnswerOf ConsistentWith
-  by_cases ht : Ttruth q
-  · simp [ht]
-    exact (hsep.mp ht)
-  · have hto : Tother q := by
-      by_contra hnot
-      have : Ttruth q := (hsep.mpr hnot)
-      exact ht this
-    simp [ht, hto]
+  classical
+  rcases hsep with hpos | hneg
+  · have ht : Ttruth q := hpos.1
+    have hno : ¬ Tother q := hpos.2
+    simp [AnswerOf, ht, ConsistentWith, hno]
+  · have ht : ¬ Ttruth q := hneg.1
+    have hyes : Tother q := hneg.2
+    simp [AnswerOf, ht, ConsistentWith, hyes]
 
-/--
-EXTENSIONAL IDENTIFIABILITY.
-If two theories are not extensionally equal, then some ambiguity query
-separates them in ACT/REFUSE answer.
--/
 theorem nonextensional_theories_have_separating_query
     {World : Type u}
     (T₁ T₂ : Theory World)
     (hne : ¬ ∀ q, T₁ q ↔ T₂ q) :
     ∃ q, Separates T₁ T₂ q := by
-  apply Classical.byContradiction
-  intro hnone
-  apply hne
-  intro q
+  classical
+  push_neg at hne
+  obtain ⟨q, hneq⟩ := hne
   by_cases h1 : T₁ q
-  · constructor
-    · intro _
-      by_contra h2
-      apply hnone
-      refine ⟨q, ?_⟩
-      exact ⟨h1, h2⟩
-    · intro _ => exact h1
-  · constructor
-    · intro h => exact False.elim (h1 h)
-    · intro h2
-      by_contra hnot1
-      exact h2 (by
-        by_contra hnot2
-        apply hnone
-        refine ⟨q, ?_⟩
-        exact ⟨hnot1, hnot2⟩)
+  · have h2 : ¬ T₂ q := by
+      intro hT2
+      exact hneq ⟨fun _ => hT2, fun _ => h1⟩
+    exact ⟨q, Or.inl ⟨h1, h2⟩⟩
+  · have h2 : T₂ q := by
+      by_contra hnot2
+      apply hneq
+      constructor
+      · intro hT1
+        exact False.elim (h1 hT1)
+      · intro hT2
+        exact False.elim (hnot2 hT2)
+    exact ⟨q, Or.inr ⟨h1, h2⟩⟩
 
-/--
-If a candidate theory disagrees extensionally with the truth, one exact query
-exists that preserves the truth and rejects that candidate.
--/
 theorem exact_query_can_kill_any_wrong_theory
     {World : Type u}
     (Ttruth Tother : Theory World)
@@ -1561,6 +1543,5 @@ theorem exact_query_can_kill_any_wrong_theory
   exact ⟨q,
     answerOf_consistent Ttruth q,
     separating_query_eliminates_competitor Ttruth Tother q hsep⟩
-
 
 end Insacermo
