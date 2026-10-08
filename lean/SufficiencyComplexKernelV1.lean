@@ -1142,4 +1142,85 @@ theorem dedicated_boundary_repairs_expose_minimal
         hzActOld
 
 
+/-! ## Obstruction-basis reconstruction: negative semantics -/
+
+def Contains
+    {World : Type u}
+    (B O : WSet World) : Prop :=
+  Subset O B
+
+def ObstructionBasis
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (Basis : (WSet World) → Prop) : Prop :=
+  (∀ O, Basis O → Obstruction good C O) ∧
+  (∀ B, Obstruction good C B → ∃ O, Basis O ∧ Contains B O)
+
+/--
+NEGATIVE RECONSTRUCTION LAW.
+Given any complete obstruction basis, an ambiguity B is actionable exactly
+when it contains no basis obstruction.
+-/
+theorem actionable_iff_avoids_obstructionBasis
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (Basis : (WSet World) → Prop)
+    (hBasis : ObstructionBasis good C Basis)
+    (B : WSet World) :
+    Actionable good C B ↔
+      ∀ O, Basis O → ¬ Contains B O := by
+  constructor
+  · intro hact O hO hcontains
+    have hobsO : Obstruction good C O := hBasis.1 O hO
+    exact hobsO (actionable_downward good C hcontains hact)
+  · intro havoid
+    apply Classical.byContradiction
+    intro hnotAct
+    have hobsB : Obstruction good C B := hnotAct
+    obtain ⟨O, hO, hOB⟩ := hBasis.2 B hobsB
+    exact havoid O hO hOB
+
+/--
+CANONICAL NEGATIVE SEMANTICS.
+Two capability systems sharing the same complete obstruction basis have
+exactly the same actionability judgement on every ambiguity set, even if their
+action labels or redundant capabilities differ.
+-/
+theorem same_obstructionBasis_same_actionability
+    {World : Type u} {Action₁ : Type v} {Action₂ : Type w}
+    (good₁ : World → Action₁ → Prop)
+    (good₂ : World → Action₂ → Prop)
+    (C₁ : CapSet Action₁)
+    (C₂ : CapSet Action₂)
+    (Basis : (WSet World) → Prop)
+    (h₁ : ObstructionBasis good₁ C₁ Basis)
+    (h₂ : ObstructionBasis good₂ C₂ Basis) :
+    ∀ B,
+      Actionable good₁ C₁ B ↔
+      Actionable good₂ C₂ B := by
+  intro B
+  rw [
+    actionable_iff_avoids_obstructionBasis good₁ C₁ Basis h₁ B,
+    actionable_iff_avoids_obstructionBasis good₂ C₂ Basis h₂ B
+  ]
+
+/--
+Any complete obstruction basis is semantically sufficient to answer ACT versus
+REFUSE for the static common-action model; the original action representation
+is not needed once the basis has been certified.
+-/
+theorem obstructionBasis_decision_complete
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (Basis : (WSet World) → Prop)
+    (hBasis : ObstructionBasis good C Basis) :
+    ∀ B,
+      (∀ O, Basis O → ¬ Contains B O) → Actionable good C B := by
+  intro B h
+  exact (actionable_iff_avoids_obstructionBasis good C Basis hBasis B).2 h
+
+
 end Insacermo
