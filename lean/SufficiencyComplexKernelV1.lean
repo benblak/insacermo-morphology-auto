@@ -1223,4 +1223,103 @@ theorem obstructionBasis_decision_complete
   exact (actionable_iff_avoids_obstructionBasis good C Basis hBasis B).2 h
 
 
+/-! ## Unified forbidden-basis decomposition -/
+
+def PairSet
+    {World : Type u}
+    (x y : World) : WSet World :=
+  fun z => z = x ∨ z = y
+
+def FutureConflict
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    (x y : World) : Prop :=
+  ¬ futureEq x y
+
+/--
+Future coherence is exactly the avoidance of all conflicting pairs.
+-/
+theorem futureCoherent_iff_avoids_conflictPairs
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    (B : WSet World) :
+    FutureCoherent futureEq B ↔
+      ∀ x y, FutureConflict futureEq x y →
+        ¬ Subset (PairSet x y) B := by
+  constructor
+  · intro h x y hconf hsub
+    apply hconf
+    exact h x y
+      (hsub x (Or.inl rfl))
+      (hsub y (Or.inr rfl))
+  · intro h x y hx hy
+    apply Classical.byContradiction
+    intro hconf
+    exact h x y hconf (by
+      intro z hz
+      rcases hz with rfl | rfl
+      · exact hx
+      · exact hy)
+
+/--
+TOTAL FORBIDDEN-BASIS LAW.
+Once a complete action-obstruction basis is known, unified sufficiency is
+completely determined by two negative ingredients:
+  1. higher-order action obstructions from the basis;
+  2. pairwise future conflicts.
+-/
+theorem sufficient_iff_avoids_actionBasis_and_futurePairs
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (Basis : (WSet World) → Prop)
+    (hBasis : ObstructionBasis good C Basis)
+    (B : WSet World) :
+    Sufficient good C futureEq B ↔
+      (∀ O, Basis O → ¬ Subset O B) ∧
+      (∀ x y, FutureConflict futureEq x y →
+        ¬ Subset (PairSet x y) B) := by
+  unfold Sufficient
+  rw [
+    actionable_iff_avoids_obstructionBasis good C Basis hBasis B,
+    futureCoherent_iff_avoids_conflictPairs futureEq B
+  ]
+
+/--
+If two systems have the same action obstruction basis and the same future
+conflict relation, then they have exactly the same unified sufficiency
+judgement on every ambiguity set.
+-/
+theorem same_negative_signature_same_sufficiency
+    {World : Type u}
+    {Action₁ : Type v} {Action₂ : Type w}
+    (good₁ : World → Action₁ → Prop)
+    (good₂ : World → Action₂ → Prop)
+    (C₁ : CapSet Action₁)
+    (C₂ : CapSet Action₂)
+    (futureEq₁ futureEq₂ : World → World → Prop)
+    (Basis : (WSet World) → Prop)
+    (h₁ : ObstructionBasis good₁ C₁ Basis)
+    (h₂ : ObstructionBasis good₂ C₂ Basis)
+    (hFuture :
+      ∀ x y, FutureConflict futureEq₁ x y ↔
+             FutureConflict futureEq₂ x y) :
+    ∀ B,
+      Sufficient good₁ C₁ futureEq₁ B ↔
+      Sufficient good₂ C₂ futureEq₂ B := by
+  intro B
+  rw [
+    sufficient_iff_avoids_actionBasis_and_futurePairs
+      good₁ C₁ futureEq₁ Basis h₁ B,
+    sufficient_iff_avoids_actionBasis_and_futurePairs
+      good₂ C₂ futureEq₂ Basis h₂ B
+  ]
+  constructor
+  · rintro ⟨ha, hf⟩
+    exact ⟨ha, fun x y hconf => hf x y ((hFuture x y).mpr hconf)⟩
+  · rintro ⟨ha, hf⟩
+    exact ⟨ha, fun x y hconf => hf x y ((hFuture x y).mp hconf)⟩
+
+
 end Insacermo
