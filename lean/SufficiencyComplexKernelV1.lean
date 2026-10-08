@@ -315,6 +315,98 @@ theorem newlyMinimal_exposes_one_outsider
     exact hGB x hx
 
 
+
+/--
+STRONG ONE-STEP EXPOSURE.
+The old obstruction H exposed inside a genuinely new minimal obstruction can
+itself be chosen minimal. Hence one added capability lifts minimal obstruction
+order by exactly one along each newly exposed branch (with the empty
+obstruction allowed in the zero-capability degenerate case).
+-/
+theorem newlyMinimal_exposes_oldMinimal_plus_one
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (b : Action)
+    (B : WSet World)
+    (hnew : MinimalObstruction good (AddCapability C b) B)
+    (hnotold : ¬ MinimalObstruction good C B) :
+    ∃ H z,
+      MinimalObstruction good C H ∧
+      Subset H (GoodRegion good b) ∧
+      B z ∧ ¬ GoodRegion good b z ∧
+      ∀ x, B x ↔ PointUnion H z x := by
+  obtain ⟨H, z, hHB, hHobs, hHcovered, hzB, hzout, hBeq⟩ :=
+    newlyMinimal_exposes_one_outsider good C b B hnew hnotold
+
+  have hHmin : MinimalObstruction good C H := by
+    constructor
+    · exact hHobs
+    · intro G hGH
+      apply Classical.byContradiction
+      intro hnotAct
+      have hGobs : Obstruction good C G := hnotAct
+
+      let J : WSet World := PointUnion G z
+
+      have hGJ : Subset G J := by
+        intro x hx
+        exact Or.inl hx
+
+      have hJobs : Obstruction good C J :=
+        obstruction_upward good C hGJ hGobs
+
+      have hJnotCovered : ¬ Subset J (GoodRegion good b) := by
+        intro hsub
+        exact hzout (hsub z (Or.inr rfl))
+
+      have hJsurv : SurvivingObstruction good C b J :=
+        ⟨hJobs, hJnotCovered⟩
+
+      have hJB : Subset J B := by
+        intro x hx
+        cases hx with
+        | inl hGx =>
+            exact hHB.1 x (hGH.1 x hGx)
+        | inr hxz =>
+            subst x
+            exact hzB
+
+      have hex : ∃ x, H x ∧ ¬ G x := by
+        apply Classical.byContradiction
+        intro hnone
+        apply hGH.2
+        intro x hxH
+        apply Classical.byContradiction
+        intro hxnotG
+        exact hnone ⟨x, hxH, hxnotG⟩
+
+      obtain ⟨x, hxH, hxnotG⟩ := hex
+
+      have hxnez : x ≠ z := by
+        intro hxz
+        subst x
+        exact hzout (hHcovered z hxH)
+
+      have hxB : B x := hHB.1 x hxH
+
+      have hxnotJ : ¬ J x := by
+        intro hxJ
+        cases hxJ with
+        | inl hxG => exact hxnotG hxG
+        | inr hxeq => exact hxnez hxeq
+
+      have hnotBJ : ¬ Subset B J := by
+        intro hsub
+        exact hxnotJ (hsub x hxB)
+
+      have hstrictJB : StrictSubset J B := ⟨hJB, hnotBJ⟩
+
+      have hchar := (minimalObstruction_addCapability_iff good C b B).mp hnew
+      exact hchar.2 J hstrictJB hJsurv
+
+  exact ⟨H, z, hHmin, hHcovered, hzB, hzout, hBeq⟩
+
 /-! ## Unified future/action sufficiency geometry -/
 
 def FutureCoherent
