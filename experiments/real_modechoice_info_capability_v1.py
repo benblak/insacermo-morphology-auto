@@ -2,31 +2,29 @@
 import json, math, statistics, functools
 from collections import Counter, defaultdict
 
-MODES=("air","train","bus","car")
+MODES=("air","train","bus","car")\nMODE_CODE={1:"air",2:"train",3:"bus",4:"car"}
 
 def load_data():
     import statsmodels.api as sm
     d=sm.datasets.modechoice.load_pandas().data.copy()
     # normalize columns across statsmodels versions
     d["individual"]=d["individual"].astype(int)
-    d["mode"]=d["mode"].astype(str)
-    if "choice" in d:
-        d["choice"]=d["choice"].astype(str)
+    d["mode_name"]=d["mode"].astype(int).map(MODE_CODE)
     return d
 
 def traveler_records(df, train_factor=1.0):
     recs=[]
     for pid,g in df.groupby("individual",sort=True):
-        rows={str(r["mode"]):r for _,r in g.iterrows()}
+        rows={r["mode_name"]:r for _,r in g.iterrows()}
         if set(rows)!=set(MODES):
             raise RuntimeError((pid,set(rows)))
         vals={}
         for m in MODES:
             r=rows[m]
-            gc=float(r["gcost"])
+            gc=float(r["gc"])
             if m=="train":
                 gc*=train_factor
-            total=float(r["wait"])+float(r["travel"])
+            total=float(r["ttme"])+float(r["invt"])
             vals[m]={"gcost":gc,"time":total}
         admiss=[]
         for m in MODES:
