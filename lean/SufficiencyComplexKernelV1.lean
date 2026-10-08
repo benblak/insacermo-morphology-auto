@@ -2025,4 +2025,134 @@ theorem identityProbeSafe_afterRepair_iff_residualServiceable
   exact pointwiseServiceable_addCapability_iff_residual good C b B
 
 
+/-! ## Pairwise quotient limit and higher-order necessity -/
+
+def PairwiseActionable
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World) : Prop :=
+  ∀ x y, B x → B y →
+    Actionable good C (PairSet x y)
+
+/--
+Ordinary actionability always implies pairwise actionability by downward
+closure.
+-/
+theorem actionable_implies_pairwiseActionable
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (h : Actionable good C B) :
+    PairwiseActionable good C B := by
+  intro x y hx hy
+  apply actionable_downward good C
+    (A := PairSet x y) (B := B)
+  · intro z hz
+    rcases hz with rfl | rfl
+    · exact hx
+    · exact hy
+  · exact h
+
+def PairGenerated
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action) : Prop :=
+  ∀ B, PairwiseActionable good C B → Actionable good C B
+
+/--
+PAIRWISE REPRESENTABILITY CRITERION.
+Actionability is completely determined by singleton/pair information exactly
+in the pair-generated regime.
+-/
+theorem actionable_iff_pairwiseActionable_of_pairGenerated
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (hpair : PairGenerated good C)
+    (B : WSet World) :
+    Actionable good C B ↔ PairwiseActionable good C B := by
+  constructor
+  · exact actionable_implies_pairwiseActionable good C B
+  · exact hpair B
+
+inductive PairWitnessAction where
+  | a01 | a02 | a12
+  deriving DecidableEq, Repr
+
+def pairWitnessGood : W3 → PairWitnessAction → Prop
+  | W3.w0, PairWitnessAction.a01 => True
+  | W3.w1, PairWitnessAction.a01 => True
+  | W3.w2, PairWitnessAction.a01 => False
+  | W3.w0, PairWitnessAction.a02 => True
+  | W3.w1, PairWitnessAction.a02 => False
+  | W3.w2, PairWitnessAction.a02 => True
+  | W3.w0, PairWitnessAction.a12 => False
+  | W3.w1, PairWitnessAction.a12 => True
+  | W3.w2, PairWitnessAction.a12 => True
+
+def allPairWitnessCaps : CapSet PairWitnessAction := fun _ => True
+
+def B012 : WSet W3 := fun _ => True
+
+theorem pairWitness_all_pairs_actionable :
+    PairwiseActionable pairWitnessGood allPairWitnessCaps B012 := by
+  intro x y hx hy
+  cases x <;> cases y
+  · exact ⟨PairWitnessAction.a01, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a01, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a02, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a01, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a01, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a12, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a02, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a12, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+  · exact ⟨PairWitnessAction.a12, trivial, by
+      intro z hz
+      rcases hz with rfl | rfl <;> simp [pairWitnessGood]⟩
+
+theorem pairWitness_triple_not_actionable :
+    ¬ Actionable pairWitnessGood allPairWitnessCaps B012 := by
+  intro h
+  obtain ⟨a, ha, hgood⟩ := h
+  cases a with
+  | a01 =>
+      have := hgood W3.w2 trivial
+      simp [pairWitnessGood] at this
+  | a02 =>
+      have := hgood W3.w1 trivial
+      simp [pairWitnessGood] at this
+  | a12 =>
+      have := hgood W3.w0 trivial
+      simp [pairWitnessGood] at this
+
+/--
+HIGHER-ORDER NECESSITY WITNESS.
+All singleton/pair tests can pass while the triple itself is impossible.
+Therefore general actionability cannot be represented by a pairwise quotient
+or graph alone.
+-/
+theorem pairwise_quotient_is_not_complete_in_general :
+    PairwiseActionable pairWitnessGood allPairWitnessCaps B012 ∧
+    ¬ Actionable pairWitnessGood allPairWitnessCaps B012 := by
+  exact ⟨pairWitness_all_pairs_actionable, pairWitness_triple_not_actionable⟩
+
+
 end Insacermo
