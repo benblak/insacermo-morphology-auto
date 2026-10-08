@@ -1285,6 +1285,7 @@ theorem sufficient_iff_avoids_actionBasis_and_futurePairs
     actionable_iff_avoids_obstructionBasis good C Basis hBasis B,
     futureCoherent_iff_avoids_conflictPairs futureEq B
   ]
+  simp [Contains]
 
 /--
 If two systems have the same action obstruction basis and the same future
