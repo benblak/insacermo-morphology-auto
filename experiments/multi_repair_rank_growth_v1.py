@@ -72,36 +72,40 @@ def exhaustive_sequences(n=4,max_steps=3):
       "observed_step_growth_pairs":[list(k) for k in sorted(witnesses)],
     }
 
-def tight_family(base_order=2,steps=6):
-    # K0 = all subsets that do NOT contain H. Thus H is unique minimal nonface.
-    n=base_order+steps
-    H=frozenset(range(base_order))
-    allsubs=list(subsets(n))
-    faces=[B for B in allsubs if not H <= B]
-    # maximal faces of K0
-    facets=tuple(B for B in faces if not any(B<C for C in faces))
-    seq=[]
-    records=[{"step":0,"max_order":max_order(n,facets),"target":sorted(H)}]
-    target=H
+def tight_family(steps=6):
+    # n=steps+1 worlds. Initially one facet contains all worlds except z,
+    # so {z} is a minimal obstruction of order 1.
+    # Repair j adds the facet "all worlds except j". After all steps,
+    # every proper subset is a face while the full world set is not:
+    # the unique top obstruction has order steps+1.
+    n=steps+1
+    worlds=frozenset(range(n))
+    z=steps
+    facets=(frozenset(range(steps)),)
+    records=[{"step":0,"max_order":max_order(n,facets),
+              "minimal_obstructions":[sorted(x) for x in minobs(n,facets)]}]
+    assert max_order(n,facets)==1
     for j in range(steps):
-        facets=fill(facets,target)
-        target=target|{base_order+j}
-        seq.append(sorted(target-{base_order+j}) if False else sorted(target))
-        records.append({"step":j+1,"max_order":max_order(n,facets),"target_next":sorted(target)})
-        assert target in minobs(n,facets)
-        assert max_order(n,facets)==base_order+j+1
-    return {"base_order":base_order,"steps":steps,"records":records}
+        G=worlds-{j}
+        facets=fill(facets,G)
+        records.append({"step":j+1,"repair":sorted(G),
+                        "max_order":max_order(n,facets),
+                        "minimal_obstructions":[sorted(x) for x in minobs(n,facets)]})
+    assert worlds in minobs(n,facets)
+    assert max_order(n,facets)==steps+1
+    return {"steps":steps,"worlds":n,"records":records,
+            "growth":max_order(n,facets)-1}
 
 def main():
     import json
     audit=exhaustive_sequences(4,3)
     assert not audit["violations"]
-    fam=tight_family(2,6)
+    fam=tight_family(6)
     out={
       "experiment":"INSACERMO_MULTI_REPAIR_RANK_GROWTH_V1",
       "audit":audit,
       "tight_family":fam,
-      "candidate_law":"After m single-capability fills, maximum minimal-obstruction order rises by at most m; the bound is tight.",
+      "candidate_law":"After m single-capability fills, maximum minimal-obstruction order rises by at most m; an explicit family attains equality.",
       "status":"PASS"
     }
     print(json.dumps(out,indent=2,sort_keys=True))
