@@ -1,0 +1,24 @@
+name: INSACERMO Repair Information Frontier V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - experiments/repair_information_frontier_v1.py
+      - .github/workflows/repair-information-frontier-v1.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python experiments/repair_information_frontier_v1.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_REPAIR_INFORMATION_FRONTIER_V1
+          path: REPAIR_INFORMATION_FRONTIER_V1.json
+          if-no-files-found: error
