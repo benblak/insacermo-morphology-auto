@@ -49,16 +49,28 @@ def choose_query(cands,sigs,asked):
             best=(key,q)
     return None if best is None else best[1]
 
-def identify(target,sigs):
-    cands=list(range(len(sigs))); asked=set(); depth=0
-    while len(cands)>1:
+def build_depths(sigs):
+    m=len(sigs[0])
+    depths=[None]*len(sigs)
+    nodes=0
+    max_branch=0
+    def rec(cands,asked,depth):
+        nonlocal nodes,max_branch
+        nodes+=1
+        max_branch=max(max_branch,len(cands))
+        if len(cands)==1:
+            depths[cands[0]]=depth
+            return
         q=choose_query(cands,sigs,asked)
-        if q is None: raise RuntimeError("indistinguishable")
-        ans=sigs[target][q]
-        cands=[i for i in cands if sigs[i][q]==ans]
-        asked.add(q); depth+=1
-    assert cands[0]==target
-    return depth
+        if q is None:
+            raise RuntimeError("indistinguishable candidates")
+        yes=[i for i in cands if sigs[i][q]]
+        no=[i for i in cands if not sigs[i][q]]
+        rec(yes,asked|{q},depth+1)
+        rec(no,asked|{q},depth+1)
+    rec(list(range(len(sigs))),set(),0)
+    assert all(d is not None for d in depths)
+    return depths,nodes,max_branch
 
 def main():
     n=5
@@ -66,7 +78,7 @@ def main():
     sigs=[signature(n,F) for F in complexes]
     assert len(complexes)==7580 or len(complexes)==7581
     assert len(set(sigs))==len(sigs)
-    depths=[identify(i,sigs) for i in range(len(sigs))]
+    depths,nodes,max_branch=build_depths(sigs)
     out={
       "experiment":"INSACERMO_EXACT_THEORY_IDENTIFICATION_5W_V1",
       "n_worlds":n,
@@ -78,6 +90,8 @@ def main():
       "adaptive_query_median":statistics.median(depths),
       "adaptive_query_max":max(depths),
       "all_geometries_identified_exactly":True,
+      "decision_tree_nodes":nodes,
+      "root_candidate_count":max_branch,
       "status":"PASS"
     }
     print(json.dumps(out,indent=2,sort_keys=True))
