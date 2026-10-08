@@ -11,20 +11,25 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean4-action@v1
-        with:
-          auto-config: false
-          build: false
-      - run: lean lean/SufficiencyComplexKernelV1.lean
-      - run: |
-          if grep -R -n -E '\bsorry\b|\badmit\b' lean/SufficiencyComplexKernelV1.lean; then
+      - name: Install Lean 4
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean version
+        run: lean --version
+      - name: Compile sufficiency complex kernel
+        run: lean lean/SufficiencyComplexKernelV1.lean
+      - name: Audit forbidden placeholders
+        run: |
+          if grep -R -n -E '\b(sorry|admit)\b' lean/SufficiencyComplexKernelV1.lean; then
             echo "Forbidden placeholder found"; exit 1
           fi
           echo "ZERO_SORRY_ADMIT"
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: python experiments/sufficiency_complex_audit_v1.py
+      - name: Exhaustive finite audit
+        run: python experiments/sufficiency_complex_audit_v1.py
