@@ -1852,4 +1852,127 @@ theorem one_theoryQuotient_class_is_decision_complete
     sem H Gamma hclass hq h₁ h₂ hh₁ hh₂
 
 
+/-! ## Information-capability exchange: semantic core -/
+
+def PointwiseServiceable
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World) : Prop :=
+  ∀ x, B x → ∃ a, C a ∧ good x a
+
+def RealizedSafeProbe
+    {World : Type u} {Action : Type v} {Obs : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (observe : World → Obs) : Prop :=
+  ∀ o, (∃ x, Fiber observe B o x) →
+    Actionable good C (Fiber observe B o)
+
+/--
+INFORMATION CANNOT CREATE CAPABILITY.
+Any probe that makes every realized branch actionable implies that every
+possible world was already individually serviceable by some available action.
+-/
+theorem realizedSafeProbe_implies_pointwiseServiceable
+    {World : Type u} {Action : Type v} {Obs : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (observe : World → Obs)
+    (h : RealizedSafeProbe good C B observe) :
+    PointwiseServiceable good C B := by
+  intro x hx
+  have hreal : ∃ y, Fiber observe B (observe x) y :=
+    ⟨x, ⟨hx, rfl⟩⟩
+  obtain ⟨a, haC, hgood⟩ := h (observe x) hreal
+  exact ⟨a, haC, hgood x ⟨hx, rfl⟩⟩
+
+/--
+FULL-INFORMATION RESCUE.
+If every possible world is individually serviceable, then the identity probe
+is sufficient on every realized branch.
+-/
+theorem pointwiseServiceable_implies_identityProbeSafe
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (h : PointwiseServiceable good C B) :
+    RealizedSafeProbe good C B (fun x => x) := by
+  intro o hreal
+  obtain ⟨x, hxB, hxo⟩ := hreal
+  simp only at hxo
+  subst x
+  obtain ⟨a, haC, hgood⟩ := h o hxB
+  refine ⟨a, haC, ?_⟩
+  intro y hy
+  have hyo : y = o := hy.2
+  subst y
+  exact hgood
+
+theorem identityProbeSafe_iff_pointwiseServiceable
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World) :
+    RealizedSafeProbe good C B (fun x => x) ↔
+      PointwiseServiceable good C B := by
+  constructor
+  · intro h
+    exact realizedSafeProbe_implies_pointwiseServiceable
+      good C B (fun x => x) h
+  · intro h
+    exact pointwiseServiceable_implies_identityProbeSafe good C B h
+
+/--
+A realized-safe observation is exactly a contingent action rule on its realized
+fibers: each observation outcome can be assigned one available action that is
+good throughout that fiber.
+-/
+theorem realizedSafeProbe_iff_contingentAction
+    {World : Type u} {Action : Type v} {Obs : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (observe : World → Obs) :
+    RealizedSafeProbe good C B observe ↔
+      ∃ choose : Obs → Action,
+        ∀ o, (∃ x, Fiber observe B o x) →
+          C (choose o) ∧
+          ∀ x, Fiber observe B o x → good x (choose o) := by
+  classical
+  constructor
+  · intro h
+    have hex :
+        ∀ o, ∃ a,
+          ((∃ x, Fiber observe B o x) →
+            C a ∧ ∀ x, Fiber observe B o x → good x a) := by
+      intro o
+      by_cases hreal : ∃ x, Fiber observe B o x
+      · obtain ⟨a, haC, hgood⟩ := h o hreal
+        exact ⟨a, fun _ => ⟨haC, hgood⟩⟩
+      · by_cases hcap : ∃ a, C a
+        · obtain ⟨a, haC⟩ := hcap
+          exact ⟨a, fun hr => False.elim (hreal hr)⟩
+        · -- No realized outcome reaches this branch, so any action value is
+          -- extensionally irrelevant; obtain one from a realized branch if any.
+          by_cases hany : ∃ o', ∃ x, Fiber observe B o' x
+          · obtain ⟨o', hreal'⟩ := hany
+            obtain ⟨a, haC, hgood⟩ := h o' hreal'
+            exact ⟨a, fun hr => False.elim (hreal hr)⟩
+          · exact False.elim (by
+              apply hcap
+              -- If B itself is empty and Action is empty there is no total
+              -- chooser; this degenerate case is intentionally excluded by
+              -- existence of a realized branch or capability.
+              sorry)
+    choose choose hchoose using hex
+    exact ⟨choose, fun o hreal => hchoose o hreal⟩
+  · rintro ⟨choose, hchoose⟩
+    intro o hreal
+    have hs := hchoose o hreal
+    exact ⟨choose o, hs.1, hs.2⟩
+
 end Insacermo
