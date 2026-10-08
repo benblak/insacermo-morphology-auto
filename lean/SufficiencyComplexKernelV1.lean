@@ -612,4 +612,182 @@ theorem iterated_one_step_rank_bound
         simpa [Nat.add_assoc] using h1
 
 
+/-! ## Batch repair geometry and endpoint/path separation -/
+
+def AddCapabilities
+    {Action : Type v}
+    (C : CapSet Action)
+    (bs : List Action) : CapSet Action :=
+  fun a => C a ∨ a ∈ bs
+
+/--
+BATCH FILL LAW.
+After adding a finite list of capabilities, B is actionable exactly when it
+was already actionable or one newly added capability covers all of B.
+-/
+theorem actionable_addCapabilities_iff
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (bs : List Action)
+    (B : WSet World) :
+    Actionable good (AddCapabilities C bs) B ↔
+      Actionable good C B ∨
+      ∃ b, b ∈ bs ∧ Subset B (GoodRegion good b) := by
+  constructor
+  · intro h
+    obtain ⟨a, ha, hgood⟩ := h
+    cases ha with
+    | inl haC =>
+        exact Or.inl ⟨a, haC, hgood⟩
+    | inr hab =>
+        exact Or.inr ⟨a, hab, fun x hx => hgood x hx⟩
+  · intro h
+    cases h with
+    | inl hold =>
+        obtain ⟨a, haC, hgood⟩ := hold
+        exact ⟨a, Or.inl haC, hgood⟩
+    | inr hnew =>
+        obtain ⟨b, hbmem, hsub⟩ := hnew
+        exact ⟨b, Or.inr hbmem, fun x hx => hsub x hx⟩
+
+/--
+Exact batch obstruction law.
+After a finite family of capability additions, B remains impossible exactly
+when it was impossible before and no added capability covers B completely.
+-/
+theorem obstruction_addCapabilities_iff
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (bs : List Action)
+    (B : WSet World) :
+    Obstruction good (AddCapabilities C bs) B ↔
+      Obstruction good C B ∧
+      ∀ b, b ∈ bs → ¬ Subset B (GoodRegion good b) := by
+  unfold Obstruction
+  rw [actionable_addCapabilities_iff]
+  constructor
+  · intro h
+    constructor
+    · intro ha
+      exact h (Or.inl ha)
+    · intro b hb hsub
+      exact h (Or.inr ⟨b, hb, hsub⟩)
+  · rintro ⟨hold, hcover⟩ h
+    cases h with
+    | inl ha => exact hold ha
+    | inr hnew =>
+        obtain ⟨b, hb, hsub⟩ := hnew
+        exact hcover b hb hsub
+
+/--
+Exact minimal-obstruction characterization after a batch of repairs:
+the final minimal obstructions are the inclusion-minimal old obstructions that
+escape every newly added capability region.
+-/
+theorem minimalObstruction_addCapabilities_iff
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (bs : List Action)
+    (B : WSet World) :
+    MinimalObstruction good (AddCapabilities C bs) B ↔
+      (Obstruction good C B ∧
+       ∀ b, b ∈ bs → ¬ Subset B (GoodRegion good b)) ∧
+      ∀ G, StrictSubset G B →
+        ¬ (Obstruction good C G ∧
+           ∀ b, b ∈ bs → ¬ Subset G (GoodRegion good b)) := by
+  constructor
+  · rintro ⟨hobs, hmins⟩
+    constructor
+    · exact (obstruction_addCapabilities_iff good C bs B).mp hobs
+    · intro G hGB hsurv
+      have hobsG : Obstruction good (AddCapabilities C bs) G :=
+        (obstruction_addCapabilities_iff good C bs G).mpr hsurv
+      exact hobsG (hmins G hGB)
+  · rintro ⟨hsurv, hminsurv⟩
+    constructor
+    · exact (obstruction_addCapabilities_iff good C bs B).mpr hsurv
+    · intro G hGB
+      apply Classical.byContradiction
+      intro hnot
+      have hobsG : Obstruction good (AddCapabilities C bs) G := hnot
+      have hsurvG :=
+        (obstruction_addCapabilities_iff good C bs G).mp hobsG
+      exact hminsurv G hGB hsurvG
+
+/--
+ENDPOINT ORDER INDEPENDENCE.
+For the static model, the final actionability geometry depends only on which
+capabilities were added, not on their list order or multiplicity.
+-/
+theorem actionable_batch_endpoint_extensional
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (xs ys : List Action)
+    (B : WSet World)
+    (hmem : ∀ a, a ∈ xs ↔ a ∈ ys) :
+    Actionable good (AddCapabilities C xs) B ↔
+      Actionable good (AddCapabilities C ys) B := by
+  constructor
+  · intro h
+    obtain ⟨a, ha, hgood⟩ := h
+    cases ha with
+    | inl haC =>
+        exact ⟨a, Or.inl haC, hgood⟩
+    | inr hax =>
+        exact ⟨a, Or.inr ((hmem a).mp hax), hgood⟩
+  · intro h
+    obtain ⟨a, ha, hgood⟩ := h
+    cases ha with
+    | inl haC =>
+        exact ⟨a, Or.inl haC, hgood⟩
+    | inr hay =>
+        exact ⟨a, Or.inr ((hmem a).mpr hay), hgood⟩
+
+theorem sufficient_addCapabilities_iff
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (bs : List Action)
+    (B : WSet World) :
+    Sufficient good (AddCapabilities C bs) futureEq B ↔
+      FutureCoherent futureEq B ∧
+      (Actionable good C B ∨
+       ∃ b, b ∈ bs ∧ Subset B (GoodRegion good b)) := by
+  unfold Sufficient
+  rw [actionable_addCapabilities_iff]
+  constructor
+  · rintro ⟨hact, hfuture⟩
+    exact ⟨hfuture, hact⟩
+  · rintro ⟨hfuture, hact⟩
+    exact ⟨hact, hfuture⟩
+
+theorem sufficient_batch_endpoint_extensional
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (xs ys : List Action)
+    (B : WSet World)
+    (hmem : ∀ a, a ∈ xs ↔ a ∈ ys) :
+    Sufficient good (AddCapabilities C xs) futureEq B ↔
+      Sufficient good (AddCapabilities C ys) futureEq B := by
+  unfold Sufficient
+  constructor
+  · rintro ⟨hact, hfuture⟩
+    exact ⟨
+      (actionable_batch_endpoint_extensional good C xs ys B hmem).mp hact,
+      hfuture
+    ⟩
+  · rintro ⟨hact, hfuture⟩
+    exact ⟨
+      (actionable_batch_endpoint_extensional good C xs ys B hmem).mpr hact,
+      hfuture
+    ⟩
+
+
 end Insacermo
