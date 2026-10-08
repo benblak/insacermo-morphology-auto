@@ -854,4 +854,163 @@ theorem endpoint_same_path_different_witness :
     cases a <;> simp
 
 
+/-! ## Boundary debt and exact exposure geometry -/
+
+def RemovePoint
+    {World : Type u}
+    (B : WSet World)
+    (z : World) : WSet World :=
+  fun x => B x ∧ x ≠ z
+
+def BoundaryObstructed
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (z : World) : Prop :=
+  B z ∧ Obstruction good C (RemovePoint B z)
+
+theorem removePoint_subset
+    {World : Type u}
+    (B : WSet World)
+    (z : World) :
+    Subset (RemovePoint B z) B := by
+  intro x hx
+  exact hx.1
+
+theorem removePoint_strict
+    {World : Type u}
+    (B : WSet World)
+    (z : World)
+    (hz : B z) :
+    StrictSubset (RemovePoint B z) B := by
+  constructor
+  · exact removePoint_subset B z
+  · intro h
+    have hzrem := h z hz
+    exact hzrem.2 rfl
+
+/--
+BOUNDARY CRITERION.
+An obstruction is minimal exactly when every one-point deletion is actionable.
+This holds without a finiteness assumption.
+-/
+theorem minimalObstruction_iff_all_point_deletions_actionable
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World) :
+    MinimalObstruction good C B ↔
+      Obstruction good C B ∧
+      ∀ z, B z → Actionable good C (RemovePoint B z) := by
+  constructor
+  · rintro ⟨hobs, hmin⟩
+    constructor
+    · exact hobs
+    · intro z hz
+      exact hmin (RemovePoint B z) (removePoint_strict B z hz)
+  · rintro ⟨hobs, hdel⟩
+    constructor
+    · exact hobs
+    · intro G hGB
+      apply Classical.byContradiction
+      intro hnotAct
+      have hex : ∃ z, B z ∧ ¬ G z := by
+        apply Classical.byContradiction
+        intro hnone
+        apply hGB.2
+        intro x hxB
+        apply Classical.byContradiction
+        intro hxnotG
+        exact hnone ⟨x, hxB, hxnotG⟩
+      obtain ⟨z, hzB, hznotG⟩ := hex
+      have hGrem : Subset G (RemovePoint B z) := by
+        intro x hxG
+        constructor
+        · exact hGB.1 x hxG
+        · intro hxz
+          subst x
+          exact hznotG hxG
+      exact hnotAct (actionable_downward good C hGrem (hdel z hzB))
+
+/--
+NO-SHARING LAW.
+A single repair region that covers two distinct codimension-one faces of B
+necessarily covers B itself. Therefore a repair that preserves B as an
+obstruction can resolve at most one blocked boundary face.
+-/
+theorem two_boundary_faces_force_full_cover
+    {World : Type u}
+    (B G : WSet World)
+    (x y : World)
+    (hxB : B x)
+    (hyB : B y)
+    (hxy : x ≠ y)
+    (hx : Subset (RemovePoint B x) G)
+    (hy : Subset (RemovePoint B y) G) :
+    Subset B G := by
+  intro z hzB
+  by_cases hzx : z = x
+  · subst z
+    apply hy
+    exact ⟨hxB, hxy⟩
+  · apply hx
+    exact ⟨hzB, hzx⟩
+
+/--
+A preserving repair cannot simultaneously fix two distinct blocked boundary
+faces of the same target obstruction.
+-/
+theorem preserving_repair_cannot_resolve_two_boundary_faces
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (b : Action)
+    (B : WSet World)
+    (x y : World)
+    (hxB : B x)
+    (hyB : B y)
+    (hxy : x ≠ y)
+    (hpreserve : ¬ Subset B (GoodRegion good b))
+    (hx : Subset (RemovePoint B x) (GoodRegion good b))
+    (hy : Subset (RemovePoint B y) (GoodRegion good b)) :
+    False := by
+  apply hpreserve
+  exact two_boundary_faces_force_full_cover B (GoodRegion good b)
+    x y hxB hyB hxy hx hy
+
+/--
+Each previously blocked boundary face of a target B that becomes minimal after
+a batch repair must be covered by at least one added capability, while every
+such capability must fail to cover B itself.
+-/
+theorem exposed_boundary_face_gets_preserving_repair
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (bs : List Action)
+    (B : WSet World)
+    (hnew : MinimalObstruction good (AddCapabilities C bs) B)
+    (z : World)
+    (hzB : B z)
+    (hold : Obstruction good C (RemovePoint B z)) :
+    ∃ b, b ∈ bs ∧
+      Subset (RemovePoint B z) (GoodRegion good b) ∧
+      ¬ Subset B (GoodRegion good b) := by
+  have hdelNew :
+      Actionable good (AddCapabilities C bs) (RemovePoint B z) :=
+    (minimalObstruction_iff_all_point_deletions_actionable
+      good (AddCapabilities C bs) B).mp hnew |>.2 z hzB
+  have hdelChar :=
+    (actionable_addCapabilities_iff good C bs (RemovePoint B z)).mp hdelNew
+  have hBobsNew : Obstruction good (AddCapabilities C bs) B := hnew.1
+  have hBchar :=
+    (obstruction_addCapabilities_iff good C bs B).mp hBobsNew
+  cases hdelChar with
+  | inl holdAct =>
+      exact False.elim (hold holdAct)
+  | inr hrep =>
+      obtain ⟨b, hb, hsub⟩ := hrep
+      exact ⟨b, hb, hsub, hBchar.2 b hb⟩
+
+
 end Insacermo
