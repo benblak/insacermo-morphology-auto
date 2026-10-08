@@ -1514,25 +1514,22 @@ theorem nonextensional_theories_have_separating_query
     (hne : ¬ ∀ q, T₁ q ↔ T₂ q) :
     ∃ q, Separates T₁ T₂ q := by
   classical
-  apply Classical.byContradiction
-  intro hno
-  apply hne
-  intro q
-  by_cases h1 : T₁ q
-  · have h2 : T₂ q := by
-      by_contra hnot2
-      apply hno
-      exact ⟨q, Or.inl ⟨h1, hnot2⟩⟩
-    exact ⟨fun _ => h2, fun _ => h1⟩
-  · have h2 : ¬ T₂ q := by
-      intro hT2
-      apply hno
-      exact ⟨q, Or.inr ⟨h1, hT2⟩⟩
-    constructor
-    · intro hT1
-      exact False.elim (h1 hT1)
-    · intro hT2
-      exact False.elim (h2 hT2)
+  by_cases hsep : ∃ q, Separates T₁ T₂ q
+  · exact hsep
+  · exfalso
+    apply hne
+    intro q
+    by_cases h1 : T₁ q
+    · by_cases h2 : T₂ q
+      · exact ⟨fun _ => h2, fun _ => h1⟩
+      · exact False.elim (hsep ⟨q, Or.inl ⟨h1, h2⟩⟩)
+    · by_cases h2 : T₂ q
+      · exact False.elim (hsep ⟨q, Or.inr ⟨h1, h2⟩⟩)
+      · constructor
+        · intro hT1
+          exact False.elim (h1 hT1)
+        · intro hT2
+          exact False.elim (h2 hT2)
 
 theorem exact_query_can_kill_any_wrong_theory
     {World : Type u}
