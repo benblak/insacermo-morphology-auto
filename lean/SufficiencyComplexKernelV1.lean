@@ -1605,4 +1605,170 @@ theorem wrong_hypothesis_can_be_cut_from_theorySpace
     exact hkill h.2
 
 
+/-! ## Meta-world collapse: flattening world and theory uncertainty -/
+
+def MetaGood
+    {Hyp : Type v} {World : Type u} {Action : Type w}
+    (good : Hyp → World → Action → Prop) :
+    (Hyp × World) → Action → Prop :=
+  fun hw a => good hw.1 hw.2 a
+
+def MetaAmbiguity
+    {Hyp : Type v} {World : Type u}
+    (H : Hyp → Prop)
+    (B : WSet World) :
+    WSet (Hyp × World) :=
+  fun hw => H hw.1 ∧ B hw.2
+
+def RobustActionable
+    {Hyp : Type v} {World : Type u} {Action : Type w}
+    (good : Hyp → World → Action → Prop)
+    (C : CapSet Action)
+    (H : Hyp → Prop)
+    (B : WSet World) : Prop :=
+  ∃ a, C a ∧
+    ∀ h, H h →
+      ∀ x, B x → good h x a
+
+/--
+META-WORLD ACTIONABILITY COLLAPSE.
+Robust actionability under simultaneous uncertainty over theories H and worlds
+B is exactly ordinary INSACERMO actionability on the product ambiguity H × B.
+-/
+theorem robustActionable_iff_metaActionable
+    {Hyp : Type v} {World : Type u} {Action : Type w}
+    (good : Hyp → World → Action → Prop)
+    (C : CapSet Action)
+    (H : Hyp → Prop)
+    (B : WSet World) :
+    RobustActionable good C H B ↔
+      Actionable (MetaGood good) C (MetaAmbiguity H B) := by
+  constructor
+  · rintro ⟨a, haC, hgood⟩
+    refine ⟨a, haC, ?_⟩
+    intro hw hhw
+    exact hgood hw.1 hhw.1 hw.2 hhw.2
+  · rintro ⟨a, haC, hgood⟩
+    refine ⟨a, haC, ?_⟩
+    intro h hh x hx
+    exact hgood (h, x) ⟨hh, hx⟩
+
+def RobustFutureCoherent
+    {Hyp : Type v} {World : Type u}
+    (futureEq : Hyp → World → World → Prop)
+    (H : Hyp → Prop)
+    (B : WSet World) : Prop :=
+  ∀ h, H h →
+    ∀ x y, B x → B y → futureEq h x y
+
+def MetaFutureEq
+    {Hyp : Type v} {World : Type u}
+    (futureEq : Hyp → World → World → Prop)
+    (p q : Hyp × World) : Prop :=
+  p.1 = q.1 → futureEq p.1 p.2 q.2
+
+/--
+META-WORLD FUTURE COLLAPSE.
+Robust future coherence across all candidate theories is ordinary future
+coherence on the product meta-world, with cross-theory pairs unconstrained and
+same-theory pairs checked against that theory's future relation.
+-/
+theorem robustFutureCoherent_iff_metaFutureCoherent
+    {Hyp : Type v} {World : Type u}
+    (futureEq : Hyp → World → World → Prop)
+    (H : Hyp → Prop)
+    (B : WSet World) :
+    RobustFutureCoherent futureEq H B ↔
+      FutureCoherent (MetaFutureEq futureEq) (MetaAmbiguity H B) := by
+  constructor
+  · intro hrob p q hp hq
+    intro hpq
+    cases p with
+    | mk h x =>
+      cases q with
+      | mk k y =>
+        simp only at hpq
+        subst k
+        exact hrob h hp.1 x y hp.2 hq.2
+  · intro hmeta h hh x y hx hy
+    have hs := hmeta (h, x) (h, y) ⟨hh, hx⟩ ⟨hh, hy⟩
+    exact hs rfl
+
+def RobustSufficient
+    {Hyp : Type v} {World : Type u} {Action : Type w}
+    (good : Hyp → World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : Hyp → World → World → Prop)
+    (H : Hyp → Prop)
+    (B : WSet World) : Prop :=
+  RobustActionable good C H B ∧
+  RobustFutureCoherent futureEq H B
+
+/--
+HIERARCHY FLATTENING THEOREM.
+Simultaneous uncertainty about which theory is true and which world is true
+requires no new decision semantics: it is exactly the existing INSACERMO
+sufficiency predicate on the product space Hyp × World.
+-/
+theorem robustSufficient_iff_metaSufficient
+    {Hyp : Type v} {World : Type u} {Action : Type w}
+    (good : Hyp → World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : Hyp → World → World → Prop)
+    (H : Hyp → Prop)
+    (B : WSet World) :
+    RobustSufficient good C futureEq H B ↔
+      Sufficient
+        (MetaGood good) C
+        (MetaFutureEq futureEq)
+        (MetaAmbiguity H B) := by
+  unfold RobustSufficient Sufficient
+  rw [
+    robustActionable_iff_metaActionable good C H B,
+    robustFutureCoherent_iff_metaFutureCoherent futureEq H B
+  ]
+
+noncomputable def TheoryProbe
+    {Hyp : Type v} {World : Type u}
+    (sem : Hyp → Theory World)
+    (q : WSet World) :
+    (Hyp × World) → Bool :=
+  fun hw => AnswerOf (sem hw.1) q
+
+theorem answerOf_eq_iff_consistent
+    {World : Type u}
+    (T : Theory World)
+    (q : WSet World)
+    (answer : Bool) :
+    AnswerOf T q = answer ↔ ConsistentWith T q answer := by
+  classical
+  cases answer <;> simp [AnswerOf, ConsistentWith] <;>
+    by_cases h : T q <;> simp [h]
+
+/--
+THEORY PROBES ARE ORDINARY PROBES.
+A query on candidate theories is exactly an ordinary probe fiber on the
+meta-world product space: it refines the theory coordinate while preserving
+the world coordinate.
+-/
+theorem theoryProbe_fiber_iff
+    {Hyp : Type v} {World : Type u}
+    (sem : Hyp → Theory World)
+    (q : WSet World)
+    (answer : Bool)
+    (H : Hyp → Prop)
+    (B : WSet World)
+    (h : Hyp)
+    (x : World) :
+    Fiber (TheoryProbe sem q) (MetaAmbiguity H B) answer (h, x) ↔
+      TheoryFiber sem q answer H h ∧ B x := by
+  unfold Fiber MetaAmbiguity TheoryFiber TheoryProbe
+  constructor
+  · rintro ⟨⟨hh, hx⟩, hans⟩
+    exact ⟨⟨hh, (answerOf_eq_iff_consistent (sem h) q answer).mp hans⟩, hx⟩
+  · rintro ⟨⟨hh, hcons⟩, hx⟩
+    exact ⟨⟨hh, hx⟩,
+      (answerOf_eq_iff_consistent (sem h) q answer).mpr hcons⟩
+
+
 end Insacermo
