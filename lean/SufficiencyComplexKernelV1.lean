@@ -1771,4 +1771,85 @@ theorem theoryProbe_fiber_iff
       (answerOf_eq_iff_consistent (sem h) q answer).mpr hcons⟩
 
 
+/-! ## Theory decision quotient -/
+
+def TheoryEqOn
+    {World : Type u}
+    (Gamma : WSet World → Prop)
+    (T₁ T₂ : Theory World) : Prop :=
+  ∀ q, Gamma q → (T₁ q ↔ T₂ q)
+
+theorem theoryEqOn_refl
+    {World : Type u}
+    (Gamma : WSet World → Prop)
+    (T : Theory World) :
+    TheoryEqOn Gamma T T := by
+  intro q hq
+  exact Iff.rfl
+
+theorem theoryEqOn_symm
+    {World : Type u}
+    (Gamma : WSet World → Prop)
+    {T₁ T₂ : Theory World}
+    (h : TheoryEqOn Gamma T₁ T₂) :
+    TheoryEqOn Gamma T₂ T₁ := by
+  intro q hq
+  exact (h q hq).symm
+
+theorem theoryEqOn_trans
+    {World : Type u}
+    (Gamma : WSet World → Prop)
+    {T₁ T₂ T₃ : Theory World}
+    (h12 : TheoryEqOn Gamma T₁ T₂)
+    (h23 : TheoryEqOn Gamma T₂ T₃) :
+    TheoryEqOn Gamma T₁ T₃ := by
+  intro q hq
+  exact Iff.trans (h12 q hq) (h23 q hq)
+
+def TheoryConsensusOn
+    {World : Type u} {Hyp : Type v}
+    (sem : Hyp → Theory World)
+    (H : Hyp → Prop)
+    (Gamma : WSet World → Prop) : Prop :=
+  ∀ h₁ h₂, H h₁ → H h₂ →
+    TheoryEqOn Gamma (sem h₁) (sem h₂)
+
+/--
+DECISION-QUOTIENT STOPPING LAW.
+If all remaining hypotheses are equivalent on the future contract Gamma, then
+for every future-relevant query q, all remaining hypotheses give the same
+ACT/REFUSE answer. Exact theory identification is therefore unnecessary for
+Gamma-relative decision.
+-/
+theorem theoryConsensusOn_forces_query_consensus
+    {World : Type u} {Hyp : Type v}
+    (sem : Hyp → Theory World)
+    (H : Hyp → Prop)
+    (Gamma : WSet World → Prop)
+    (hcons : TheoryConsensusOn sem H Gamma)
+    {q : WSet World}
+    (hq : Gamma q) :
+    ∀ h₁ h₂, H h₁ → H h₂ →
+      (sem h₁ q ↔ sem h₂ q) := by
+  intro h₁ h₂ hh₁ hh₂
+  exact hcons h₁ h₂ hh₁ hh₂ q hq
+
+/--
+Any two version-space hypotheses in one Gamma-equivalence class are
+indistinguishable for every contract-relevant decision query.
+-/
+theorem one_theoryQuotient_class_is_decision_complete
+    {World : Type u} {Hyp : Type v}
+    (sem : Hyp → Theory World)
+    (H : Hyp → Prop)
+    (Gamma : WSet World → Prop)
+    (hclass : TheoryConsensusOn sem H Gamma) :
+    ∀ q, Gamma q →
+      ∀ h₁ h₂, H h₁ → H h₂ →
+        (sem h₁ q ↔ sem h₂ q) := by
+  intro q hq h₁ h₂ hh₁ hh₂
+  exact theoryConsensusOn_forces_query_consensus
+    sem H Gamma hclass hq h₁ h₂ hh₁ hh₂
+
+
 end Insacermo
