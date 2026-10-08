@@ -1929,10 +1929,12 @@ theorem identityProbeSafe_iff_pointwiseServiceable
 /--
 A realized-safe observation is exactly a contingent action rule on its realized
 fibers: each observation outcome can be assigned one available action that is
-good throughout that fiber.
+good throughout that fiber. Nonempty Action is only needed to define an
+irrelevant value on unrealized outcomes.
 -/
 theorem realizedSafeProbe_iff_contingentAction
     {World : Type u} {Action : Type v} {Obs : Type w}
+    [Nonempty Action]
     (good : World → Action → Prop)
     (C : CapSet Action)
     (B : WSet World)
@@ -1945,6 +1947,7 @@ theorem realizedSafeProbe_iff_contingentAction
   classical
   constructor
   · intro h
+    let defaultAction : Action := Classical.choice inferInstance
     have hex :
         ∀ o, ∃ a,
           ((∃ x, Fiber observe B o x) →
@@ -1953,21 +1956,7 @@ theorem realizedSafeProbe_iff_contingentAction
       by_cases hreal : ∃ x, Fiber observe B o x
       · obtain ⟨a, haC, hgood⟩ := h o hreal
         exact ⟨a, fun _ => ⟨haC, hgood⟩⟩
-      · by_cases hcap : ∃ a, C a
-        · obtain ⟨a, haC⟩ := hcap
-          exact ⟨a, fun hr => False.elim (hreal hr)⟩
-        · -- No realized outcome reaches this branch, so any action value is
-          -- extensionally irrelevant; obtain one from a realized branch if any.
-          by_cases hany : ∃ o', ∃ x, Fiber observe B o' x
-          · obtain ⟨o', hreal'⟩ := hany
-            obtain ⟨a, haC, hgood⟩ := h o' hreal'
-            exact ⟨a, fun hr => False.elim (hreal hr)⟩
-          · exact False.elim (by
-              apply hcap
-              -- If B itself is empty and Action is empty there is no total
-              -- chooser; this degenerate case is intentionally excluded by
-              -- existence of a realized branch or capability.
-              sorry)
+      · exact ⟨defaultAction, fun hr => False.elim (hreal hr)⟩
     choose choose hchoose using hex
     exact ⟨choose, fun o hreal => hchoose o hreal⟩
   · rintro ⟨choose, hchoose⟩
