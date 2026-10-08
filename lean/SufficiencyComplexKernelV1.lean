@@ -1134,8 +1134,10 @@ theorem dedicated_boundary_repairs_expose_minimal
         apply Classical.byContradiction
         intro hnot
         exact hzOld hnot
-      exact actionable_capability_mono good C
+      exact actionable_capability_mono good
+        (C := C)
         (D := AddBoundaryRepairs good C B repairFor)
+        (B := RemovePoint B z)
         (fun a ha => Or.inl ha)
         hzActOld
 
