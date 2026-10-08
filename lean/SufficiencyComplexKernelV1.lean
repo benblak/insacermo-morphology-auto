@@ -202,4 +202,117 @@ theorem safeProbe_iff_allFibersActionable
       ∀ o, Actionable good C (Fiber observe B o) := by
   rfl
 
+/-- Obstructions are upward closed in the ambiguity set. -/
+theorem obstruction_upward
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    {A B : WSet World}
+    (hAB : Subset A B)
+    (hA : Obstruction good C A) :
+    Obstruction good C B := by
+  intro hB
+  exact hA (actionable_downward good C hAB hB)
+
+def PointUnion
+    {World : Type u}
+    (H : WSet World)
+    (z : World) : WSet World :=
+  fun x => H x ∨ x = z
+
+/--
+ONE-STEP EXPOSURE LAW.
+If B becomes a genuinely new minimal obstruction after adding one capability b
+(i.e. B was not already minimal before), then some old proper obstruction H
+inside B is completely repaired by b, and B is exactly H plus one world z
+outside b's good region.
+
+This is the order-theoretic core behind the finite k -> k+1 phenomenon.
+No finiteness assumption is needed for this structural statement.
+-/
+theorem newlyMinimal_exposes_one_outsider
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (b : Action)
+    (B : WSet World)
+    (hnew : MinimalObstruction good (AddCapability C b) B)
+    (hnotold : ¬ MinimalObstruction good C B) :
+    ∃ H z,
+      StrictSubset H B ∧
+      Obstruction good C H ∧
+      Subset H (GoodRegion good b) ∧
+      B z ∧ ¬ GoodRegion good b z ∧
+      ∀ x, B x ↔ PointUnion H z x := by
+  have hchar := (minimalObstruction_addCapability_iff good C b B).mp hnew
+  rcases hchar with ⟨hsurvB, hminsurv⟩
+
+  have hexH : ∃ H, StrictSubset H B ∧ Obstruction good C H := by
+    apply Classical.byContradiction
+    intro hnone
+    apply hnotold
+    constructor
+    · exact hsurvB.1
+    · intro G hGB
+      apply Classical.byContradiction
+      intro hnotAct
+      exact hnone ⟨G, hGB, hnotAct⟩
+
+  obtain ⟨H, hHB, hHobs⟩ := hexH
+
+  have hHcovered : Subset H (GoodRegion good b) := by
+    apply Classical.byContradiction
+    intro hnotCovered
+    exact hminsurv H hHB ⟨hHobs, hnotCovered⟩
+
+  have hexz : ∃ z, B z ∧ ¬ GoodRegion good b z := by
+    apply Classical.byContradiction
+    intro hnone
+    apply hsurvB.2
+    intro x hx
+    apply Classical.byContradiction
+    intro hnotGood
+    exact hnone ⟨x, hx, hnotGood⟩
+
+  obtain ⟨z, hzB, hzout⟩ := hexz
+
+  let G : WSet World := PointUnion H z
+
+  have hHG : Subset H G := by
+    intro x hx
+    exact Or.inl hx
+
+  have hGB : Subset G B := by
+    intro x hx
+    cases hx with
+    | inl hHx => exact hHB.1 x hHx
+    | inr hxz =>
+        subst x
+        exact hzB
+
+  have hGobs : Obstruction good C G :=
+    obstruction_upward good C hHG hHobs
+
+  have hGnotCovered : ¬ Subset G (GoodRegion good b) := by
+    intro hsub
+    exact hzout (hsub z (Or.inr rfl))
+
+  have hGsurv : SurvivingObstruction good C b G :=
+    ⟨hGobs, hGnotCovered⟩
+
+  have hBG : Subset B G := by
+    apply Classical.byContradiction
+    intro hnotBG
+    have hstrict : StrictSubset G B := ⟨hGB, hnotBG⟩
+    exact hminsurv G hstrict hGsurv
+
+  refine ⟨H, z, hHB, hHobs, hHcovered, hzB, hzout, ?_⟩
+  intro x
+  constructor
+  · intro hx
+    exact hBG x hx
+  · intro hx
+    exact hGB x hx
+
+
 end Insacermo
