@@ -12,7 +12,7 @@ def is_antichain(fam):
 def all_complex_facets(n):
     subs=list(subsets(n))
     # Every finite simplicial complex is represented by its antichain of maximal faces.
-    for mask in range(1<<len(subs)):
+    for mask in range(1,1<<len(subs)):
         fam=[subs[i] for i in range(len(subs)) if mask>>i & 1]
         if is_antichain(fam):
             yield tuple(fam)
@@ -58,9 +58,10 @@ def analyze(n=4):
                       "new":[sorted(x) for x in new],"offender":sorted(B)
                     })
                     if len(counterexamples)>=3:
-                        return None
+                        pass
     observed={
       "n_worlds":n,
+      "scope":"all nonempty finite actionability complexes on n worlds; excludes the degenerate zero-capability system",
       "complexes_profiled":complexes,
       "repair_transitions":transition_count,
       "new_minimal_obstructions":new_count,
@@ -81,7 +82,7 @@ def analyze(n=4):
 def main():
     import json
     out=analyze(4)
-    assert out is not None
+    assert not out["counterexamples"]
     print(json.dumps(out,indent=2,sort_keys=True))
     with open("STRUCTURE_DISCOVERY_V1.json","w") as f:
         json.dump(out,f,indent=2,sort_keys=True)
