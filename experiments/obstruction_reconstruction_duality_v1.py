@@ -11,10 +11,21 @@ def antichain(fam):
 
 def all_complex_facets(n):
     subs=list(subsets(n))
-    for mask in range(1,1<<len(subs)):
-        fam=[subs[i] for i in range(len(subs)) if mask>>i & 1]
-        if antichain(fam):
-            yield tuple(fam)
+    fam=[]
+    def rec(i):
+        if i==len(subs):
+            if fam:
+                yield tuple(fam)
+            return
+        # skip
+        yield from rec(i+1)
+        # include only if still an antichain with what is already chosen
+        S=subs[i]
+        if all(not (S<T or T<S) for T in fam):
+            fam.append(S)
+            yield from rec(i+1)
+            fam.pop()
+    yield from rec(0)
 
 def is_face(S,facets):
     return any(S <= F for F in facets)
