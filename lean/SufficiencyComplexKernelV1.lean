@@ -315,4 +315,165 @@ theorem newlyMinimal_exposes_one_outsider
     exact hGB x hx
 
 
+/-! ## Unified future/action sufficiency geometry -/
+
+def FutureCoherent
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    (B : WSet World) : Prop :=
+  ∀ x y, B x → B y → futureEq x y
+
+def Sufficient
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (B : WSet World) : Prop :=
+  Actionable good C B ∧ FutureCoherent futureEq B
+
+theorem futureCoherent_downward
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    {A B : WSet World}
+    (hAB : Subset A B)
+    (hB : FutureCoherent futureEq B) :
+    FutureCoherent futureEq A := by
+  intro x y hx hy
+  exact hB x y (hAB x hx) (hAB y hy)
+
+theorem sufficient_downward
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    {A B : WSet World}
+    (hAB : Subset A B)
+    (hB : Sufficient good C futureEq B) :
+    Sufficient good C futureEq A := by
+  exact ⟨
+    actionable_downward good C hAB hB.1,
+    futureCoherent_downward futureEq hAB hB.2
+  ⟩
+
+/--
+UNIFIED FILL LAW.
+Adding one capability changes only the actionability side of sufficiency:
+future coherence is untouched, while the ambiguity becomes actionable either
+because it already was or because the new capability covers it completely.
+-/
+theorem sufficient_addCapability_iff
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (b : Action)
+    (B : WSet World) :
+    Sufficient good (AddCapability C b) futureEq B ↔
+      FutureCoherent futureEq B ∧
+      (Actionable good C B ∨ Subset B (GoodRegion good b)) := by
+  unfold Sufficient
+  rw [actionable_addCapability_iff]
+  constructor
+  · rintro ⟨hact, hfuture⟩
+    exact ⟨hfuture, hact⟩
+  · rintro ⟨hfuture, hact⟩
+    exact ⟨hact, hfuture⟩
+
+def RepFiber
+    {World : Type u} {Code : Type w}
+    (encode : World → Code)
+    (z : Code) : WSet World :=
+  fun x => encode x = z
+
+def RepresentationSafe
+    {World : Type u} {Action : Type v} {Code : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (encode : World → Code) : Prop :=
+  ∀ z, Sufficient good C futureEq (RepFiber encode z)
+
+/--
+A representation is safe exactly when every information fiber is a sufficient
+ambiguity set. This is the common fiber form behind future-preserving
+compression and capability-relative actionability.
+-/
+theorem representationSafe_iff_allFibersSufficient
+    {World : Type u} {Action : Type v} {Code : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (encode : World → Code) :
+    RepresentationSafe good C futureEq encode ↔
+      ∀ z, Sufficient good C futureEq (RepFiber encode z) := by
+  rfl
+
+def FullySafeProbe
+    {World : Type u} {Action : Type v} {Obs : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (B : WSet World)
+    (observe : World → Obs) : Prop :=
+  ∀ o, Sufficient good C futureEq (Fiber observe B o)
+
+theorem fullySafeProbe_implies_actionSafe
+    {World : Type u} {Action : Type v} {Obs : Type w}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (B : WSet World)
+    (observe : World → Obs)
+    (h : FullySafeProbe good C futureEq B observe) :
+    SafeProbe good C B observe := by
+  intro o
+  exact (h o).1
+
+/-! ## Abstract resource frontier -/
+
+def MinimalSufficientResource
+    {Resource : Type u}
+    (leR : Resource → Resource → Prop)
+    (Suff : Resource → Prop)
+    (r : Resource) : Prop :=
+  Suff r ∧
+  ∀ q, leR q r → ¬ leR r q → ¬ Suff q
+
+/--
+Minimal sufficient resources form an antichain up to resource equivalence:
+if two minimal resources are comparable, the comparison must also hold in the
+reverse direction.
+-/
+theorem minimalSufficient_comparable_implies_equiv
+    {Resource : Type u}
+    (leR : Resource → Resource → Prop)
+    (Suff : Resource → Prop)
+    {r s : Resource}
+    (hr : MinimalSufficientResource leR Suff r)
+    (hs : MinimalSufficientResource leR Suff s)
+    (hrs : leR r s) :
+    leR s r := by
+  apply Classical.byContradiction
+  intro hnot
+  have hnotSuffR : ¬ Suff r := hs.2 r hrs hnot
+  exact hnotSuffR hr.1
+
+/--
+COMPENSATION PRINCIPLE.
+For an upward-monotone sufficiency predicate, if the current resource r is
+insufficient while s is sufficient, then s cannot be no richer than r.
+-/
+theorem insufficiency_requires_resource_upgrade
+    {Resource : Type u}
+    (leR : Resource → Resource → Prop)
+    (Suff : Resource → Prop)
+    (mono : ∀ a b, leR a b → Suff a → Suff b)
+    {r s : Resource}
+    (hr : ¬ Suff r)
+    (hs : Suff s) :
+    ¬ leR s r := by
+  intro hsr
+  exact hr (mono s r hsr hs)
+
+
 end Insacermo
