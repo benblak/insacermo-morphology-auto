@@ -1422,4 +1422,145 @@ theorem relevantActionBasis_antitone_under_future_conflicts
     exact hrel.2 ⟨x, y, hconf x y hLoose, hpair⟩
 
 
+/-! ## Theory-space identification kernel -/
+
+abbrev Theory (World : Type u) := WSet World → Prop
+
+def ConsistentWith
+    {World : Type u}
+    (T : Theory World)
+    (q : WSet World)
+    (answer : Bool) : Prop :=
+  if answer then T q else ¬ T q
+
+def VersionSpace
+    {World : Type u} {Hyp : Type v}
+    (sem : Hyp → Theory World)
+    (Obs : List (WSet World × Bool))
+    (h : Hyp) : Prop :=
+  ∀ qa ∈ Obs, ConsistentWith (sem h) qa.1 qa.2
+
+def AnswerOf
+    {World : Type u}
+    (T : Theory World)
+    (q : WSet World) : Bool :=
+  if h : T q then true else false
+
+theorem answerOf_consistent
+    {World : Type u}
+    (T : Theory World)
+    (q : WSet World) :
+    ConsistentWith T q (AnswerOf T q) := by
+  unfold AnswerOf ConsistentWith
+  split <;> simp_all
+
+/--
+The true theory is never removed by appending its own observed answer.
+-/
+theorem trueTheory_survives_observation
+    {World : Type u} {Hyp : Type v}
+    (sem : Hyp → Theory World)
+    (truth : Hyp)
+    (Obs : List (WSet World × Bool))
+    (htruth : VersionSpace sem Obs truth)
+    (q : WSet World) :
+    VersionSpace sem
+      (Obs ++ [(q, AnswerOf (sem truth) q)]) truth := by
+  intro qa hmem
+  simp only [List.mem_append, List.mem_singleton] at hmem
+  cases hmem with
+  | inl hold => exact htruth qa hold
+  | inr hnew =>
+      subst qa
+      exact answerOf_consistent (sem truth) q
+
+/--
+Version spaces only shrink when observations are appended.
+-/
+theorem versionSpace_antitone_under_more_observations
+    {World : Type u} {Hyp : Type v}
+    (sem : Hyp → Theory World)
+    (Obs More : List (WSet World × Bool))
+    (h : Hyp)
+    (hmore : VersionSpace sem (Obs ++ More) h) :
+    VersionSpace sem Obs h := by
+  intro qa hqa
+  exact hmore qa (by simp [hqa])
+
+def Separates
+    {World : Type u}
+    (T₁ T₂ : Theory World)
+    (q : WSet World) : Prop :=
+  T₁ q ↔ ¬ T₂ q
+
+/--
+A separating query guarantees that at least one of two competing theories is
+eliminated after observing the true answer.
+-/
+theorem separating_query_eliminates_competitor
+    {World : Type u}
+    (Ttruth Tother : Theory World)
+    (q : WSet World)
+    (hsep : Ttruth q ↔ ¬ Tother q) :
+    ¬ ConsistentWith Tother q (AnswerOf Ttruth q) := by
+  unfold AnswerOf ConsistentWith
+  by_cases ht : Ttruth q
+  · simp [ht]
+    exact (hsep.mp ht)
+  · have hto : Tother q := by
+      by_contra hnot
+      have : Ttruth q := (hsep.mpr hnot)
+      exact ht this
+    simp [ht, hto]
+
+/--
+EXTENSIONAL IDENTIFIABILITY.
+If two theories are not extensionally equal, then some ambiguity query
+separates them in ACT/REFUSE answer.
+-/
+theorem nonextensional_theories_have_separating_query
+    {World : Type u}
+    (T₁ T₂ : Theory World)
+    (hne : ¬ ∀ q, T₁ q ↔ T₂ q) :
+    ∃ q, Separates T₁ T₂ q := by
+  apply Classical.byContradiction
+  intro hnone
+  apply hne
+  intro q
+  by_cases h1 : T₁ q
+  · constructor
+    · intro _
+      by_contra h2
+      apply hnone
+      refine ⟨q, ?_⟩
+      exact ⟨h1, h2⟩
+    · intro _ => exact h1
+  · constructor
+    · intro h => exact False.elim (h1 h)
+    · intro h2
+      by_contra hnot1
+      exact h2 (by
+        by_contra hnot2
+        apply hnone
+        refine ⟨q, ?_⟩
+        exact ⟨hnot1, hnot2⟩)
+
+/--
+If a candidate theory disagrees extensionally with the truth, one exact query
+exists that preserves the truth and rejects that candidate.
+-/
+theorem exact_query_can_kill_any_wrong_theory
+    {World : Type u}
+    (Ttruth Tother : Theory World)
+    (hne : ¬ ∀ q, Ttruth q ↔ Tother q) :
+    ∃ q,
+      ConsistentWith Ttruth q (AnswerOf Ttruth q) ∧
+      ¬ ConsistentWith Tother q (AnswerOf Ttruth q) := by
+  obtain ⟨q, hsep⟩ :=
+    nonextensional_theories_have_separating_query Ttruth Tother hne
+  exact ⟨q,
+    answerOf_consistent Ttruth q,
+    separating_query_eliminates_competitor Ttruth Tother q hsep⟩
+
+
 end Insacermo
