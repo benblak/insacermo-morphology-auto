@@ -1323,4 +1323,103 @@ theorem same_negative_signature_same_sufficiency
     exact ⟨ha, fun x y hconf => hf x y ((hFuture x y).mp hconf)⟩
 
 
+/-! ## Contract-capability masking -/
+
+def MaskedByFuture
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    (O : WSet World) : Prop :=
+  ∃ x y,
+    FutureConflict futureEq x y ∧
+    Subset (PairSet x y) O
+
+def RelevantActionBasis
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    (Basis : (WSet World) → Prop)
+    (O : WSet World) : Prop :=
+  Basis O ∧ ¬ MaskedByFuture futureEq O
+
+/--
+MASKING LAW.
+An action obstruction containing a future-conflict pair can never be the first
+effective forbidden reason for a sufficient ambiguity: every ambiguity
+containing that obstruction is already future-incoherent.
+-/
+theorem masked_action_obstruction_forces_future_failure
+    {World : Type u}
+    (futureEq : World → World → Prop)
+    (O B : WSet World)
+    (hmask : MaskedByFuture futureEq O)
+    (hOB : Subset O B) :
+    ¬ FutureCoherent futureEq B := by
+  obtain ⟨x, y, hconf, hpairO⟩ := hmask
+  intro hfuture
+  apply hconf
+  exact hfuture x y
+    (hOB x (hpairO x (Or.inl rfl)))
+    (hOB y (hpairO y (Or.inr rfl)))
+
+/--
+PRUNED TOTAL BASIS LAW.
+In unified sufficiency, every action-basis obstruction masked by a future
+conflict pair is redundant. It can be removed from the action basis without
+changing the sufficiency judgement.
+-/
+theorem sufficient_iff_avoids_relevantActionBasis_and_futurePairs
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (futureEq : World → World → Prop)
+    (Basis : (WSet World) → Prop)
+    (hBasis : ObstructionBasis good C Basis)
+    (B : WSet World) :
+    Sufficient good C futureEq B ↔
+      (∀ O, RelevantActionBasis futureEq Basis O → ¬ Subset O B) ∧
+      (∀ x y, FutureConflict futureEq x y →
+        ¬ Subset (PairSet x y) B) := by
+  constructor
+  · intro hs
+    have hfull :=
+      (sufficient_iff_avoids_actionBasis_and_futurePairs
+        good C futureEq Basis hBasis B).mp hs
+    constructor
+    · intro O hrel
+      exact hfull.1 O hrel.1
+    · exact hfull.2
+  · rintro ⟨hrelevant, hfuture⟩
+    apply (sufficient_iff_avoids_actionBasis_and_futurePairs
+      good C futureEq Basis hBasis B).mpr
+    constructor
+    · intro O hO hOB
+      by_cases hmask : MaskedByFuture futureEq O
+      · obtain ⟨x, y, hconf, hpairO⟩ := hmask
+        exact hfuture x y hconf (fun z hz => hOB z (hpairO z hz))
+      · exact hrelevant O ⟨hO, hmask⟩ hOB
+    · exact hfuture
+
+/--
+Tightening the future contract (adding conflict pairs) can only mask more
+action obstructions: every action obstruction still relevant under the
+stricter contract was already relevant under the looser one.
+-/
+theorem relevantActionBasis_antitone_under_future_conflicts
+    {World : Type u}
+    (futureEqLoose futureEqStrict : World → World → Prop)
+    (Basis : (WSet World) → Prop)
+    (hconf :
+      ∀ x y,
+        FutureConflict futureEqLoose x y →
+        FutureConflict futureEqStrict x y) :
+    ∀ O,
+      RelevantActionBasis futureEqStrict Basis O →
+      RelevantActionBasis futureEqLoose Basis O := by
+  intro O hrel
+  constructor
+  · exact hrel.1
+  · intro hmaskLoose
+    obtain ⟨x, y, hLoose, hpair⟩ := hmaskLoose
+    exact hrel.2 ⟨x, y, hconf x y hLoose, hpair⟩
+
+
 end Insacermo
