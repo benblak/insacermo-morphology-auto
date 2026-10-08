@@ -44,18 +44,24 @@ def choose_query(cands,sigs,labels,asked):
             best=(key,q,yes,no)
     return best
 
-def run_target(target,sigs,labels):
-    cands=list(range(len(sigs))); asked=set(); transcript=[]
-    while len({labels[i] for i in cands})>1:
+def build_tree_paths(sigs,labels):
+    paths=[None]*len(sigs)
+    leaf_cands=[None]*len(sigs)
+    def rec(cands,asked):
+        if len({labels[i] for i in cands})==1:
+            for i in cands:
+                paths[i]=frozenset(asked)
+                leaf_cands[i]=tuple(cands)
+            return
         best=choose_query(cands,sigs,labels,asked)
-        if best is None: raise RuntimeError("cannot distinguish decision classes")
+        if best is None:
+            raise RuntimeError("cannot distinguish decision classes")
         _,q,yes,no=best
-        ans=sigs[target][q]
-        before=len(cands)
-        cands=yes if ans else no
-        asked.add(q)
-        transcript.append((q,ans,before,len(cands)))
-    return cands,asked,transcript
+        rec(yes,asked|{q})
+        rec(no,asked|{q})
+    rec(list(range(len(sigs))),set())
+    assert all(p is not None for p in paths)
+    return paths,leaf_cands
 
 def main():
     n=5
@@ -67,11 +73,12 @@ def main():
 
     # A. Full blind discovery: identify exact theory, reconstruct all unqueried answers
     full_labels=list(sigs)
+    full_paths,full_leaf_cands=build_tree_paths(sigs,full_labels)
     full_depths=[]; unseen_total=0; unseen_errors=0; basis_errors=0
     for t in range(len(sigs)):
-        cands,asked,tr=run_target(t,sigs,full_labels)
+        asked=full_paths[t]
+        cands=full_leaf_cands[t]
         assert len({full_labels[i] for i in cands})==1
-        # unique full signature => exact theory
         leaf_sig=full_labels[cands[0]]
         full_depths.append(len(asked))
         for q in range(len(ss)):
@@ -87,20 +94,20 @@ def main():
     # B. Contract-limited blind discovery: only future obligations |B|>=4
     gamma=[i for i,S in enumerate(ss) if len(S)>=4]
     qlabels=[tuple(sig[i] for i in gamma) for sig in sigs]
+    q_paths,q_leaf_cands=build_tree_paths(sigs,qlabels)
     q_depths=[]; q_unseen_total=0; q_unseen_errors=0
     residual_sizes=[]; unresolved_offcontract_pairs=0
     for t in range(len(sigs)):
-        cands,asked,tr=run_target(t,sigs,qlabels)
+        asked=q_paths[t]
+        cands=q_leaf_cands[t]
         q_depths.append(len(asked))
         residual_sizes.append(len(cands))
-        # all remaining candidates must agree on Gamma; verify against hidden truth
         representative=cands[0]
         for q in gamma:
             if q not in asked:
                 q_unseen_total+=1
                 if sigs[representative][q] != sigs[t][q]:
                     q_unseen_errors+=1
-        # Count whether exact theory is still unresolved outside Gamma.
         if len(cands)>1:
             unresolved_offcontract_pairs += 1
 
