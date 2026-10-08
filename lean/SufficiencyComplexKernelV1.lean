@@ -1075,4 +1075,69 @@ theorem boundaryRepair_witness_exists
     good C bs B hnew z hz.1 hz.2
 
 
+/-! ## General construction attaining boundary debt -/
+
+def AddBoundaryRepairs
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (repairFor : World → Action) : CapSet Action :=
+  fun a =>
+    C a ∨
+    ∃ z, BoundaryObstructed good C B z ∧ a = repairFor z
+
+/--
+UPPER-BOUND CONSTRUCTION.
+Assume B is initially obstructed. For every blocked boundary point z, suppose
+repairFor z covers the whole face B\{z} but still does not cover B. Then after
+adding all these dedicated boundary repairs, B becomes a minimal obstruction.
+
+Combined with boundary-repair injectivity, this is the structural equality:
+one dedicated preserving repair per blocked boundary face is sufficient and
+no preserving repair can serve two distinct blocked faces.
+-/
+theorem dedicated_boundary_repairs_expose_minimal
+    {World : Type u} {Action : Type v}
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World)
+    (repairFor : World → Action)
+    (hBobs : Obstruction good C B)
+    (hcover :
+      ∀ z, BoundaryObstructed good C B z →
+        Subset (RemovePoint B z) (GoodRegion good (repairFor z)))
+    (hpreserve :
+      ∀ z, BoundaryObstructed good C B z →
+        ¬ Subset B (GoodRegion good (repairFor z))) :
+    MinimalObstruction good
+      (AddBoundaryRepairs good C B repairFor) B := by
+  apply (minimalObstruction_iff_all_point_deletions_actionable
+    good (AddBoundaryRepairs good C B repairFor) B).2
+  constructor
+  · intro hact
+    obtain ⟨a, ha, haGood⟩ := hact
+    cases ha with
+    | inl haC =>
+        exact hBobs ⟨a, haC, haGood⟩
+    | inr hnew =>
+        obtain ⟨z, hzBlocked, hEq⟩ := hnew
+        subst a
+        exact hpreserve z hzBlocked (fun x hx => haGood x hx)
+  · intro z hzB
+    by_cases hzOld : Obstruction good C (RemovePoint B z)
+    · have hzBlocked : BoundaryObstructed good C B z := ⟨hzB, hzOld⟩
+      refine ⟨repairFor z, Or.inr ⟨z, hzBlocked, rfl⟩, ?_⟩
+      intro x hx
+      exact hcover z hzBlocked x hx
+    · have hzActOld : Actionable good C (RemovePoint B z) := by
+        apply Classical.byContradiction
+        intro hnot
+        exact hzOld hnot
+      exact actionable_capability_mono good C
+        (D := AddBoundaryRepairs good C B repairFor)
+        (fun a ha => Or.inl ha)
+        hzActOld
+
+
 end Insacermo
