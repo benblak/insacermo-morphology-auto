@@ -1957,11 +1957,13 @@ theorem realizedSafeProbe_iff_contingentAction
       · obtain ⟨a, haC, hgood⟩ := h o hreal
         exact ⟨a, fun _ => ⟨haC, hgood⟩⟩
       · exact ⟨defaultAction, fun hr => False.elim (hreal hr)⟩
-    choose choose hchoose using hex
-    exact ⟨choose, fun o hreal => hchoose o hreal⟩
+    let choose : Obs → Action := fun o => Classical.choose (hex o)
+    refine ⟨choose, ?_⟩
+    intro o hreal
+    exact (Classical.choose_spec (hex o)) hreal
   · rintro ⟨choose, hchoose⟩
     intro o hreal
-    have hs := hchoose o hreal
-    exact ⟨choose o, hs.1, hs.2⟩
+    obtain ⟨haC, hgood⟩ := hchoose o hreal
+    exact ⟨choose o, haC, hgood⟩
 
 end Insacermo
