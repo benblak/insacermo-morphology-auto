@@ -1013,4 +1013,87 @@ theorem exposed_boundary_face_gets_preserving_repair
       exact ⟨b, hb, hsub, hBchar.2 b hb⟩
 
 
+/-! ## Finite boundary debt lower bound -/
+
+noncomputable def BoundaryDebtFinset
+    {World : Type u} {Action : Type v}
+    [Fintype World]
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (B : WSet World) : Finset World := by
+  classical
+  exact Finset.univ.filter
+    (fun z => B z ∧ Obstruction good C (RemovePoint B z))
+
+/--
+FINITE LOWER BOUND.
+If a finite batch of repairs exposes B as a minimal obstruction, then the
+number of distinct added capabilities is at least the number of boundary
+points whose codimension-one faces were obstructed before the batch.
+-/
+theorem boundaryDebt_card_le_distinctRepairs
+    {World : Type u} {Action : Type v}
+    [Fintype World] [DecidableEq Action]
+    (good : World → Action → Prop)
+    (C : CapSet Action)
+    (bs : List Action)
+    (B : WSet World)
+    (hnew : MinimalObstruction good (AddCapabilities C bs) B) :
+    (BoundaryDebtFinset good C B).card ≤ bs.toFinset.card := by
+  classical
+  let D := BoundaryDebtFinset good C B
+
+  have hrepair :
+      ∀ z : {x // x ∈ D},
+        ∃ b, b ∈ bs ∧
+          Subset (RemovePoint B z.1) (GoodRegion good b) ∧
+          ¬ Subset B (GoodRegion good b) := by
+    intro z
+    have hzspec :
+        B z.1 ∧ Obstruction good C (RemovePoint B z.1) := by
+      simpa [D, BoundaryDebtFinset] using z.2
+    exact exposed_boundary_face_gets_preserving_repair
+      good C bs B hnew z.1 hzspec.1 hzspec.2
+
+  let pick : {x // x ∈ D} → Action :=
+    fun z => Classical.choose (hrepair z)
+
+  have pick_spec :
+      ∀ z : {x // x ∈ D},
+        pick z ∈ bs ∧
+        Subset (RemovePoint B z.1) (GoodRegion good (pick z)) ∧
+        ¬ Subset B (GoodRegion good (pick z)) := by
+    intro z
+    exact Classical.choose_spec (hrepair z)
+
+  let f :
+      {x // x ∈ D} → {b // b ∈ bs.toFinset} :=
+    fun z => ⟨pick z, by
+      simpa using (pick_spec z).1⟩
+
+  have hinj : Function.Injective f := by
+    intro x y hxy
+    apply Subtype.ext
+    by_contra hne
+    have hxspec :
+        B x.1 ∧ Obstruction good C (RemovePoint B x.1) := by
+      simpa [D, BoundaryDebtFinset] using x.2
+    have hyspec :
+        B y.1 ∧ Obstruction good C (RemovePoint B y.1) := by
+      simpa [D, BoundaryDebtFinset] using y.2
+    have hpick : pick x = pick y := congrArg Subtype.val hxy
+    have hycover :
+        Subset (RemovePoint B y.1) (GoodRegion good (pick x)) := by
+      simpa [hpick] using (pick_spec y).2.1
+    exact preserving_repair_cannot_resolve_two_boundary_faces
+      good (pick x) B x.1 y.1
+      hxspec.1 hyspec.1 hne
+      (pick_spec x).2.2
+      (pick_spec x).2.1
+      hycover
+
+  have hcard := Fintype.card_le_of_injective f hinj
+  simpa [D] using hcard
+
+
 end Insacermo
