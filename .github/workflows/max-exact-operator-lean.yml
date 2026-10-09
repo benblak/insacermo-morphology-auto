@@ -1,0 +1,25 @@
+name: INSACERMO MAX Exact Operator Lean
+on:
+  push:
+    branches: [insacermo-max-lean-exact-operator-optimum-2026-10-09]
+    paths:
+      - lean/MaxExactOperatorOptimumV1.lean
+      - .github/workflows/max-exact-operator-lean.yml
+  workflow_dispatch:
+jobs:
+  lean-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: lean --version
+      - name: Kernel-check exact four-unit optimum
+        run: lean lean/MaxExactOperatorOptimumV1.lean
+      - name: No placeholders / custom axioms
+        run: |
+          if grep -n -E '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/MaxExactOperatorOptimumV1.lean; then exit 1; fi
+          echo ZERO_SORRY_ADMIT_CUSTOM_AXIOMS
