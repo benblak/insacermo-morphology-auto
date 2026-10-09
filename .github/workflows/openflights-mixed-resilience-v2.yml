@@ -1,0 +1,22 @@
+name: INSACERMO OpenFlights Mixed Resilience V2
+on:
+  push:
+    branches: [insacermo-fmnist-min-info-v1-2026-10-05]
+    paths:
+      - experiments/openflights_mixed_resilience_v2.py
+      - .github/workflows/openflights-mixed-resilience-v2.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python experiments/openflights_mixed_resilience_v2.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPENFLIGHTS_MIXED_RESILIENCE_V2
+          path: OPENFLIGHTS_MIXED_RESILIENCE_V2.json
+          if-no-files-found: error
