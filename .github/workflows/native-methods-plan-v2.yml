@@ -1,0 +1,31 @@
+name: INSACERMO V1.5 Native Method Planner Portable Lean
+on:
+  push:
+    branches: [insacermo-v15-native-method-actions-v2-2026-10-09]
+    paths:
+      - lean/SolverV3PortablePlanKernelV1.lean
+      - lean/generated/NativeMethodsPlannerGeneratedV2.lean
+      - .github/workflows/native-methods-plan-v2.yml
+  workflow_dispatch:
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify exact emitted source SHA-256
+        run: |
+          echo '65368999394ad0787b8434106fd9e9823f4c75f30ec75855976c27e56741ff30  lean/generated/NativeMethodsPlannerGeneratedV2.lean' | sha256sum -c -
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile standalone frozen-policy verifier
+        run: |
+          LEAN_PATH=lean lean -o lean/SolverV3PortablePlanKernelV1.olean lean/SolverV3PortablePlanKernelV1.lean
+      - name: Compile exact generated native planner policy
+        run: |
+          LEAN_PATH=lean lean lean/generated/NativeMethodsPlannerGeneratedV2.lean
+      - name: No placeholders or custom axioms
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/SolverV3PortablePlanKernelV1.lean lean/generated/NativeMethodsPlannerGeneratedV2.lean
