@@ -35,7 +35,7 @@ theorem certificate_guarantees_coverage (n : Nat) (clauses : List (List Nat))
     (choice : Nat) (h : certifyMinimum n clauses choice = true) :
     covers clauses choice = true := by
   simp [certifyMinimum] at h
-  exact h.2.1
+  exact h.1.2
 
 /-- A true certificate implies no smaller subset can satisfy the finite
     contract. This theorem is independent of any particular data set. -/
@@ -46,7 +46,7 @@ theorem certificate_guarantees_minimum (n : Nat)
     (hCandidate : covers clauses candidate = true) :
     count n choice <= count n candidate := by
   simp only [certifyMinimum, Bool.and_eq_true] at h
-  have hAll := h.2.2
+  have hAll := h.2
   have hm : candidate ∈ List.range (2^n) := List.mem_range.mpr hRange
   have hc : (if covers clauses candidate
     then decide (count n choice <= count n candidate) else true) = true := by
