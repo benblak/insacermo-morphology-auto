@@ -4,7 +4,7 @@ on:
     branches: [insacermo-v15-native-method-actions-v2-2026-10-09]
     paths:
       - lean/SolverV3PortablePlanKernelV1.lean
-      - lean/generated/NativeMethodsPlannerGeneratedV2.lean lean/NativeMethodsTamperChecksV2.lean
+      - lean/generated/NativeMethodsPlannerGeneratedV2.lean
       - lean/NativeMethodsTamperChecksV2.lean
       - .github/workflows/native-methods-plan-v2.yml
   workflow_dispatch:
@@ -32,4 +32,4 @@ jobs:
           LEAN_PATH=lean lean lean/NativeMethodsTamperChecksV2.lean
       - name: No placeholders or custom axioms
         run: |
-          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/SolverV3PortablePlanKernelV1.lean lean/generated/NativeMethodsPlannerGeneratedV2.lean
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/SolverV3PortablePlanKernelV1.lean lean/generated/NativeMethodsPlannerGeneratedV2.lean lean/NativeMethodsTamperChecksV2.lean
