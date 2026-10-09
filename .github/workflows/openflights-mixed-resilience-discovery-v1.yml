@@ -1,0 +1,24 @@
+name: INSACERMO OpenFlights Mixed Resilience Discovery V1
+on:
+  push:
+    branches:
+      - insacermo-fmnist-min-info-v1-2026-10-05
+    paths:
+      - experiments/openflights_mixed_resilience_discovery_v1.py
+      - .github/workflows/openflights-mixed-resilience-discovery-v1.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python experiments/openflights_mixed_resilience_discovery_v1.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPENFLIGHTS_MIXED_RESILIENCE_DISCOVERY_V1
+          path: OPENFLIGHTS_MIXED_RESILIENCE_DISCOVERY_V1.json
+          if-no-files-found: error
