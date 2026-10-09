@@ -58,11 +58,11 @@ termination_by budget => budget
 
 /-- The exact optimum worst-case cost is at most four abstract units. -/
 theorem four_suffices : feasible 4 allBelief 0 = true := by
-  decide
+  decide +kernel
 
 /-- There is no guaranteed policy costing at most three units. -/
 theorem three_insufficient : feasible 3 allBelief 0 = false := by
-  decide
+  decide +kernel
 
 theorem exact_minimax_cost_four :
     feasible 4 allBelief 0 = true ∧ feasible 3 allBelief 0 = false :=
