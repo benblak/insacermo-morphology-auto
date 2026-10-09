@@ -1,0 +1,29 @@
+name: INSACERMO Onehot Observation Lean V1
+on:
+  push:
+    branches: [insacermo-openflights-blind-dual-failure-v2-2026-10-09]
+    paths:
+      - lean/OneHotObservationKernelV1.lean
+      - .github/workflows/onehot-observation-lean-v1.yml
+  workflow_dispatch:
+jobs:
+  lean-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check Lean version
+        run: lean --version
+      - name: Compile OneHot kernel
+        run: lean lean/OneHotObservationKernelV1.lean
+      - name: Audit forbidden placeholders and axioms
+        run: |
+          if grep -n -E '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/OneHotObservationKernelV1.lean; then
+            echo "FORBIDDEN_PLACEHOLDER_OR_CUSTOM_AXIOM"
+            exit 1
+          fi
+          echo "ZERO_SORRY_ADMIT_CUSTOM_AXIOMS"
