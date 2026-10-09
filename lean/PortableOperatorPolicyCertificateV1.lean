@@ -52,7 +52,7 @@ def runWorld (world repaired : Nat) : Policy → Nat × Nat
   | .act => (repaired, 0)
   | .probe mask yes no =>
       let down := world < 4 && !(repaired.testBit world) && mask.testBit world
-      let r := runWorld world repaired (if down then yes else no)
+      let r := if down then runWorld world repaired yes else runWorld world repaired no
       (r.1, r.2 + 1)
   | .repair mask next =>
       let r := runWorld world (Nat.lor repaired mask) next
