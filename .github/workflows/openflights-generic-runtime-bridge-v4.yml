@@ -1,0 +1,22 @@
+name: INSACERMO OpenFlights Generic Runtime Bridge V4
+on:
+  push:
+    branches: [insacermo-openflights-blind-dual-failure-v2-2026-10-09]
+    paths:
+      - experiments/openflights_generic_runtime_bridge_v4.py
+      - .github/workflows/openflights-generic-runtime-bridge-v4.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: PYTHONPATH=.:experiments python experiments/openflights_generic_runtime_bridge_v4.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPENFLIGHTS_GENERIC_RUNTIME_BRIDGE_V4
+          path: INSACERMO_OPENFLIGHTS_GENERIC_RUNTIME_BRIDGE_V4.json
+          if-no-files-found: error
