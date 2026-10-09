@@ -1,0 +1,28 @@
+name: INSACERMO Open-World Blind 3823 Digits Gate Audit
+on:
+  push:
+    branches: [insacermo-open-world-heldout-3823-gate-v1-2026-10-10]
+    paths:
+      - experiments/heldout_optdigits_3823_gate_audit_v1.py
+      - .github/workflows/heldout-digits-gate-v1.yml
+  workflow_dispatch:
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install numeric and dataset-reader dependencies
+        run: python -m pip install numpy scikit-learn
+      - name: Audit unseen 3823 labels after decisions
+        run: python experiments/heldout_optdigits_3823_gate_audit_v1.py
+      - name: Upload reproducible result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPEN_WORLD_3823_AUDIT_V1
+          path: audit_result.json
+          if-no-files-found: ignore
