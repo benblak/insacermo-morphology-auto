@@ -65,7 +65,8 @@ theorem opposite_actions_require_observing_one
     (sound : GloballySound S act)
     (x y : World) (hdiff : act x ≠ act y) :
     x ∈ S ∨ y ∈ S := by
-  by_contra hnone
+  apply Classical.byContradiction
+  intro hnone
   have hx : x ∉ S := by
     intro hx
     exact hnone (Or.inl hx)
