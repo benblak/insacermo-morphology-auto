@@ -1,0 +1,22 @@
+name: INSACERMO OpenFlights Blind Dual Failure V2
+on:
+  push:
+    branches: [insacermo-openflights-blind-dual-failure-v2-2026-10-09]
+    paths:
+      - experiments/openflights_blind_dual_failure_v2.py
+      - .github/workflows/openflights-blind-dual-failure-v2.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python experiments/openflights_blind_dual_failure_v2.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPENFLIGHTS_BLIND_DUAL_FAILURE_V2
+          path: INSACERMO_OPENFLIGHTS_BLIND_DUAL_FAILURE_V2.json
+          if-no-files-found: error
