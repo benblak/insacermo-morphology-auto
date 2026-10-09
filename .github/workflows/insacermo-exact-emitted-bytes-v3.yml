@@ -1,0 +1,30 @@
+name: INSACERMO Exact Emitted Bytes Lean V3
+on:
+  push:
+    branches: [insacermo-byte-exact-finite-lean-v3-2026-10-09]
+    paths:
+      - lean/generated/EmittedOpenFlightsPolicyV2.lean
+      - .github/workflows/insacermo-exact-emitted-bytes-v3.yml
+  workflow_dispatch:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check exact generated source SHA-256 from V2 package
+        run: |
+          echo '3949a59f4fd0fe781903f4b59dbd6687d814caf6d5e7706736712f32f5fff491  lean/generated/EmittedOpenFlightsPolicyV2.lean' | sha256sum -c -
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel compile exact generated file
+        run: |
+          LEAN_PATH=lean lean -o lean/MaxExactOperatorOptimumV1.olean lean/MaxExactOperatorOptimumV1.lean
+          LEAN_PATH=lean lean -o lean/FiniteDecisionCertificateCheckerV2.olean lean/FiniteDecisionCertificateCheckerV2.lean
+          LEAN_PATH=lean lean lean/generated/EmittedOpenFlightsPolicyV2.lean
+      - name: No sorry admit custom axioms in the certifying files
+        run: |
+          if grep -n -E '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/MaxExactOperatorOptimumV1.lean lean/FiniteDecisionCertificateCheckerV2.lean lean/generated/EmittedOpenFlightsPolicyV2.lean; then exit 1; fi
+          echo CERTIFICATE_CHECK_PASS
