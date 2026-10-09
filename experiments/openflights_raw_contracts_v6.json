@@ -1,0 +1,77 @@
+{
+  "protocol": "INSACERMO_DECLARED_RELATION_CONTRACT_V6",
+  "contracts": [
+    {
+      "source": "STZ",
+      "target": "BSB",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "YZY",
+      "target": "YKA",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "YIK",
+      "target": "SYX",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "BEU",
+      "target": "BVI",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "AWD",
+      "target": "FTA",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "CDG",
+      "target": "JFK",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "LHR",
+      "target": "HND",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    },
+    {
+      "source": "RNS",
+      "target": "CDG",
+      "semantics": "directed_transitive_closure",
+      "failure_budget": 1,
+      "failure_quantifier": "exactly",
+      "observer": "perfect_individual_edge_failure",
+      "decision_rule": "ACT_IF_REACHABLE_ELSE_REPAIR_FAILED_EDGE"
+    }
+  ]
+}
