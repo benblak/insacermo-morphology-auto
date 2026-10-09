@@ -20,8 +20,7 @@ theorem separation_under_one_error
     new0 ≠ new1 := by
   intro hEqual
   have hLeft := triangle origin0 new0 origin1
-  have hRight := triangle new0 new1 origin1
-  rw [hEqual, zero] at hRight
+  rw [← hEqual] at h1
   omega
 
 end INSACERMO.RadiusOne
