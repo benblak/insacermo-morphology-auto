@@ -6,6 +6,11 @@ namespace INSACERMO.NativeMethodsTamper
 open InsacermoSolverV3PortablePlanKernelV1
 open InsacermoTotalRuntimeSolverV3PlanV1
 
+theorem kernel_independent_plan_recheck :
+    PortablePlanCertificateValid portableInstance certifiedPlan
+      certifiedDepth certifiedTotalProbeCost certifiedRootProbe := by
+  decide +kernel
+
 def swappedBranches : Plan := Plan.probe 0 [(0, Plan.act 3), (1, Plan.act 1)]
 
 theorem swapped_branches_rejected :
