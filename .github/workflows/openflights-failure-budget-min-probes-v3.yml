@@ -1,0 +1,22 @@
+name: INSACERMO OpenFlights Failure-Budget Min Probes V3
+on:
+  push:
+    branches: [insacermo-openflights-blind-dual-failure-v2-2026-10-09]
+    paths:
+      - experiments/openflights_failure_budget_min_probes_v3.py
+      - .github/workflows/openflights-failure-budget-min-probes-v3.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python experiments/openflights_failure_budget_min_probes_v3.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPENFLIGHTS_FAILURE_BUDGET_MIN_PROBES_V3
+          path: INSACERMO_OPENFLIGHTS_FAILURE_BUDGET_MIN_PROBES_V3.json
+          if-no-files-found: error
