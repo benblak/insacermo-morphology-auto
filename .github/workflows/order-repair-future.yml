@@ -1,0 +1,22 @@
+name: INSACERMO Order Repair Future Lean
+on:
+  push:
+    branches: [insacermo-order-repair-future-kernel-2026-10-09]
+    paths:
+      - lean/OrderRepairFutureKernelV1.lean
+      - .github/workflows/order-repair-future.yml
+  workflow_dispatch:
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel proof
+        run: lean lean/OrderRepairFutureKernelV1.lean
+      - name: Check placeholders
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/OrderRepairFutureKernelV1.lean
