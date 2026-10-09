@@ -1,0 +1,27 @@
+name: INSACERMO V1.5 Frozen Runtime Four Verdicts Lean
+on:
+  push:
+    branches: [insacermo-v15-real-runtime-four-verdicts-lean-2026-10-09]
+    paths:
+      - lean/RuntimeVerdictProjectionCheckerV1.lean
+      - lean/generated/ActualFrozenRuntimeVerdictsV1.lean
+      - .github/workflows/frozen-runtime-four-verdicts-lean.yml
+  workflow_dispatch:
+jobs:
+  lean-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check runtime finite model and all four verdicts
+        run: |
+          LEAN_PATH=lean lean -o lean/RuntimeVerdictProjectionCheckerV1.olean lean/RuntimeVerdictProjectionCheckerV1.lean
+          LEAN_PATH=lean lean lean/generated/ActualFrozenRuntimeVerdictsV1.lean
+      - name: No sorry admit axiom
+        run: |
+          if grep -n -E '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/RuntimeVerdictProjectionCheckerV1.lean lean/generated/ActualFrozenRuntimeVerdictsV1.lean; then exit 1; fi
+          echo PASS_NO_CUSTOM_AXIOM
