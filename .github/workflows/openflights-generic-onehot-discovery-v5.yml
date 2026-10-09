@@ -1,0 +1,23 @@
+name: INSACERMO Generic Onehot Contract Discovery V5
+on:
+  push:
+    branches: [insacermo-openflights-blind-dual-failure-v2-2026-10-09]
+    paths:
+      - experiments/generic_onehot_contract_optimizer_v1.py
+      - experiments/openflights_generic_onehot_discovery_v5.py
+      - .github/workflows/openflights-generic-onehot-discovery-v5.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: PYTHONPATH=.:experiments python experiments/openflights_generic_onehot_discovery_v5.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_GENERIC_ONEHOT_CONTRACT_DISCOVERY_V5
+          path: INSACERMO_GENERIC_ONEHOT_CONTRACT_DISCOVERY_V5.json
+          if-no-files-found: error
