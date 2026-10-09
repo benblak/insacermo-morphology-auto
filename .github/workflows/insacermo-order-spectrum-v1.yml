@@ -1,0 +1,22 @@
+name: INSACERMO Exact Order Spectrum Lean
+on:
+  push:
+    branches: [insacermo-obstruction-order-spectrum-2026-10-09]
+    paths:
+      - lean/OrderSpectrumFiniteAuditV1.lean
+      - .github/workflows/insacermo-order-spectrum-v1.yml
+  workflow_dispatch:
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean kernel compile
+        run: lean lean/OrderSpectrumFiniteAuditV1.lean
+      - name: No placeholders or axioms
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/OrderSpectrumFiniteAuditV1.lean
