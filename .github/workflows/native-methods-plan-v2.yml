@@ -4,7 +4,8 @@ on:
     branches: [insacermo-v15-native-method-actions-v2-2026-10-09]
     paths:
       - lean/SolverV3PortablePlanKernelV1.lean
-      - lean/generated/NativeMethodsPlannerGeneratedV2.lean
+      - lean/generated/NativeMethodsPlannerGeneratedV2.lean lean/NativeMethodsTamperChecksV2.lean
+      - lean/NativeMethodsTamperChecksV2.lean
       - .github/workflows/native-methods-plan-v2.yml
   workflow_dispatch:
 jobs:
@@ -25,7 +26,10 @@ jobs:
           LEAN_PATH=lean lean -o lean/SolverV3PortablePlanKernelV1.olean lean/SolverV3PortablePlanKernelV1.lean
       - name: Compile exact generated native planner policy
         run: |
-          LEAN_PATH=lean lean lean/generated/NativeMethodsPlannerGeneratedV2.lean
+          LEAN_PATH=lean lean -o lean/NativeMethodsPlannerGeneratedV2.olean lean/generated/NativeMethodsPlannerGeneratedV2.lean
+      - name: Reject forged and altered plan claims in Lean
+        run: |
+          LEAN_PATH=lean lean lean/NativeMethodsTamperChecksV2.lean
       - name: No placeholders or custom axioms
         run: |
           ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/SolverV3PortablePlanKernelV1.lean lean/generated/NativeMethodsPlannerGeneratedV2.lean
