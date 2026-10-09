@@ -1,0 +1,28 @@
+name: INSACERMO V1.5 Automatic Finite Certificate Lean
+on:
+  push:
+    branches: [insacermo-max-lean-exact-operator-optimum-2026-10-09]
+    paths:
+      - lean/FiniteDecisionCertificateCheckerV2.lean
+      - lean/generated/EmittedOpenFlightsPolicyV2.lean
+      - .github/workflows/max-auto-finite-cert-v2.yml
+  workflow_dispatch:
+jobs:
+  lean-kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile independently
+        run: |
+          LEAN_PATH=lean lean -o lean/MaxExactOperatorOptimumV1.olean lean/MaxExactOperatorOptimumV1.lean
+          LEAN_PATH=lean lean -o lean/FiniteDecisionCertificateCheckerV2.olean lean/FiniteDecisionCertificateCheckerV2.lean
+          LEAN_PATH=lean lean lean/generated/EmittedOpenFlightsPolicyV2.lean
+      - name: No placeholders
+        run: |
+          if grep -n -E '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/MaxExactOperatorOptimumV1.lean lean/FiniteDecisionCertificateCheckerV2.lean lean/generated/EmittedOpenFlightsPolicyV2.lean; then exit 1; fi
+          echo NO_SORRY_ADMIT_AX
