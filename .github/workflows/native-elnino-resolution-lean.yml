@@ -1,0 +1,25 @@
+name: INSACERMO Native ElNino Resolution Lean V1
+on:
+  push:
+    branches: [insacermo-native-elnino-resolution-lean-v1-2026-10-10]
+    paths:
+      - lean/generated/ElNinoResolutionFiniteCertificatesV1.lean
+      - .github/workflows/native-elnino-resolution-lean.yml
+  workflow_dispatch:
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel verify general certificate theorem
+        run: LEAN_PATH=lean lean -o lean/FiniteContractCoverKernelV1.olean lean/FiniteContractCoverKernelV1.lean
+      - name: Kernel verify ElNino concrete certificates
+        run: LEAN_PATH=lean lean lean/generated/ElNinoResolutionFiniteCertificatesV1.lean
+      - name: No shortcuts
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/FiniteContractCoverKernelV1.lean lean/generated/ElNinoResolutionFiniteCertificatesV1.lean
