@@ -31,10 +31,11 @@ theorem demand_le_iff (xs : List Bound) (u : Nat) :
   | nil =>
       simp [demand]
   | cons c cs ih =>
-      simp only [demand, max_le_iff]
+      simp only [demand]
       constructor
       · intro h x hx
-        rcases h with ⟨hc, hcs⟩
+        have hc : c.1 ≤ u := by omega
+        have hcs : demand cs ≤ u := by omega
         rcases List.mem_cons.mp hx with heq | htail
         · subst x
           exact hc
@@ -42,9 +43,10 @@ theorem demand_le_iff (xs : List Bound) (u : Nat) :
       · intro h
         constructor
         · exact h c (by simp)
-        · exact ih.mpr (by
+        · have hcs : demand cs ≤ u := ih.mpr (by
             intro x hx
             exact h x (by simp [hx]))
+        omega
 
 theorem repairAt_le_iff (xs : List Bound) (u r : Nat) :
     repairAt u xs ≤ r ↔ ∀ c, c ∈ xs → u ≤ c.2 + r := by
@@ -52,10 +54,11 @@ theorem repairAt_le_iff (xs : List Bound) (u r : Nat) :
   | nil =>
       simp [repairAt]
   | cons c cs ih =>
-      simp only [repairAt, max_le_iff]
+      simp only [repairAt]
       constructor
       · intro h x hx
-        rcases h with ⟨hc, hcs⟩
+        have hc : c.1 ≤ u := by omega
+        have hcs : demand cs ≤ u := by omega
         rcases List.mem_cons.mp hx with heq | htail
         · subst x
           omega
@@ -64,17 +67,18 @@ theorem repairAt_le_iff (xs : List Bound) (u r : Nat) :
         constructor
         · have hc := h c (by simp)
           omega
-        · exact ih.mpr (by
+        · have hcs : repairAt u cs ≤ r := ih.mpr (by
             intro x hx
             exact h x (by simp [hx]))
+        omega
 
 /-- The synthesized control and repair meet every world constraint. -/
 theorem synthesized_sound (xs : List Bound) :
     Feasible xs (demand xs) (optimalRepair xs) := by
   intro c hc
   constructor
-  · exact (demand_le_iff xs (demand xs)).mp (le_refl _) c hc
-  · exact (repairAt_le_iff xs (demand xs) (optimalRepair xs)).mp (le_refl _) c hc
+  · exact (demand_le_iff xs (demand xs)).mp (by omega) c hc
+  · exact (repairAt_le_iff xs (demand xs) (optimalRepair xs)).mp (by omega) c hc
 
 /-- No feasible control can use a repair smaller than the synthesized one. -/
 theorem synthesized_minimal (xs : List Bound) (u r : Nat)
@@ -86,7 +90,7 @@ theorem synthesized_minimal (xs : List Bound) (u r : Nat)
       exact (h c hc).1)
   apply (repairAt_le_iff xs (demand xs) r).mpr
   intro c hc
-  exact le_trans hDemand (h c hc).2
+  omega
 
 /-- The mathematical synthesis problem is solved without enumerating u. -/
 theorem synthesis_iff_budget (xs : List Bound) (r : Nat) :
@@ -108,12 +112,12 @@ theorem feasible_iff_pairs (xs : List Bound) (r : Nat) :
       ∀ a, a ∈ xs → ∀ b, b ∈ xs → a.1 ≤ b.2 + r := by
   constructor
   · rintro ⟨u, hu⟩ a ha b hb
-    exact le_trans (hu a ha).1 (hu b hb).2
+    omega
   · intro h
     refine ⟨demand xs, ?_⟩
     intro c hc
     constructor
-    · exact (demand_le_iff xs (demand xs)).mp (le_refl _) c hc
+    · exact (demand_le_iff xs (demand xs)).mp (by omega) c hc
     · exact (demand_le_iff xs (c.2 + r)).mpr (by
         intro a ha
         exact h a ha c hc)
@@ -140,10 +144,11 @@ theorem branchReserve_le_iff (groups : List (List Bound)) (r : Nat) :
   | nil =>
       simp [branchReserve]
   | cons xs rest ih =>
-      simp only [branchReserve, max_le_iff]
+      simp only [branchReserve]
       constructor
       · intro h ys hy
-        rcases h with ⟨hx, ht⟩
+        have hx : optimalRepair xs ≤ r := by omega
+        have ht : branchReserve rest ≤ r := by omega
         rcases List.mem_cons.mp hy with heq | htail
         · subst ys
           exact hx
@@ -151,9 +156,10 @@ theorem branchReserve_le_iff (groups : List (List Bound)) (r : Nat) :
       · intro h
         constructor
         · exact h xs (by simp)
-        · exact ih.mpr (by
+        · have ht : branchReserve rest ≤ r := ih.mpr (by
             intro ys hy
             exact h ys (by simp [hy]))
+        omega
 
 /-- Exact robust budget for an observation with independent branch controls. -/
 theorem adaptive_synthesis_iff
