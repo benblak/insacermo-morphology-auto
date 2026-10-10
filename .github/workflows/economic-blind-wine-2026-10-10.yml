@@ -1,0 +1,24 @@
+name: INSACERMO Economic Wine Blind Audit
+on:
+  push:
+    branches: [insacermo-economic-blind-wine-real-tariffs-2026-10-10]
+    paths:
+      - experiments/economic_blind_wine_2026_10_10.py
+      - .github/workflows/economic-blind-wine-2026-10-10.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Confirm pinned source and audit unseen wine samples
+        run: python experiments/economic_blind_wine_2026_10_10.py | tee ECONOMIC_WINE_BLIND_AUDIT.txt
+      - name: Attach auditable results
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ECONOMIC_WINE_AUDIT
+          path: ECONOMIC_WINE_BLIND_AUDIT.txt
