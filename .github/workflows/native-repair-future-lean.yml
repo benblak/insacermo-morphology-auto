@@ -1,0 +1,25 @@
+name: INSACERMO Native Repair Future Lean
+on:
+  push:
+    branches: [insacermo-native-sensor-repair-future-lean-2026-10-10]
+    paths:
+      - lean/generated/SensorRepairFutureElNinoV1.lean
+      - .github/workflows/native-repair-future-lean.yml
+  workflow_dispatch:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.34.1
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:v4.34.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile generic minimum certificate theorem
+        run: LEAN_PATH=lean lean -o lean/FiniteContractCoverKernelV1.olean lean/FiniteContractCoverKernelV1.lean
+      - name: Verify historical present and future repair minima
+        run: LEAN_PATH=lean lean lean/generated/SensorRepairFutureElNinoV1.lean
+      - name: No shortcuts
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)[[:space:]]' lean/FiniteContractCoverKernelV1.lean lean/generated/SensorRepairFutureElNinoV1.lean
