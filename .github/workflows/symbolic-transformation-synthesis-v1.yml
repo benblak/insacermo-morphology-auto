@@ -1,0 +1,26 @@
+name: INSACERMO Symbolic Transformation Synthesis V1
+on:
+  push:
+    branches: [insacermo-symbolic-transformation-synthesis-v1-20261010]
+    paths:
+      - lean/SymbolicTransformationSynthesisV1.lean
+      - .github/workflows/symbolic-transformation-synthesis-v1.yml
+  workflow_dispatch:
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean proof
+        run: |
+          lean --version
+          lean lean/SymbolicTransformationSynthesisV1.lean
+      - name: Strict audit
+        run: |
+          if grep -nE '^ *\b(sorry|admit|axiom)\b' lean/SymbolicTransformationSynthesisV1.lean; then exit 1; fi
+          echo ZERO_PLACEHOLDERS
