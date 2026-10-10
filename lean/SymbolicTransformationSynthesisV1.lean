@@ -41,11 +41,10 @@ theorem demand_le_iff (xs : List Bound) (u : Nat) :
           exact hc
         · exact (ih.mp hcs) x htail
       · intro h
-        constructor
-        · exact h c (by simp)
-        · have hcs : demand cs ≤ u := ih.mpr (by
-            intro x hx
-            exact h x (by simp [hx]))
+        have hc : c.1 ≤ u := h c (by simp)
+        have hcs : demand cs ≤ u := ih.mpr (by
+          intro x hx
+          exact h x (by simp [hx]))
         omega
 
 theorem repairAt_le_iff (xs : List Bound) (u r : Nat) :
@@ -57,19 +56,17 @@ theorem repairAt_le_iff (xs : List Bound) (u r : Nat) :
       simp only [repairAt]
       constructor
       · intro h x hx
-        have hc : c.1 ≤ u := by omega
-        have hcs : demand cs ≤ u := by omega
+        have hc : u - c.2 ≤ r := by omega
+        have hcs : repairAt u cs ≤ r := by omega
         rcases List.mem_cons.mp hx with heq | htail
         · subst x
           omega
         · exact (ih.mp hcs) x htail
       · intro h
-        constructor
-        · have hc := h c (by simp)
-          omega
-        · have hcs : repairAt u cs ≤ r := ih.mpr (by
-            intro x hx
-            exact h x (by simp [hx]))
+        have hc := h c (by simp)
+        have hcs : repairAt u cs ≤ r := ih.mpr (by
+          intro x hx
+          exact h x (by simp [hx]))
         omega
 
 /-- The synthesized control and repair meet every world constraint. -/
@@ -112,6 +109,8 @@ theorem feasible_iff_pairs (xs : List Bound) (r : Nat) :
       ∀ a, a ∈ xs → ∀ b, b ∈ xs → a.1 ≤ b.2 + r := by
   constructor
   · rintro ⟨u, hu⟩ a ha b hb
+    have h1 := (hu a ha).1
+    have h2 := (hu b hb).2
     omega
   · intro h
     refine ⟨demand xs, ?_⟩
@@ -154,11 +153,10 @@ theorem branchReserve_le_iff (groups : List (List Bound)) (r : Nat) :
           exact hx
         · exact (ih.mp ht) ys htail
       · intro h
-        constructor
-        · exact h xs (by simp)
-        · have ht : branchReserve rest ≤ r := ih.mpr (by
-            intro ys hy
-            exact h ys (by simp [hy]))
+        have hx : optimalRepair xs ≤ r := h xs (by simp)
+        have ht : branchReserve rest ≤ r := ih.mpr (by
+          intro ys hy
+          exact h ys (by simp [hy]))
         omega
 
 /-- Exact robust budget for an observation with independent branch controls. -/
