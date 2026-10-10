@@ -75,7 +75,7 @@ theorem synthesized_sound (xs : List Bound) :
   intro c hc
   constructor
   · exact (demand_le_iff xs (demand xs)).mp (by omega) c hc
-  · exact (repairAt_le_iff xs (demand xs) (optimalRepair xs)).mp (by rfl) c hc
+  · exact (repairAt_le_iff xs (demand xs) (optimalRepair xs)).mp (by dsimp [optimalRepair]; omega) c hc
 
 /-- No feasible control can use a repair smaller than the synthesized one. -/
 theorem synthesized_minimal (xs : List Bound) (u r : Nat)
