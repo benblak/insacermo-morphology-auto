@@ -101,12 +101,14 @@ theorem probe_failure_iff
   · intro hn
     by_cases hd : Subset B dom
     · right
-      by_contra hnot
-      apply hn
-      refine ⟨hd, ?_⟩
-      intro result
-      by_contra hk
-      exact hnot ⟨result, hk⟩
+      by_cases he : ∃ result, ¬ K (BranchImage observe f B result)
+      · exact he
+      · have hall : ∀ result, K (BranchImage observe f B result) := by
+          intro result
+          by_cases hr : K (BranchImage observe f B result)
+          · exact hr
+          · exact False.elim (he ⟨result, hr⟩)
+        exact False.elim (hn ⟨hd, hall⟩)
     · exact Or.inl hd
   · intro h hp
     rcases h with hd | ⟨result, hbad⟩
