@@ -32,6 +32,5 @@ theorem blind_cost_witness : BlindFeasible 1 1 0 2 ∧ BlindCost 1 1 0 2 = 10 :=
   · dsimp [BlindFeasible]
     omega
   · dsimp [BlindCost]
-    omega
 
 end InsacermoTotalHorizon
