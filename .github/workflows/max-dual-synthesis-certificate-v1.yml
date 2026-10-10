@@ -1,0 +1,26 @@
+name: INSACERMO MAX Dual Synthesis Certificate V1
+on:
+  push:
+    branches: [insacermo-max-dual-synthesis-certificate-v1-20261010]
+    paths:
+      - lean/MaxDualSynthesisCertificateV1.lean
+      - .github/workflows/max-dual-synthesis-certificate-v1.yml
+  workflow_dispatch:
+jobs:
+  lean:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean kernel check
+        run: |
+          lean --version
+          lean lean/MaxDualSynthesisCertificateV1.lean
+      - name: Prohibit unsupported axioms and holes
+        run: |
+          if grep -nE '^ *\b(sorry|admit|axiom)\b' lean/MaxDualSynthesisCertificateV1.lean; then exit 1; fi
+          echo ZERO_SHORTCUTS
