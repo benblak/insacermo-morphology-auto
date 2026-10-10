@@ -97,6 +97,20 @@ theorem probe_failure_iff
       ¬ Subset B dom ∨
         ∃ result, ¬ K (BranchImage observe f B result) := by
   classical
-  simp [ProbeOp, not_and_or, not_forall]
+  constructor
+  · intro hn
+    by_cases hd : Subset B dom
+    · right
+      by_contra hnot
+      apply hn
+      refine ⟨hd, ?_⟩
+      intro result
+      by_contra hk
+      exact hnot ⟨result, hk⟩
+    · exact Or.inl hd
+  · intro h hp
+    rcases h with hd | ⟨result, hbad⟩
+    · exact hd hp.1
+    · exact hbad (hp.2 result)
 
 end InsacermoDynamic
