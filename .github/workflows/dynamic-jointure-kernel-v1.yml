@@ -1,0 +1,30 @@
+name: INSACERMO Dynamic Jointure Lean Kernel V1
+on:
+  push:
+    branches: [insacermo-dynamic-jointure-preimage-kernel-v1-20261010]
+    paths:
+      - lean/DynamicJointureKernelV1.lean
+      - .github/workflows/dynamic-jointure-kernel-v1.yml
+  workflow_dispatch:
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y --default-toolchain leanprover/lean4:stable
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean compiler and independent kernel check
+        run: |
+          lean --version
+          lean lean/DynamicJointureKernelV1.lean
+          echo DYNAMIC_JOINTURE_LEAN_COMPILED
+      - name: Audit forbidden shortcuts
+        run: |
+          if grep -E -n '\\b(sorry|admit|axiom)\\b' lean/DynamicJointureKernelV1.lean; then
+            echo FORBIDDEN_AXIOM_OR_PLACEHOLDER
+            exit 1
+          fi
+          echo ZERO_SORRY_ADMIT_AXIOM
