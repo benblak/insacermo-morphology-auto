@@ -28,6 +28,10 @@ theorem blind_cost_lower_bound (a b c d : Nat)
   omega
 
 theorem blind_cost_witness : BlindFeasible 1 1 0 2 ∧ BlindCost 1 1 0 2 = 10 := by
-  decide
+  constructor
+  · dsimp [BlindFeasible]
+    omega
+  · dsimp [BlindCost]
+    omega
 
 end InsacermoTotalHorizon
