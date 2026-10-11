@@ -14,25 +14,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
-        with:
-          auto-config: false
-          test: false
-          build: false
-          lint: false
-      - name: Check kernel with Lean 4.33.1
+      - name: Install elan and Lean without Lake project
+        shell: bash
         run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile Lean C3 proof
+        shell: bash
+        run: |
+          set -euo pipefail
           lean --version
           lean C3/DoubleEnvelopeKernel.lean
-      - name: Audit absence of admitted proofs and custom axioms
+      - name: Check forbidden proof escapes (independent static check)
+        shell: bash
         run: |
+          set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
           import re
-          text = Path("C3/DoubleEnvelopeKernel.lean").read_text()
-          # Only scan declaration starts; comments and docs may mention these words.
-          bad = re.findall(r"(?m)^\s*(?:sorry|admit|axiom)\b", text)
-          if bad:
-              raise SystemExit("Forbidden declarations: " + str(bad))
-          print("No obvious proof escape (supplementary audit)")
+          src = Path("C3/DoubleEnvelopeKernel.lean").read_text()
+          # Remove both block and line comments for this supplemental test.
+          src = re.sub(r"/-.*?-/", "", src, flags=re.S)
+          src = re.sub(r"--[^\n]*", "", src)
+          bad = re.findall(r"\b(sorry|admit|axiom)\b", src)
+          assert not bad, f"Forbidden proof escapes: {bad}"
+          print("Static proof-escape scan PASS")
           PY
