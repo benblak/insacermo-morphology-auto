@@ -7,11 +7,10 @@ Primal x and dual y can be represented as Nat numerators over denominators
 D and E. The generic inequality has no numerical instance hardcoded.
 -/
 namespace InsacermoExactRepair
--- Self-contained bounded-sum syntax (no mathlib dependency).
-syntax "∑" ident ":" "Fin" ident "," term : term
-macro_rules
-  | `(∑ $i:ident : Fin $n:ident, $body:term) =>
-      `(Finset.univ.sum (fun ($i : Fin $n) => $body))
+-- Self-contained notation for a finite sum, requiring only Std.
+macro "∑ " x:ident " : " ty:term ", " body:term : term =>
+  `(Finset.univ.sum (fun ($x : $ty) => $body))
+
 variable {m n : Nat}
 
 def PrimalValid (A : Fin m → Fin n → Nat) (b : Fin m → Nat)
