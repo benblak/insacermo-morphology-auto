@@ -21,7 +21,7 @@ jobs:
         run: pip install numpy scipy sympy
       - name: Fetch pinned public real Stigler source
         run: |
-          curl -fsSL https://raw.githubusercontent.com/google/or-tools/ed3741de6401c6f95bbcd30686409f87e17d1b68/ortools/linear_solver/samples/stigler_diet.py -o /tmp/stigler_diet.py
+          curl -fsSL https://raw.githubusercontent.com/google/or-tools/stable/ortools/linear_solver/samples/stigler_diet.py -o /tmp/stigler_diet.py
           test -s /tmp/stigler_diet.py
       - name: Build verified generic Lean kernel
         env:
