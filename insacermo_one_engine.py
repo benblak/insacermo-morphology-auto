@@ -30,7 +30,8 @@ def validate(m):
     assert len(Must)==len(set(Must)) and len(May)==len(set(May)) and set(Must)<=set(May)
     for k in ("depth","budget","reserve","debt"):
         assert type(m[k])==int and 0<=m[k]<=100
-    assert m["depth"]<=4 and m["debt"]<m["reserve"]\n    assert "probeKinds" in m and len(m["probeKinds"])==Q and all(k in ("PROBE","REPAIR") for k in m["probeKinds"])
+    assert m["depth"]<=4 and m["debt"]<m["reserve"]
+    assert "probeKinds" in m and len(m["probeKinds"])==Q and all(k in ("PROBE","REPAIR") for k in m["probeKinds"])
 
 def solve(m,X,action_allowed,depth,budget):
     @lru_cache(None)
