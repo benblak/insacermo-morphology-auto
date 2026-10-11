@@ -1,0 +1,40 @@
+name: INSACERMO C3Plus Unknown Laws Probe Lean
+on:
+  push:
+    branches:
+      - insacermo-c3plus-laws-probe-kernel-v1-20261011
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  c3plus:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify C3 dependency and C3Plus
+        env:
+          LEAN_PATH: "."
+        run: |
+          set -euo pipefail
+          lean --version
+          lean -o C3/DoubleEnvelopeKernel.olean C3/DoubleEnvelopeKernel.lean
+          lean C3/UnknownLawsProbeKernel.lean
+      - name: Ensure no escapes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for p in [Path('C3/DoubleEnvelopeKernel.lean'), Path('C3/UnknownLawsProbeKernel.lean')]:
+              s=p.read_text()
+              s=re.sub(r'/\-.*?\-/', '', s, flags=re.S)
+              s=re.sub(r'--[^\n]*', '', s)
+              bad=re.findall(r'\b(sorry|admit|axiom)\b',s)
+              assert not bad, (str(p), bad)
+          print('PASS no proof escapes')
+          PY
