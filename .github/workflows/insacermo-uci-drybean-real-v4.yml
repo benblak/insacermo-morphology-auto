@@ -1,0 +1,126 @@
+name: INSACERMO REAL UCI DRY BEAN BLIND AUDIT
+on:
+  push:
+    branches: [insacermo-v4-ui-real-uci-drybean-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  observed-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download ORIGINAL UCI 602 measurement archive
+        run: |
+          mkdir -p /tmp/insacermo_uci /tmp/insacermo_output
+          curl --retry 3 --retry-delay 2 -fsSL 'https://archive.ics.uci.edu/static/public/602/dry+bean+dataset.zip' -o /tmp/insacermo_uci/uci602.zip || \
+            curl --retry 3 --retry-delay 2 -fsSL 'https://archive.ics.uci.edu/ml/machine-learning-databases/00602/DryBeanDataset.zip' -o /tmp/insacermo_uci/uci602.zip
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile,io,hashlib
+          blob=Path('/tmp/insacermo_uci/uci602.zip').read_bytes()
+          print('Original downloaded bytes',len(blob), 'sha256',hashlib.sha256(blob).hexdigest())
+          def locate(data,level=0):
+              if level>4:raise ValueError('ZIP depth limit')
+              z=zipfile.ZipFile(io.BytesIO(data))
+              for name in z.namelist():
+                  if name.lower().endswith('.arff') and 'bean' in name.lower():
+                      return z.read(name)
+              for name in z.namelist():
+                  if name.lower().endswith('.zip'):
+                      nested=locate(z.read(name),level+1)
+                      if nested is not None:return nested
+              return None
+          raw=locate(blob)
+          assert raw is not None and len(raw)>100000
+          Path('/tmp/insacermo_output/Dry_Bean_Dataset.arff').write_bytes(raw)
+          print('ARFF sha256', hashlib.sha256(raw).hexdigest())
+          PY
+      - name: Independent exact finite-catalog audit + fresh C3 two-world problem
+        run: |
+          python3 - <<'PY'
+          import hashlib,collections,csv,json
+          from decimal import Decimal
+          from pathlib import Path
+          from experiments.c3_raw_dynamic_autoplan_lean import synth,emit
+          p=Path('/tmp/insacermo_output/Dry_Bean_Dataset.arff')
+          raw=p.read_bytes()
+          cols=[];rows=[];section=False
+          for line in raw.decode('utf-8-sig',errors='replace').splitlines():
+              s=line.strip()
+              if not s or s.startswith('%'):continue
+              if not section:
+                  if s.lower().startswith('@attribute'):cols.append(s.split(maxsplit=2)[1].strip('"\''))
+                  if s.lower().startswith('@data'):section=True
+              else:
+                  val=next(csv.reader([s]))
+                  assert len(val)==len(cols)
+                  rows.append(dict(zip(cols,val)))
+          assert len(rows)==13611, len(rows)
+          low={k.lower():k for k in cols}
+          name=low['class']; ar=low['area']
+          keys=[low['area'],low.get('aspectration',low.get('aspectratio')),low['solidity'],low['shapefactor4']]
+          assert all(keys)
+          steps=['2500','0.05','0.01','0.05']
+          classes=collections.Counter(r[name] for r in rows)
+          assert len(classes)==7,len(classes)
+          profiles=[tuple(int(Decimal(r[key])/Decimal(step)) for key,step in zip(keys,steps)) for r in rows]
+          counts=[]
+          for depth in range(5):
+              g=collections.defaultdict(set)
+              sz=collections.Counter()
+              for row,profile in zip(rows,profiles):
+                  k=profile[:depth];g[k].add(row[name]);sz[k]+=1
+              act=sum(sz[k] for k,v in g.items() if len(v)==1)
+              counts.append({'depth':depth,'ACT_closed_world':act,'EPISTEMIC_OPEN':len(rows)-act,'profiles':len(g)})
+          lowidx=next(i for i,row in enumerate(rows) if Decimal(row[ar])<50000)
+          highidx=next(i for i,row in enumerate(rows) if Decimal(row[ar])>=50000 and row[name]!=rows[lowidx][name])
+          c={'A':[[10,10]],'b':[1],'annual_limit':40,'annual_days':365,'scale':10,'denominator':10,
+             'max_units':5,'future_worlds':[[True,False],[False,True]],'initial':[0,1],'outcomes':2,
+             'depth':1,'probe_budget':1,'rho':3,'debt':0,
+             'probes':[{'price':1,'observation':[0,1],'transition':[[0,0],[1,1]]}]}
+          answer=synth(c)
+          assert answer['verdict']=='ACT' and answer['tree']['kind']=='probe'
+          Path('/tmp/insacermo_output/UCIRealPair.lean').write_text(emit(c,answer,0))
+          Path('/tmp/insacermo_output/real_pair.json').write_text(json.dumps({
+              'contract':c,'source_rows':[lowidx,highidx],
+              'measured_area':[rows[lowidx][ar],rows[highidx][ar]],
+              'observed_class':[rows[lowidx][name],rows[highidx][name]],
+              'threshold_declared_before_data':'Area 50000','scope':'two measured records only'},indent=2))
+          report={'source':'UCI dry bean DOI 10.24432/C50S4B','sha256':hashlib.sha256(raw).hexdigest(),
+              'rows':len(rows),'labels':classes,'fixed_feature_binning':dict(zip(keys,steps)),
+              'stages':counts,'lean_pair_source_rows':[lowidx,highidx],
+              'claim_limit':'finite labeled catalog, not generalization'}
+          Path('/tmp/insacermo_output/report.json').write_text(json.dumps(report,indent=2))
+          print(json.dumps(report,indent=2))
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile historical C3 and exact REPAIR Lean kernels + certificate from UCI records
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          for name in CostlyProbeMinimal SafeProbeTheorem ProbeRepairKernel ProbePriceKernel ProbeReserveDebtBridge MultiProbeBudgetKernel MultiProbePlannerKernel ProofCarryingMultiProbeRuntimeKernelV1; do lean -o "lean/$name.olean" "lean/$name.lean"; done
+          for name in DoubleEnvelopeKernel UnknownLawsProbeKernel AdaptiveBudgetKernel; do lean -o "C3/$name.olean" "C3/$name.lean"; done
+          for name in DynamicJointureKernelV1 SymbolicTransformationSynthesisV1 MaxDualSynthesisCertificateV1; do lean -o "lean/$name.olean" "lean/$name.lean"; done
+          lean -o C3/TotalSymbolicDynamicBridgeV1.olean C3/TotalSymbolicDynamicBridgeV1.lean
+          lean -o C3/RecursiveTotalPlanKernelV1.olean C3/RecursiveTotalPlanKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o C3/TotalRepairFutureBridgeV1.olean C3/TotalRepairFutureBridgeV1.lean
+          for name in LegacyTemporalValidityKernelV1 LegacyCertifiedOnlineDebtKernelV1 LegacyFinalIntegrationKernelV1; do lean -o "lean/$name.olean" "lean/$name.lean"; done
+          lean -o C3/LegacyTemporalRepairIntegrationV1.olean C3/LegacyTemporalRepairIntegrationV1.lean
+          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean
+          lean /tmp/insacermo_output/UCIRealPair.lean
+          echo 'REAL UCI TWO-WORLD C3 STRATEGY: LEAN SUCCESS'
+      - name: Preserve original UCI observations and verified bridge witness
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_UCI_DRYBEAN_REAL_DATA_LEAN
+          path: /tmp/insacermo_output/
+          retention-days: 90
+          compression-level: 9
