@@ -82,7 +82,8 @@ theorem open_has_possible_success (e : Envelope World Policy)
     (good : Policy → World → Prop) (h : OPEN e good) :
     Succeeds good e.lowerWorld e.upperPolicy := by
   classical
-  exact not_not.mp h.2
+  by_contra hMissing
+  exact h.2 hMissing
 
 theorem open_has_possible_failure (e : Envelope World Policy)
     (good : Policy → World → Prop) (h : OPEN e good) :
