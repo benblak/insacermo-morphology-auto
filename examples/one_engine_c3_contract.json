@@ -1,0 +1,62 @@
+{
+  "worldCount": 2,
+  "actionCount": 2,
+  "probeCount": 1,
+  "good": [
+    [
+      true,
+      false
+    ],
+    [
+      false,
+      true
+    ]
+  ],
+  "sense": [
+    [
+      1,
+      2
+    ]
+  ],
+  "nextFalse": [
+    [
+      0,
+      1
+    ]
+  ],
+  "nextTrue": [
+    [
+      0,
+      1
+    ]
+  ],
+  "actionCost": [
+    0,
+    0
+  ],
+  "probeCost": [
+    1
+  ],
+  "lowerWorld": [
+    0
+  ],
+  "upperWorld": [
+    0,
+    1
+  ],
+  "mustActions": [
+    0,
+    1
+  ],
+  "mayActions": [
+    0,
+    1
+  ],
+  "probeKinds": [
+    "PROBE"
+  ],
+  "depth": 1,
+  "budget": 1,
+  "reserve": 5,
+  "debt": 0
+}
