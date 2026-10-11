@@ -1,0 +1,88 @@
+name: INSACERMO C3 Dynamic AutoPlanner Lean V1
+on:
+  push:
+    branches: [insacermo-v3-dynamic-c3-lean-autoplan-v1-20261011]
+  pull_request:
+    branches: [insacermo-max-total-historical-multiprobe-integration-v1-20261011]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Synthesize dynamic trees from raw contracts
+        run: |
+          python3 experiments/c3_raw_dynamic_autoplan_lean.py experiments/dynamic_unseen_cases_v1.json /tmp/dynamicproofs
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/dynamicproofs/result.json').read_text())
+          assert [x['verdict'] for x in r]==['ACT','REFUSE_PROVEN','UNKNOWN_BOUNDED','ACT']
+          assert len(list(Path('/tmp/dynamicproofs').glob('DynamicCase*.lean')))==3
+          assert r[0]['tree']['kind']=='probe'
+          assert r[3]['tree']['kind']=='probe'
+          print('AUTOPLAN SUCCESS: dynamic act, dual refusal, honest unknown, capability creation')
+          PY
+      - name: Python syntax
+        run: |
+          python3 -m py_compile unified_runtime_v3.py test_unified_runtime_v3.py
+      - name: Retest original history
+        run: |
+          python3 -m proof_carrying_multi_probe_runtime_v1.test_multi_probe_runtime_v2
+          PYTHONPATH=certified_online_debt_v1 python3 certified_online_debt_v1/test_online_debt_v1.py
+          PYTHONPATH=temporal_runtime python3 temporal_runtime/test_runtime_v1.py
+          PYTHONPATH=.:certified_online_debt_v1:temporal_runtime:minimum_proof_acquisition_v1 python3 final_integration_v1/test_final_integration_v1.py
+      - name: New executable future-safe decision test and adversarial counterexamples
+        run: |
+          python3 test_unified_runtime_v3.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Recompile verified October legacy and new temporal bridges
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          for name in CostlyProbeMinimal SafeProbeTheorem ProbeRepairKernel ProbePriceKernel ProbeReserveDebtBridge MultiProbeBudgetKernel MultiProbePlannerKernel ProofCarryingMultiProbeRuntimeKernelV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          for name in DoubleEnvelopeKernel UnknownLawsProbeKernel AdaptiveBudgetKernel; do
+            lean -o "C3/$name.olean" "C3/$name.lean"
+          done
+          for name in DynamicJointureKernelV1 SymbolicTransformationSynthesisV1 MaxDualSynthesisCertificateV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          lean -o C3/TotalSymbolicDynamicBridgeV1.olean C3/TotalSymbolicDynamicBridgeV1.lean
+          lean -o C3/RecursiveTotalPlanKernelV1.olean C3/RecursiveTotalPlanKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o C3/TotalRepairFutureBridgeV1.olean C3/TotalRepairFutureBridgeV1.lean
+          for name in LegacyTemporalValidityKernelV1 LegacyCertifiedOnlineDebtKernelV1 LegacyFinalIntegrationKernelV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          lean -o C3/LegacyTemporalRepairIntegrationV1.olean C3/LegacyTemporalRepairIntegrationV1.lean
+          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean
+          lean C3/TemporalRepairNegativeControlV1.lean
+          lean /tmp/dynamicproofs/DynamicCase0.lean
+          lean /tmp/dynamicproofs/DynamicCase1.lean
+          lean /tmp/dynamicproofs/DynamicCase3.lean
+      - name: Reject malicious corrupted dynamic future witness
+        env:
+          LEAN_PATH: '.:lean'
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/dynamicproofs/DynamicCase0.lean')
+          s=p.read_text()
+          assert 'def recipe0v : List Nat :=' in s
+          s=s.replace('def recipe0v : List Nat :=', 'def recipe0v : List Nat := [0,0] --')
+          p.write_text(s)
+          PY
+          if lean /tmp/dynamicproofs/DynamicCase0.lean > /tmp/malicious.log 2>&1; then echo 'FATAL tampered proof accepted'; exit 1; fi
+          grep -q 'error' /tmp/malicious.log
+      - name: Audit no admitted proof
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' C3/TotalHistoricalMultiProbeIntegrationV1.lean C3/TemporalRepairNegativeControlV1.lean
