@@ -37,7 +37,10 @@ theorem checked_primal_sound
     (allowed : Nat → Bool) (x : Nat → Nat) (D : Nat)
     (h : checkPrimal m n A b allowed x D = true) :
     PrimalValid (m := m) (n := n) A b allowed x D := by
-  obtain ⟨hall, hreq⟩ := Bool.and_eq_true.mp h
+  have hh : ((List.range n).all (fun j => decide (x j = 0) || allowed j)) = true ∧
+      ((List.range m).all (fun i => decide (b i * D ≤ sumN n (fun j => A i j * x j)))) = true := by
+    simpa [checkPrimal] using h
+  rcases hh with ⟨hall, hreq⟩
   constructor
   · intro j hj hx
     have hrow := (List.all_eq_true.mp hall) j (List.mem_range.mpr hj)
