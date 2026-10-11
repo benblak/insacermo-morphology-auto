@@ -132,8 +132,15 @@ theorem weak_duality
       · simp [hx]
       · exact Nat.mul_le_mul_right (x j) (hd j hj (hp.1 j hj hx))
     _ = (10 * E) * sumN n x := by
-      rw [sumN_mul_right]
-      ac_rfl
+      have hsum : sumN n (fun j => x j * (10 * E)) = sumN n x * (10 * E) :=
+        sumN_mul_right n x (10 * E)
+      calc
+        _ = sumN n (fun j => x j * (10 * E)) := by
+          apply sumN_congr
+          intro j hj
+          ac_rfl
+        _ = sumN n x * (10 * E) := hsum
+        _ = _ := by ac_rfl
 
 theorem dual_budget_impossible
     (A : Nat → Nat → Nat) (b : Nat → Nat)
