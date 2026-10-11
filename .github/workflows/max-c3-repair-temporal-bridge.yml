@@ -19,6 +19,7 @@ jobs:
         env:
           LEAN_PATH: ".:lean"
         run: |
+          lean -o C3/DoubleEnvelopeKernel.olean C3/DoubleEnvelopeKernel.lean
           lean -o C3/UnknownLawsProbeKernel.olean C3/UnknownLawsProbeKernel.lean
           lean -o C3/AdaptiveBudgetKernel.olean C3/AdaptiveBudgetKernel.lean
           lean -o lean/DynamicJointureKernelV1.olean lean/DynamicJointureKernelV1.lean
