@@ -1,0 +1,40 @@
+name: INSACERMO Historical Temporal C3 Repair Composition
+on:
+  push:
+    branches: [insacermo-total-legacy-temporal-c3-repair-v1-20261011]
+  pull_request:
+    branches: [insacermo-max-total-c3-repair-temporal-bridge-20261011]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Rebuild historical actual kernels and current C3 and repair
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          lean -o C3/DoubleEnvelopeKernel.olean C3/DoubleEnvelopeKernel.lean
+          lean -o C3/UnknownLawsProbeKernel.olean C3/UnknownLawsProbeKernel.lean
+          lean -o C3/AdaptiveBudgetKernel.olean C3/AdaptiveBudgetKernel.lean
+          lean -o lean/DynamicJointureKernelV1.olean lean/DynamicJointureKernelV1.lean
+          lean -o lean/SymbolicTransformationSynthesisV1.olean lean/SymbolicTransformationSynthesisV1.lean
+          lean -o lean/MaxDualSynthesisCertificateV1.olean lean/MaxDualSynthesisCertificateV1.lean
+          lean -o C3/TotalSymbolicDynamicBridgeV1.olean C3/TotalSymbolicDynamicBridgeV1.lean
+          lean -o C3/RecursiveTotalPlanKernelV1.olean C3/RecursiveTotalPlanKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o C3/TotalRepairFutureBridgeV1.olean C3/TotalRepairFutureBridgeV1.lean
+          lean -o lean/LegacyTemporalValidityKernelV1.olean lean/LegacyTemporalValidityKernelV1.lean
+          lean -o lean/LegacyCertifiedOnlineDebtKernelV1.olean lean/LegacyCertifiedOnlineDebtKernelV1.lean
+          lean -o lean/LegacyFinalIntegrationKernelV1.olean lean/LegacyFinalIntegrationKernelV1.lean
+          lean C3/LegacyTemporalRepairIntegrationV1.lean
+      - name: Safety hygiene
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' C3/LegacyTemporalRepairIntegrationV1.lean
