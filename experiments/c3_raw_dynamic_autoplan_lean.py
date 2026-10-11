@@ -166,12 +166,16 @@ set_option maxHeartbeats 20000000
         code+=f"""def plan : Plan Recipe (Fin {Q}) (Fin {O}) := {tree}
 theorem tree_valid : PlanValid model {c['depth']} {c['probe_budget']} initial plan := by
   unfold plan
-  simp only [PlanValid, model, repairModel, Total, AfterDynamic]
-  decide +kernel
+  simp [PlanValid, model, repairModel, Total, AfterDynamic, 
+    observation, transition, initial, start, obs, trans, rows, rhs,
+    futureFlags, state, HistoricalFuture, INSACERMO.TemporalValidityV1.Safe,
+    bad0, dist, checkPrimal, a, req, prices, price]
+  all_goals decide +kernel
 theorem price_envelope : PriceEnvelope model {c['depth']} initial plan {r['ceiling']} := by
   unfold plan
-  simp only [PriceEnvelope, model, repairModel, AfterDynamic]
-  decide +kernel
+  simp [PriceEnvelope, model, repairModel, AfterDynamic,
+    transition, observation, initial, obs, trans, price, prices]
+  all_goals decide +kernel
 theorem strict_reserve : PlanAffordable {c['rho']} {c['debt']} [{r['ceiling']}] := by
   simp [PlanAffordable, debtAfterPlan]
 theorem CERTIFIED_C3_DYNAMIC : CanDynamic model {c['depth']} {c['probe_budget']} initial :=
