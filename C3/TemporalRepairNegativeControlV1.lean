@@ -70,6 +70,6 @@ theorem bad_fails_future_contract :
 
 theorem equal_to_reserve_must_refuse :
     ¬ PlanAffordable 1 0 [1] := by
-  decide
+  simp [PlanAffordable, debtAfterPlan]
 
 end INSACERMO.Regression
