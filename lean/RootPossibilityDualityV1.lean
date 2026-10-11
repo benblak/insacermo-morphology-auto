@@ -207,11 +207,49 @@ def Ypair (w : Fin 3) : Prop := w.val ≠ 1
 def TriplePlan : ReadOnlyPlan (Fin 3) Bool :=
   .observe (fun w => w.val == 1) (.act true) (.act false)
 
+/-- The two scenario sets have no common immediately successful action.
+    Nonetheless a read-only policy can solve one and cannot solve the other. -/
+theorem no_common_action_pair :
+    ∀ a : Bool, ¬ Common TripleGood Xpair a := by
+  intro a h
+  cases a with
+  | false =>
+      have h1 : Xpair (⟨1, by decide⟩ : Fin 3) := by decide
+      have hb := h ⟨1, by decide⟩ h1
+      exact (by decide : ¬ TripleGood (⟨1, by decide⟩ : Fin 3) false) hb
+  | true =>
+      have h0 : Xpair (⟨0, by decide⟩ : Fin 3) := by decide
+      have hb := h ⟨0, by decide⟩ h0
+      exact (by decide : ¬ TripleGood (⟨0, by decide⟩ : Fin 3) true) hb
+
+theorem no_common_action_unrepairable :
+    ∀ a : Bool, ¬ Common TripleGood Ypair a := by
+  intro a h
+  have h2 : Ypair (⟨2, by decide⟩ : Fin 3) := by decide
+  have hb := h ⟨2, by decide⟩ h2
+  cases a with
+  | false => exact (by decide : ¬ TripleGood (⟨2, by decide⟩ : Fin 3) false) hb
+  | true => exact (by decide : ¬ TripleGood (⟨2, by decide⟩ : Fin 3) true) hb
+
 theorem same_immediate_actions_but_different_futures :
-    (∀ a : Bool, Common TripleGood Xpair a ↔
-      Common TripleGood Ypair a) ∧
+    (∀ a : Bool, Common TripleGood Xpair a ↔ Common TripleGood Ypair a) ∧
     ReadOnlySafe TripleGood Xpair TriplePlan ∧
     ¬ ReadOnlySafe TripleGood Ypair TriplePlan := by
-  decide
+  constructor
+  · intro a
+    constructor
+    · intro h
+      exact False.elim (no_common_action_pair a h)
+    · intro h
+      exact False.elim (no_common_action_unrepairable a h)
+  constructor
+  · intro w hw
+    fin_cases w <;> simp_all [TripleGood, TriplePlan, Xpair,
+      ReadOnlySafe, executeReadOnly]
+  · intro h
+    have hw : Ypair (⟨2, by decide⟩ : Fin 3) := by decide
+    have hb := h (⟨2, by decide⟩ : Fin 3) hw
+    exact (by decide : ¬ TripleGood (⟨2, by decide⟩ : Fin 3)
+      (executeReadOnly TriplePlan ⟨2, by decide⟩)) hb
 
 end INSACERMO.Root
