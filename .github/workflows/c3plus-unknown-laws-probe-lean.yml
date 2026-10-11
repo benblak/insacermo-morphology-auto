@@ -3,6 +3,9 @@ on:
   push:
     branches:
       - insacermo-c3plus-laws-probe-kernel-v1-20261011
+  pull_request:
+    branches:
+      - insacermo-c3-double-envelope-lean-kernel-v1-20261011
   workflow_dispatch:
 permissions:
   contents: read
