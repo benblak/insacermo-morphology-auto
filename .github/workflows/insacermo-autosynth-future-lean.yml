@@ -1,0 +1,61 @@
+name: INSACERMO Raw AutoSynth Lean V3
+on:
+  push:
+    branches: [insacermo-v3-auto-synthesis-lean-certs-v1-20261011]
+  pull_request:
+    branches: [insacermo-unified-runtime-v3-live-upgrade-20261011]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate witnesses automatically from raw unseen contracts
+        run: |
+          python3 experiments/unified_auto_synth_to_lean.py experiments/auto_synth_unseen_contracts.json /tmp/auto-leans
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('/tmp/auto-leans/result.json').read_text())
+          assert [r['verdict'] for r in x]==['ACT','REFUSE_PROVEN','REFUSE_UNPROVEN']
+          assert len(list(Path('/tmp/auto-leans').glob('AutoCase*.lean')))==2
+          print('PASS: autonomous synthesis; dual impossibility; honest unproven refusal')
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel soundness and machine verification of generated certificates
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o lean/UnifiedAutoSynthCertificateV1.olean lean/UnifiedAutoSynthCertificateV1.lean
+          lean /tmp/auto-leans/AutoCase0.lean
+          lean /tmp/auto-leans/AutoCase1.lean
+      - name: Tamper a generated primal witness - Lean MUST reject
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/auto-leans/AutoCase0.lean')
+          s=p.read_text()
+          assert 'def xv : List Nat := [0,1]' in s
+          p.write_text(s.replace('def xv : List Nat := [0,1]','def xv : List Nat := [1,0]'))
+          PY
+          if lean /tmp/auto-leans/AutoCase0.lean > /tmp/tamper_autosynth.log 2>&1; then
+            echo 'FATAL: Lean accepted a future-destructive repair'; exit 1
+          fi
+          grep -q 'error' /tmp/tamper_autosynth.log
+          echo 'PASS: Lean rejects future-destructive candidate'
+      - name: Regression compatibility with historical unified runtime
+        run: |
+          python3 test_unified_runtime_v3.py
+          python3 -m proof_carrying_multi_probe_runtime_v1.test_multi_probe_runtime_v2
+      - name: Reject proof shortcuts in new kernel
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' lean/UnifiedAutoSynthCertificateV1.lean
