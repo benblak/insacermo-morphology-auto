@@ -102,7 +102,7 @@ def lean(m,mode,tree,budget):
                 f"theorem possible_on_lower : ∃ t : Tree, Safe mayActionsModel {m['depth']} {budget} lower t :=",
                 f"  (finite_search_complete mayActionsModel {m['depth']} {budget} lower).mp lower_can"])
     lines.append("end INSACERMO.C3OneDecision")
-    return "\\n".join(lines)+"\\n"
+    return "\n".join(lines)+"\n"
 
 def decide(model,folder,*,lean_binary="lean"):
     try:validate(model)
