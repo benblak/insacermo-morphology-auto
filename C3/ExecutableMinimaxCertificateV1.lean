@@ -35,15 +35,14 @@ def after (X : List St) (q : ProbeId) (o : Bool) : List St :=
   (X.filter (fun s => sense q s o)).map (step q o)
 
 def direct (X : List St) : Bool :=
-  ((List.range 4).map (fun k => ⟨k, by omega⟩ : ActId)).any
+  (List.finRange 4).any
     (fun p => X.all (good p))
 
 def canFinite : Nat → Nat → List St → Bool
   | 0, _, X => direct X
   | n+1, b, X =>
       direct X ||
-      (b > 0 && ((List.range 4).map
-          (fun k => ⟨k, by omega⟩ : ProbeId)).any (fun q =>
+      (b > 0 && (List.finRange 4).any (fun q =>
           (canFinite n (b-1) (after X q false)) &&
           (canFinite n (b-1) (after X q true))))
 
@@ -94,6 +93,6 @@ theorem exact_finite_minimax :
 theorem ambiguous_sensor_keeps_worlds :
     ∀ s : St, ∀ o : Bool, sense 3 s o = true := by
   intro s o
-  simp [sense]
+  decide
 
 end INSACERMO.TotalExecutable
