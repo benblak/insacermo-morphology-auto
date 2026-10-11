@@ -93,4 +93,39 @@ theorem impossible_budget_rejects_every_plan (m : Model)
         (finite_search_iff_checked_tree m n b X).mpr ⟨t, hc⟩
       simp [h] at hyes
 
+/-- Additional resources cannot invalidate an already safe policy tree. -/
+theorem safe_budget_monotone (m : Model) (t : Tree) :
+    ∀ n b b' X, b ≤ b' → Safe m n b X t → Safe m n b' X t := by
+  induction t with
+  | act a =>
+      intro n b b' X hbb hs
+      exact ⟨hs.1, Nat.le_trans hs.2.1 hbb, hs.2.2⟩
+  | probe q no yes ihNo ihYes =>
+      intro n b b' X hbb hs
+      rcases hs with ⟨hdepth, hq, hcost, htotal, hno, hyes⟩
+      refine ⟨hdepth, hq, Nat.le_trans hcost hbb, htotal, ?_, ?_⟩
+      · exact ihNo (n-1) (b-priceProbe m q) (b'-priceProbe m q)
+          (after m X q false) (Nat.sub_le_sub_right hbb _) hno
+      · exact ihYes (n-1) (b-priceProbe m q) (b'-priceProbe m q)
+          (after m X q true) (Nat.sub_le_sub_right hbb _) hyes
+
+theorem finite_budget_monotone (m : Model)
+    (n b b' : Nat) (X : List Nat)
+    (hbb : b ≤ b') (h : canFinite m n b X = true) :
+    canFinite m n b' X = true := by
+  obtain ⟨t, ht⟩ := (finite_search_complete m n b X).mp h
+  exact (finite_search_complete m n b' X).mpr
+    ⟨t, safe_budget_monotone m t n b b' X hbb ht⟩
+
+theorem one_infeasible_budget_excludes_all_cheaper (m : Model)
+    (n budget : Nat) (X : List Nat)
+    (h : canFinite m n budget X = false) (b : Nat) (hbb : b ≤ budget) :
+    canFinite m n b X = false := by
+  cases hc : canFinite m n b X with
+  | false => rfl
+  | true =>
+      have hyes : canFinite m n budget X = true :=
+        finite_budget_monotone m n b budget X hbb hc
+      simp [h] at hyes
+
 end PortableC3
