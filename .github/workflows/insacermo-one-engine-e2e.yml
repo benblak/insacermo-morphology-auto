@@ -1,0 +1,71 @@
+name: INSACERMO ONE ENGINE C3 EXACT LEAN E2E
+on:
+  push:
+    branches: [insacermo-one-engine-c3-complete-finite-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Original code untouched and syntax verified
+        run: |
+          python3 -m py_compile insacermo_one_engine.py
+          python3 -m proof_carrying_multi_probe_runtime_v1.test_multi_probe_runtime_v2
+          PYTHONPATH=certified_online_debt_v1 python3 certified_online_debt_v1/test_online_debt_v1.py
+          PYTHONPATH=temporal_runtime python3 temporal_runtime/test_runtime_v1.py
+          PYTHONPATH=.:certified_online_debt_v1:temporal_runtime:minimum_proof_acquisition_v1 python3 final_integration_v1/test_final_integration_v1.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original generic proof kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: One executable proves all five semantic verdicts, no model weakening
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          from insacermo_one_engine import decide
+          m=dict(worldCount=2,actionCount=2,probeCount=1,
+            good=[[True,False],[False,True]],sense=[[1,2]],
+            nextFalse=[[0,1]],nextTrue=[[0,1]],
+            actionCost=[0,0],probeCost=[1],
+            lowerWorld=[0],upperWorld=[0,1],
+            mustActions=[0,1],mayActions=[0,1],probeKinds=['PROBE'],
+            depth=1,budget=1,reserve=5,debt=0)
+          scenarios=[]
+          def run_case(name,changes,expected):
+              x=dict(m,**changes)
+              r=decide(x,Path('/tmp/insacermo-one')/name)
+              print(name,json.dumps(r,sort_keys=True))
+              assert r['verdict']==expected,r
+              assert r['contract_sha256'] and r['source_sha256']
+              scenarios.append(r)
+          run_case('ACT',dict(upperWorld=[0]),'ACT')
+          run_case('PROBE',{},'PROBE')
+          run_case('REPAIR',dict(probeKinds=['REPAIR']), 'REPAIR')
+          run_case('OPEN',dict(budget=0),'EPISTEMIC_OPEN')
+          run_case('REFUSE',dict(budget=0,lowerWorld=[0,1]),'REFUSE_ROBUST')
+          # Nonexistent Lean must NEVER authorize.
+          negative=decide(dict(m,upperWorld=[0]),Path('/tmp/insacermo-one')/'no-lean',lean_binary='/does/not/exist')
+          assert not negative['authorized'] and negative['verdict']=='REFUSE_CERTIFICATE_MISSING'
+          invalid=decide(dict(m,lowerWorld=[1],upperWorld=[0]),Path('/tmp/insacermo-one')/'invalid')
+          assert not invalid['authorized']
+          print('FIVE_C3_VERDICTS_AND_FAIL_CLOSED: SUCCESS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ONE_ENGINE_FIVE_C3_LEAN_CERTIFICATES
+          path: /tmp/insacermo-one/
+          retention-days: 90
