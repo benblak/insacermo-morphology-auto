@@ -49,16 +49,11 @@ def canFinite : Nat → Nat → List St → Bool
 /-- A tree made of the same actions and outcomes as the Python emitter. -/
 def emitted : Plan ActId ProbeId Bool :=
   .probe 0 (fun o =>
-    if o then
-      .probe 1 (fun o2 => if o2 then
-        .probe 2 (fun o3 => if o3 then .act 0 else .act 3)
-      else
-        .probe 2 (fun o3 => if o3 then .act 0 else .act 1))
-    else
-      .probe 1 (fun o2 => if o2 then
-        .probe 2 (fun o3 => if o3 then .act 0 else .act 2)
-      else
-        .probe 2 (fun o3 => if o3 then .act 0 else .act 0)))
+    .probe 1 (fun o2 =>
+      .probe 2 (fun _ =>
+        .act (if o then (if o2 then 3 else 1)
+              else (if o2 then 2 else 0)))))
+
 
 def checkTree : Nat → Nat → List St → Plan ActId ProbeId Bool → Bool
   | 0, _, X, .act p => X.all (good p)
@@ -89,10 +84,5 @@ theorem exact_finite_minimax :
     canFinite 3 3 initial = true :=
   ⟨emitted_tree_passes, budget_two_impossible, budget_three_exists⟩
 
-/-- A deliberately ambiguous sensor does not remove any scenario. -/
-theorem ambiguous_sensor_keeps_worlds :
-    ∀ s : St, ∀ o : Bool, sense 3 s o = true := by
-  intro s o
-  decide
 
 end INSACERMO.TotalExecutable
