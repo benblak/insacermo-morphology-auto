@@ -27,6 +27,28 @@ jobs:
           python3 experiments/generate_exact_repair_lean.py experiments/exact_repair_cases_v1.json /tmp/generated_lean
           lean /tmp/generated_lean/Generated_two_resources.lean
           lean /tmp/generated_lean/Generated_repair_with_extra_capacity.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          folder=Path('/tmp/generated_lean')
+          a=(folder/'Generated_two_resources.lean').read_text()
+          assert 'def dualDenominator : Nat := 10' in a
+          (folder/'TAMPER_dual.lean').write_text(a.replace(
+            'def dualDenominator : Nat := 10','def dualDenominator : Nat := 0'))
+          b=(folder/'Generated_repair_with_extra_capacity.lean').read_text()
+          assert 'def xvals : List Nat := [1,2]' in b
+          (folder/'TAMPER_primal.lean').write_text(b.replace(
+            'def xvals : List Nat := [1,2]','def xvals : List Nat := [0,0]'))
+          PY
+          if lean /tmp/generated_lean/TAMPER_dual.lean > /tmp/tamper_dual.log 2>&1; then
+            echo "ERROR: falsified dual witness accepted"; exit 1
+          fi
+          if lean /tmp/generated_lean/TAMPER_primal.lean > /tmp/tamper_primal.log 2>&1; then
+            echo "ERROR: falsified construction witness accepted"; exit 1
+          fi
+          grep -q 'error' /tmp/tamper_dual.log
+          grep -q 'error' /tmp/tamper_primal.log
+          echo "PASS: both falsified contracts rejected by Lean"
+
       - name: Escape audit
         run: |
           ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' lean/ExactRepairDualKernelV1.lean
