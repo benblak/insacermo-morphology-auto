@@ -3,7 +3,7 @@ on:
   push:
     branches: [insacermo-v3-dynamic-c3-lean-autoplan-v1-20261011]
   pull_request:
-    branches: [insacermo-max-total-historical-multiprobe-integration-v1-20261011]
+    branches: [insacermo-v3-auto-synthesis-lean-certs-v1-20261011]
 permissions:
   contents: read
 jobs:
