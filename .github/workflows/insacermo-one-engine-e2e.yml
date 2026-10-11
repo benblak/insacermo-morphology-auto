@@ -64,6 +64,43 @@ jobs:
           assert not invalid['authorized']
           print('FIVE_C3_VERDICTS_AND_FAIL_CLOSED: SUCCESS')
           PY
+      - name: Independently replay exact instance, reject every tamper and fail closed
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          from insacermo_one_engine import replay,decide
+          base=Path('/tmp/insacermo-one')
+          for name in ('ACT','PROBE','REPAIR','OPEN','REFUSE'):
+              p=base/name
+              assert replay(p),name
+              receipt=p/'receipt.json'
+              original=receipt.read_bytes()
+              j=json.loads(original)
+              j['authorized']=not j['authorized']
+              receipt.write_text(json.dumps(j))
+              assert not replay(p),name
+              receipt.write_bytes(original)
+              assert replay(p),name
+              source=p/'C3Decision.lean'
+              original_source=source.read_bytes()
+              source.write_bytes(original_source+b'\n-- TAMPER\n')
+              assert not replay(p),name
+              source.write_bytes(original_source)
+              assert replay(p),name
+              c=p/'contract.json'
+              orig_contract=c.read_bytes()
+              bad=json.loads(orig_contract)
+              bad['reserve']=bad['reserve']+1
+              c.write_text(json.dumps(bad))
+              assert not replay(p),name
+              c.write_bytes(orig_contract)
+              assert replay(p),name
+          assert not replay(base/'ACT',lean_binary='/does/not/exist')
+          print('FIVE SAME-INSTANCE LEAN REPLAYS AND 16 TAMPER/FAIL-CLOSED CONTROLS: SUCCESS')
+          PY
       - uses: actions/upload-artifact@v4
         with:
           name: INSACERMO_ONE_ENGINE_FIVE_C3_LEAN_CERTIFICATES
