@@ -30,7 +30,7 @@ def validate(m):
     assert len(Must)==len(set(Must)) and len(May)==len(set(May)) and set(Must)<=set(May)
     for k in ("depth","budget","reserve","debt"):
         assert type(m[k])==int and 0<=m[k]<=100
-    assert m["depth"]<=4 and m["debt"]<m["reserve"]
+    assert m["depth"]<=4 and m["debt"]<m["reserve"]\n    assert "probeKinds" in m and len(m["probeKinds"])==Q and all(k in ("PROBE","REPAIR") for k in m["probeKinds"])
 
 def solve(m,X,action_allowed,depth,budget):
     @lru_cache(None)
@@ -61,36 +61,48 @@ def lean(m,mode,tree,budget):
     def tree_l(t):
         if "act" in t:return f"(Tree.act {t['act']})"
         return f"(Tree.probe {t['probe']} {tree_l(t['no'])} {tree_l(t['yes'])})"
-    assert mode in ("ACT","REFUSE_ROBUST","EPISTEMIC_OPEN")
-    # For robust ACT, non-MUST actions are deliberately blocked in Lean.
-    action_flags=[a in (m["mustActions"] if mode=="ACT" else m["mayActions"]) for a in range(m["actionCount"])]
-    actions=[[(x if action_flags[j] else False) for j,x in enumerate(row)] for row in m["good"]]
-    worlds=m["upperWorld"] if mode=="ACT" else m["lowerWorld"]
-    lines=["import C3.PortableExactSearchV1","namespace INSACERMO.C3OneDecision","open PortableC3"]
-    lines+=["def mm : Model := {",
-        f" worldCount := {m['worldCount']}",
-        f" actionCount := {m['actionCount']}",
-        f" probeCount := {m['probeCount']}",
-        f" good := {matrix(actions,True)}",
-        f" sense := {matrix(m['sense'])}",
-        f" nextFalse := {matrix(m['nextFalse'])}",
-        f" nextTrue := {matrix(m['nextTrue'])}",
-        f" actionCost := {nat(m['actionCost'])}",
-        f" probeCost := {nat(m['probeCost'])}","}",
-        f"def start : List Nat := {nat(worlds)}",
-        "set_option maxRecDepth 8192","set_option maxHeartbeats 20000000",
-        "theorem input_ok : wellFormed mm start = true := by decide +kernel"]
+    def declared_model(which):
+        flags=[a in m[which] for a in range(m["actionCount"])]
+        good=[[v if flags[j] else False for j,v in enumerate(row)] for row in m["good"]]
+        return [
+            f"def {which}Model : Model := {{",
+            f" worldCount := {m['worldCount']}",
+            f" actionCount := {m['actionCount']}",
+            f" probeCount := {m['probeCount']}",
+            f" good := {matrix(good,True)}",
+            f" sense := {matrix(m['sense'])}",
+            f" nextFalse := {matrix(m['nextFalse'])}",
+            f" nextTrue := {matrix(m['nextTrue'])}",
+            f" actionCost := {nat(m['actionCost'])}",
+            f" probeCost := {nat(m['probeCost'])}","}"]
+    lines=["import C3.PortableExactSearchV1",
+           "namespace INSACERMO.C3OneDecision","open PortableC3",
+           *declared_model("mustActions"),*declared_model("mayActions"),
+           f"def upper : List Nat := {nat(m['upperWorld'])}",
+           f"def lower : List Nat := {nat(m['lowerWorld'])}",
+           "set_option maxRecDepth 8192","set_option maxHeartbeats 20000000",
+           "theorem input_upper_ok : wellFormed mustActionsModel upper = true := by decide +kernel",
+           "theorem input_lower_ok : wellFormed mayActionsModel lower = true := by decide +kernel",
+           "theorem lower_subset_upper : (lower.all (fun w => upper.contains w)) = true := by decide +kernel"]
     if mode=="ACT":
         lines.extend([f"def choice : Tree := {tree_l(tree)}",
-            f"theorem decision_verified : checkTree mm {m['depth']} {budget} start choice = true := by decide +kernel",
-            f"theorem all_branches_safe : Safe mm {m['depth']} {budget} start choice :=",
-            f"  accepted_certificate_sound mm {m['depth']} {budget} start choice decision_verified"])
+            f"theorem decision_verified : checkTree mustActionsModel {m['depth']} {budget} upper choice = true := by decide +kernel",
+            f"theorem all_branches_safe : Safe mustActionsModel {m['depth']} {budget} upper choice :=",
+            f"  accepted_certificate_sound mustActionsModel {m['depth']} {budget} upper choice decision_verified"])
     else:
-        lines.extend([f"theorem no_plan_in_declared_grammar : canFinite mm {m['depth']} {budget} start = false := by decide +kernel",
-            f"theorem no_checked_strategy (t : Tree) : checkTree mm {m['depth']} {budget} start t = false :=",
-            f"  impossible_budget_rejects_every_plan mm {m['depth']} {budget} start no_plan_in_declared_grammar t"])
+        lines.extend([f"theorem no_upper_guarantee : canFinite mustActionsModel {m['depth']} {budget} upper = false := by decide +kernel",
+            f"theorem no_upper_verified_strategy (t : Tree) : checkTree mustActionsModel {m['depth']} {budget} upper t = false :=",
+            f"  impossible_budget_rejects_every_plan mustActionsModel {m['depth']} {budget} upper no_upper_guarantee t"])
+        if mode=="REFUSE_ROBUST":
+            lines.extend([f"theorem lower_cannot : canFinite mayActionsModel {m['depth']} {budget} lower = false := by decide +kernel",
+            f"theorem no_lower_verified_strategy (t : Tree) : checkTree mayActionsModel {m['depth']} {budget} lower t = false :=",
+            f"  impossible_budget_rejects_every_plan mayActionsModel {m['depth']} {budget} lower lower_cannot t"])
+        elif mode=="EPISTEMIC_OPEN":
+            lines.extend([f"theorem lower_can : canFinite mayActionsModel {m['depth']} {budget} lower = true := by decide +kernel",
+                f"theorem possible_on_lower : ∃ t : Tree, Safe mayActionsModel {m['depth']} {budget} lower t :=",
+                f"  (finite_search_complete mayActionsModel {m['depth']} {budget} lower).mp lower_can"])
     lines.append("end INSACERMO.C3OneDecision")
-    return "\n".join(lines)+"\n"
+    return "\\n".join(lines)+"\\n"
 
 def decide(model,folder,*,lean_binary="lean"):
     try:validate(model)
@@ -101,7 +113,7 @@ def decide(model,folder,*,lean_binary="lean"):
     if budget<0:return {"verdict":"REFUSE_INVALID_MODEL","authorized":False}
     must=solve(model,model["upperWorld"],model["mustActions"],model["depth"],budget)
     may=solve(model,model["lowerWorld"],model["mayActions"],model["depth"],budget)
-    if must is not None:mode="ACT";plan=must
+    if must is not None:\n        mode=("ACT" if "act" in must else model.get("probeKinds",["PROBE"]*model["probeCount"])[must["probe"]])\n        if mode not in ("ACT","PROBE","REPAIR"):raise ValueError("INVALID_FIRST_ACTION")\n        plan=must
     elif may is None:mode="REFUSE_ROBUST";plan=None
     else:mode="EPISTEMIC_OPEN";plan=may
     # No positive authorization until *same-input* Lean acceptance.
@@ -118,8 +130,8 @@ def decide(model,folder,*,lean_binary="lean"):
     except (OSError,subprocess.TimeoutExpired):
         ok=False
     if not ok:return {"verdict":"REFUSE_CERTIFICATE_MISSING","authorized":False,"contract_sha256":h}
-    result={"verdict":mode,"authorized":mode=="ACT","plan":plan,
-        "probe_or_repair_required":bool(plan and "probe" in plan),
+    result={"verdict":mode,"authorized":mode in ("ACT","PROBE","REPAIR"),"plan":plan,
+        "first_step_only":mode in ("PROBE","REPAIR"),
         "contract_sha256":h,"source_sha256":sha(proof.encode()),"budget":budget,
         "scope":"EXACT FINITE C3 ENVELOPES AND DECLARED PROBE/REPAIR GRAMMAR"}
     result["receipt_sha256"]=sha(canonical(result))
