@@ -22,7 +22,8 @@ jobs:
           LEAN_PATH: ".:lean"
         run: |
           lean --version
-          lean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean lean/ExactRepairCheckerV1.lean
       - name: Escape audit
         run: |
           ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' lean/ExactRepairDualKernelV1.lean
