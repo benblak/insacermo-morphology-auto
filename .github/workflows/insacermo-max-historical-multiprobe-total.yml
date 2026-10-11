@@ -39,7 +39,7 @@ jobs:
           lean -o lean/LegacyCertifiedOnlineDebtKernelV1.olean lean/LegacyCertifiedOnlineDebtKernelV1.lean
           lean -o lean/LegacyFinalIntegrationKernelV1.olean lean/LegacyFinalIntegrationKernelV1.lean
           lean -o C3/LegacyTemporalRepairIntegrationV1.olean C3/LegacyTemporalRepairIntegrationV1.lean
-          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean C3/TemporalRepairNegativeControlV1.lean
+          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean
           lean C3/TemporalRepairNegativeControlV1.lean
       - name: No proof shortcuts in new code
         run: |
