@@ -14,6 +14,7 @@ VERSION="INSACERMO_C3_FINITE_ONE_ENGINE_V1"
 def canonical(x):return json.dumps(x,sort_keys=True,separators=(",",":")).encode()
 def sha(x):return hashlib.sha256(x).hexdigest()
 def validate(m):
+    if not __debug__:raise ValueError("PYTHON_OPTIMIZATION_MODE_NOT_AUDITED")
     W=m["worldCount"];A=m["actionCount"];Q=m["probeCount"]
     assert type(W)==int and 1<=W<=8 and type(A)==int and 1<=A<=12 and type(Q)==int and 1<=Q<=8
     for key,n,k,allowed in [("good",W,A,(False,True)),("sense",Q,W,(1,2,3)),
