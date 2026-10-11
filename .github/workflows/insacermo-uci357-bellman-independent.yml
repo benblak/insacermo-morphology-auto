@@ -17,8 +17,7 @@ jobs:
       - name: Calculate original INSACERMO and independent Bellman policies on same splits
         run: |
           set -euo pipefail
-          cd experiments
-          python3 uci_occupancy_independent_bellman_v1.py /tmp/occupancy.zip /tmp/insacermo_comparison.json
+          python3 experiments/uci_occupancy_independent_bellman_v1.py /tmp/occupancy.zip /tmp/insacermo_comparison.json
           python3 - <<'PY'
           import json
           r=json.load(open('/tmp/insacermo_comparison.json'))
