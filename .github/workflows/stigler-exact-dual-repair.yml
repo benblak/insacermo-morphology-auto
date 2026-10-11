@@ -1,0 +1,28 @@
+name: INSACERMO Stigler Exact Dual Repair Lean
+on:
+  push:
+    branches: [insacermo-stigler-exact-repair-lean-v1-20261011]
+  pull_request:
+    branches: [insacermo-c3-portable-generic-verifier-v1-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify generic exact repair math
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean lean/ExactRepairDualKernelV1.lean
+      - name: Escape audit
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' lean/ExactRepairDualKernelV1.lean
