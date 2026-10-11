@@ -99,4 +99,43 @@ theorem verified_future_repair_excludes_badt
           intro o
           exact ih _ _ (next o) (hv.2.2.2 o) (hf o)
 
+
+/-- Real end-to-end mathematical gate:
+    C3 plan + exact primal repair / budget + historical directed-debt safety
+    + original strictly positive reserve.  Both outputs are proved, not
+    merely asserted as fields of an unchecked output structure. -/
+theorem verified_temporal_repair_and_strict_reserve
+    (m n : Nat) (A : Nat → Nat → Nat) (rhs : Nat → Nat)
+    (allowed : Nat → Bool)
+    (probeOK : Probe → Prop) (probePrice : Probe → Nat)
+    (observes : Probe → Scenario → Outcome → Prop)
+    (transform : Probe → Outcome → Scenario → Scenario)
+    (bad0 badt : State → Prop) (d : State → State → Nat)
+    (D U : Nat) (state : Scenario → Recipe → State)
+    (hdebt : ∀ b, badt b → ∃ b0, bad0 b0 ∧ d b b0 ≤ D)
+    (hDU : D ≤ U)
+    (debtBound : VerifiedBound)
+    (hgate : RuntimeGate debtBound)
+    (depth budget : Nat) (X : Scenario → Prop)
+    (plan : Plan Recipe Probe Outcome)
+    (hvalid : PlanValid
+      (repairModel m n A rhs allowed (HistoricalFuture bad0 d U state)
+        probeOK probePrice observes transform)
+      depth budget X plan) :
+    NoBadAtLeaves
+      (repairModel m n A rhs allowed (HistoricalFuture bad0 d U state)
+        probeOK probePrice observes transform)
+      badt state depth X plan ∧
+    debtBound.trueDebt < debtBound.reserve := by
+  constructor
+  · exact verified_future_repair_excludes_badt
+      m n A rhs allowed probeOK probePrice observes transform
+      bad0 badt d D U state hdebt hDU depth budget X plan hvalid
+  · exact original_strict_reserve_gate debtBound hgate
+
+/-- Boundary refusal remains strict in the original integration semantics. -/
+theorem reserve_equality_refused (U rho : Nat) (h : U = rho) :
+    ¬ U < rho :=
+  equality_never_passes_strict_gate U rho h
+
 end INSACERMO.LegacyC3Repair
