@@ -12,10 +12,17 @@ FEATURES=['Temperature','Humidity','Light','CO2','HumidityRatio']
 STEP={'Temperature':2.0,'Humidity':10.0,'Light':100.0,'CO2':250.0,'HumidityRatio':0.002}
 COST={'Temperature':1,'Humidity':1,'Light':2,'CO2':3,'HumidityRatio':1}
 def getcsv(raw):
-    reader=csv.DictReader(io.StringIO(raw.decode('utf-8-sig')))
+    lines=csv.reader(io.StringIO(raw.decode('utf-8-sig')))
+    names=next(lines)
+    names=[n.strip().strip('"').strip("'") for n in names]
     out=[]
-    for r in reader:
-        if not r or not r.get('Occupancy'):continue
+    for values in lines:
+        if not values: continue
+        # UCI's date-index CSV format has an unlabeled row ID column.
+        if len(values)==len(names)+1:values=values[1:]
+        assert len(values)==len(names),(len(values),len(names))
+        r=dict(zip(names,values))
+        if not r.get('Occupancy'):continue
         out.append(([float(r[k]) for k in FEATURES],int(r['Occupancy'])))
     return out
 
