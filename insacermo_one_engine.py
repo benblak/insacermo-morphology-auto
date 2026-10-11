@@ -114,7 +114,10 @@ def decide(model,folder,*,lean_binary="lean"):
     if budget<0:return {"verdict":"REFUSE_INVALID_MODEL","authorized":False}
     must=solve(model,model["upperWorld"],model["mustActions"],model["depth"],budget)
     may=solve(model,model["lowerWorld"],model["mayActions"],model["depth"],budget)
-    if must is not None:\n        mode=("ACT" if "act" in must else model.get("probeKinds",["PROBE"]*model["probeCount"])[must["probe"]])\n        if mode not in ("ACT","PROBE","REPAIR"):raise ValueError("INVALID_FIRST_ACTION")\n        plan=must
+    if must is not None:
+        mode=("ACT" if "act" in must else model.get("probeKinds",["PROBE"]*model["probeCount"])[must["probe"]])
+        if mode not in ("ACT","PROBE","REPAIR"):raise ValueError("INVALID_FIRST_ACTION")
+        plan=must
     elif may is None:mode="REFUSE_ROBUST";plan=None
     else:mode="EPISTEMIC_OPEN";plan=may
     # No positive authorization until *same-input* Lean acceptance.
