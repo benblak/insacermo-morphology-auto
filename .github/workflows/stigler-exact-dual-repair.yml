@@ -1,0 +1,54 @@
+name: INSACERMO Stigler Exact Dual Repair Lean
+on:
+  push:
+    branches: [insacermo-stigler-exact-repair-lean-v1-20261011]
+  pull_request:
+    branches: [insacermo-c3-portable-generic-verifier-v1-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify generic exact repair math
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          python3 experiments/generate_exact_repair_lean.py experiments/exact_repair_cases_v1.json /tmp/generated_lean
+          lean /tmp/generated_lean/Generated_two_resources.lean
+          lean /tmp/generated_lean/Generated_repair_with_extra_capacity.lean
+          python3 - <<'PY'
+          from pathlib import Path
+          folder=Path('/tmp/generated_lean')
+          a=(folder/'Generated_two_resources.lean').read_text()
+          assert 'def dualDenominator : Nat := 10' in a
+          (folder/'TAMPER_dual.lean').write_text(a.replace(
+            'def dualDenominator : Nat := 10','def dualDenominator : Nat := 0'))
+          b=(folder/'Generated_repair_with_extra_capacity.lean').read_text()
+          assert 'def xvals : List Nat := [1,2]' in b
+          (folder/'TAMPER_primal.lean').write_text(b.replace(
+            'def xvals : List Nat := [1,2]','def xvals : List Nat := [0,0]'))
+          PY
+          if lean /tmp/generated_lean/TAMPER_dual.lean > /tmp/tamper_dual.log 2>&1; then
+            echo "ERROR: falsified dual witness accepted"; exit 1
+          fi
+          if lean /tmp/generated_lean/TAMPER_primal.lean > /tmp/tamper_primal.log 2>&1; then
+            echo "ERROR: falsified construction witness accepted"; exit 1
+          fi
+          grep -q 'error' /tmp/tamper_dual.log
+          grep -q 'error' /tmp/tamper_primal.log
+          echo "PASS: both falsified contracts rejected by Lean"
+
+      - name: Escape audit
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' lean/ExactRepairDualKernelV1.lean
