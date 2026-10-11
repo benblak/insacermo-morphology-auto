@@ -11,9 +11,9 @@ theorem checkTree_iff_safe (m : Model)
     checkTree m depth budget X t = true ↔ Safe m depth budget X t := by
   induction t generalizing depth budget X with
   | act a =>
-      simp [checkTree, Safe, List.all_eq_true]
+      simp [checkTree, Safe, List.all_eq_true, and_assoc]
   | probe q no yes ihNo ihYes =>
-      simp [checkTree, Safe, sensorTotal, List.all_eq_true, ihNo, ihYes]
+      simp [checkTree, Safe, sensorTotal, List.all_eq_true, ihNo, ihYes, and_assoc]
 
 theorem accepted_certificate_sound (m : Model)
     (depth budget : Nat) (X : List Nat) (t : Tree)
