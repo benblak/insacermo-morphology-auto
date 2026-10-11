@@ -1,0 +1,85 @@
+name: INSACERMO EXACT C3 PROOF GATED RUNTIME
+on:
+  push:
+    branches: [insacermo-max-total-single-lean-decision-gate-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate fresh dynamic cases and syntax-check gate
+        run: |
+          python3 -m py_compile insacermo_c3_proof_gate.py experiments/c3_raw_dynamic_autoplan_lean.py
+          python3 - <<'PY'
+          from pathlib import Path
+          from insacermo_c3_proof_gate import decide_verified
+          import json
+          cases=json.loads(Path('experiments/dynamic_unseen_cases_v1.json').read_text())
+          nolean=decide_verified(cases[0],Path('/tmp/no_lean'),lean='/does/not/exist/lean')
+          assert nolean['authorization'] is False and nolean['verdict']=='VALIDITY_REFUSE'
+          assert 'proof_status' not in nolean
+          unknown=decide_verified(cases[2],Path('/tmp/unknown_lean'),lean='/does/not/exist/lean')
+          assert unknown['verdict']=='EPISTEMIC_OPEN' and unknown['authorization'] is False
+          print('FAIL CLOSED WHEN LEAN MISSING: SUCCESS')
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile existing trusted imported kernels
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          for name in CostlyProbeMinimal SafeProbeTheorem ProbeRepairKernel ProbePriceKernel ProbeReserveDebtBridge MultiProbeBudgetKernel MultiProbePlannerKernel ProofCarryingMultiProbeRuntimeKernelV1; do lean -o "lean/$name.olean" "lean/$name.lean"; done
+          for name in DoubleEnvelopeKernel UnknownLawsProbeKernel AdaptiveBudgetKernel; do lean -o "C3/$name.olean" "C3/$name.lean"; done
+          for name in DynamicJointureKernelV1 SymbolicTransformationSynthesisV1 MaxDualSynthesisCertificateV1; do lean -o "lean/$name.olean" "lean/$name.lean"; done
+          lean -o C3/TotalSymbolicDynamicBridgeV1.olean C3/TotalSymbolicDynamicBridgeV1.lean
+          lean -o C3/RecursiveTotalPlanKernelV1.olean C3/RecursiveTotalPlanKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o C3/TotalRepairFutureBridgeV1.olean C3/TotalRepairFutureBridgeV1.lean
+          for name in LegacyTemporalValidityKernelV1 LegacyCertifiedOnlineDebtKernelV1 LegacyFinalIntegrationKernelV1; do lean -o "lean/$name.olean" "lean/$name.lean"; done
+          lean -o C3/LegacyTemporalRepairIntegrationV1.olean C3/LegacyTemporalRepairIntegrationV1.lean
+          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean
+      - name: Actual precise per-decision Lean authorization + replay + tamper
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          from insacermo_c3_proof_gate import decide_verified,verify_receipt
+          cases=json.loads(Path('experiments/dynamic_unseen_cases_v1.json').read_text())
+          for i in (0,1,3):
+              p=Path('/tmp/insacermo_decision_'+str(i))
+              r=decide_verified(cases[i],p)
+              assert r['proof_status']=='LEAN_CHECKED_ON_THIS_INPUT',r
+              assert r['verdict']==('REFUSE_PROVEN' if i==1 else 'ACT'),r
+              assert verify_receipt(p)
+              print('ACTUAL LEAN VERIFIED DECISION',i,r['verdict'],r['lean_source_sha256'])
+              proof=p/'DynamicCase0.lean'
+              original=proof.read_text()
+              proof.write_text(original.replace('def rows', 'def rows_tampered',1))
+              assert not verify_receipt(p),'tampered proof was accepted'
+              proof.write_text(original)
+              assert verify_receipt(p)
+              receipt=p/'receipt.json'
+              j=json.loads(receipt.read_text());j['authorization']=not j['authorization']
+              receipt.write_text(json.dumps(j))
+              assert not verify_receipt(p),'tampered receipt was accepted'
+          print('SAME INPUT PROOF GATE AND TAMPER: SUCCESS')
+          PY
+      - name: Prior historical runtime unchanged
+        run: |
+          python3 test_unified_runtime_v3.py
+          python3 -m proof_carrying_multi_probe_runtime_v1.test_multi_probe_runtime_v2
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_C3_EXACT_SAME_INSTANCE_LEAN_RECEIPTS
+          path: /tmp/insacermo_decision_*/
+          retention-days: 90
