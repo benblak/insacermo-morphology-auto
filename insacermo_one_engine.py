@@ -85,7 +85,7 @@ def lean(m,mode,tree,budget):
            "theorem input_upper_ok : wellFormed mustActionsModel upper = true := by decide +kernel",
            "theorem input_lower_ok : wellFormed mayActionsModel lower = true := by decide +kernel",
            "theorem lower_subset_upper : (lower.all (fun w => upper.contains w)) = true := by decide +kernel"]
-    if mode=="ACT":
+    if mode in ("ACT","PROBE","REPAIR"):
         lines.extend([f"def choice : Tree := {tree_l(tree)}",
             f"theorem decision_verified : checkTree mustActionsModel {m['depth']} {budget} upper choice = true := by decide +kernel",
             f"theorem all_branches_safe : Safe mustActionsModel {m['depth']} {budget} upper choice :=",
