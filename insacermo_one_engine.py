@@ -152,7 +152,8 @@ def decide(model,folder,*,lean_binary="lean"):
         ok=(completed.returncode==0 and "sorryAx" not in completed.stdout)
     except (OSError,subprocess.TimeoutExpired):
         ok=False
-    if not ok:return {"verdict":"REFUSE_CERTIFICATE_MISSING","authorized":False,"contract_sha256":h}
+        completed=None
+    if not ok:return {"verdict":"REFUSE_CERTIFICATE_MISSING","authorized":False,"contract_sha256":h,"lean_error":((completed.stdout+"\\n"+completed.stderr)[-1500:] if completed is not None else "LEAN_NOT_AVAILABLE")}
     result={"verdict":mode,"authorized":mode in ("ACT","PROBE","REPAIR"),"plan":plan,
         "first_step_only":mode in ("PROBE","REPAIR"),
         "contract_sha256":h,"source_sha256":sha(proof.encode()),"budget":budget,
