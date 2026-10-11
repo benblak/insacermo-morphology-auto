@@ -181,35 +181,43 @@ theorem can_dynamic_horizon_monotone
           exact Or.inr ⟨q, hallowed, hcost, htotal,
             fun o => ih _ _ (hbranches o)⟩
 
-/-- Independent specification of the minimum GUARANTEED budget.
-    Nat.find is noncomputable: this theorem is not an efficient optimizer. -/
-noncomputable def minimumBudget
-    (m : DynamicProblem Scenario Policy Probe Outcome)
-    (n : Nat) (X : Scenario → Prop)
-    (h : ∃ b, CanDynamic m n b X) : Nat :=
-  Nat.find h
+/-- A mathematical, inspectable OPTIMALITY CERTIFICATE: a feasible budget
+    and an independent lower bound against every feasible competitor. -/
+def OptimalBudget (m : DynamicProblem Scenario Policy Probe Outcome)
+    (n b : Nat) (X : Scenario → Prop) : Prop :=
+  CanDynamic m n b X ∧ ∀ k, CanDynamic m n k X → b ≤ k
 
-theorem minimum_budget_is_feasible
-    (m : DynamicProblem Scenario Policy Probe Outcome)
-    (n : Nat) (X : Scenario → Prop)
-    (h : ∃ b, CanDynamic m n b X) :
-    CanDynamic m n (minimumBudget m n X h) X :=
-  Nat.find_spec h
-
-theorem minimum_budget_is_optimal
+theorem optimal_budget_has_verified_tree
     (m : DynamicProblem Scenario Policy Probe Outcome)
     (n b : Nat) (X : Scenario → Prop)
-    (h : ∃ k, CanDynamic m n k X)
-    (hb : CanDynamic m n b X) :
-    minimumBudget m n X h ≤ b :=
-  Nat.find_min' h hb
+    (h : OptimalBudget m n b X) :
+    ∃ t : Plan Policy Probe Outcome,
+      PlanValid m n b X t :=
+  (can_iff_verified_plan m n b X).mp h.1
 
-theorem minimum_budget_has_verified_tree
+theorem verified_tree_and_lower_bound_are_optimal
     (m : DynamicProblem Scenario Policy Probe Outcome)
-    (n : Nat) (X : Scenario → Prop)
-    (h : ∃ b, CanDynamic m n b X) :
-    ∃ tree : Plan Policy Probe Outcome,
-      PlanValid m n (minimumBudget m n X h) X tree :=
-  (can_iff_verified_plan m n _ _).mp (minimum_budget_is_feasible m n X h)
+    (n b : Nat) (X : Scenario → Prop)
+    (t : Plan Policy Probe Outcome)
+    (hValid : PlanValid m n b X t)
+    (hLower : ∀ k, CanDynamic m n k X → b ≤ k) :
+    OptimalBudget m n b X :=
+  ⟨(can_iff_verified_plan m n b X).mpr ⟨t, hValid⟩, hLower⟩
+
+theorem optimal_budget_unique
+    (m : DynamicProblem Scenario Policy Probe Outcome)
+    (n b c : Nat) (X : Scenario → Prop)
+    (hb : OptimalBudget m n b X)
+    (hc : OptimalBudget m n c X) : b = c :=
+  Nat.le_antisymm (hb.2 c hc.1) (hc.2 b hb.1)
+
+/-- Any verified tree has a valid plan over the declared scenario envelope;
+    it is only certified *minimal* if the lower bound is also supplied. -/
+theorem verified_plan_guarantees_feasibility
+    (m : DynamicProblem Scenario Policy Probe Outcome)
+    (n b : Nat) (X : Scenario → Prop)
+    (t : Plan Policy Probe Outcome)
+    (ht : PlanValid m n b X t) : CanDynamic m n b X :=
+  (can_iff_verified_plan m n b X).mpr ⟨t, ht⟩
 
 end INSACERMO.RecursiveC3
