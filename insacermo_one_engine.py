@@ -32,6 +32,14 @@ def validate(m):
         assert type(m[k])==int and 0<=m[k]<=100
     assert m["depth"]<=4 and m["debt"]<m["reserve"]
     assert "probeKinds" in m and len(m["probeKinds"])==Q and all(k in ("PROBE","REPAIR") for k in m["probeKinds"])
+    # A repair is a declared state transition, not a renamed passive sensor.
+    for q,k in enumerate(m["probeKinds"]):
+        if k=="REPAIR":
+            actually_changes=any(
+                ((m["sense"][q][w]&1) and m["nextFalse"][q][w]!=w) or
+                ((m["sense"][q][w]&2) and m["nextTrue"][q][w]!=w)
+                for w in m["upperWorld"])
+            assert actually_changes, "REPAIR_WITHOUT_STATE_TRANSFORMATION"
 
 def solve(m,X,action_allowed,depth,budget):
     @lru_cache(None)
