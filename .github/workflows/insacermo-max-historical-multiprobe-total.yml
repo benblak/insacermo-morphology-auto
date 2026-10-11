@@ -1,0 +1,46 @@
+name: INSACERMO MAX TOTAL Historical MultiProbe C3 Repair
+on:
+  push:
+    branches: [insacermo-max-total-historical-multiprobe-integration-v1-20261011]
+  pull_request:
+    branches: [insacermo-total-legacy-temporal-c3-repair-v1-20261011]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Recompile actual October 4 multiprobe kernels and October 11 unified bridge
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          for name in CostlyProbeMinimal SafeProbeTheorem ProbeRepairKernel ProbePriceKernel ProbeReserveDebtBridge MultiProbeBudgetKernel MultiProbePlannerKernel ProofCarryingMultiProbeRuntimeKernelV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          lean -o C3/DoubleEnvelopeKernel.olean C3/DoubleEnvelopeKernel.lean
+          lean -o C3/UnknownLawsProbeKernel.olean C3/UnknownLawsProbeKernel.lean
+          lean -o C3/AdaptiveBudgetKernel.olean C3/AdaptiveBudgetKernel.lean
+          lean -o lean/DynamicJointureKernelV1.olean lean/DynamicJointureKernelV1.lean
+          lean -o lean/SymbolicTransformationSynthesisV1.olean lean/SymbolicTransformationSynthesisV1.lean
+          lean -o lean/MaxDualSynthesisCertificateV1.olean lean/MaxDualSynthesisCertificateV1.lean
+          lean -o C3/TotalSymbolicDynamicBridgeV1.olean C3/TotalSymbolicDynamicBridgeV1.lean
+          lean -o C3/RecursiveTotalPlanKernelV1.olean C3/RecursiveTotalPlanKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o C3/TotalRepairFutureBridgeV1.olean C3/TotalRepairFutureBridgeV1.lean
+          lean -o lean/LegacyTemporalValidityKernelV1.olean lean/LegacyTemporalValidityKernelV1.lean
+          lean -o lean/LegacyCertifiedOnlineDebtKernelV1.olean lean/LegacyCertifiedOnlineDebtKernelV1.lean
+          lean -o lean/LegacyFinalIntegrationKernelV1.olean lean/LegacyFinalIntegrationKernelV1.lean
+          lean -o C3/LegacyTemporalRepairIntegrationV1.olean C3/LegacyTemporalRepairIntegrationV1.lean
+          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean
+          lean C3/TemporalRepairNegativeControlV1.lean
+      - name: No proof shortcuts in new code
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' C3/TotalHistoricalMultiProbeIntegrationV1.lean
