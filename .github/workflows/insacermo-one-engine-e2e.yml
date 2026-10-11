@@ -54,7 +54,7 @@ jobs:
               scenarios.append(r)
           run_case('ACT',dict(upperWorld=[0]),'ACT')
           run_case('PROBE',{},'PROBE')
-          run_case('REPAIR',dict(probeKinds=['REPAIR']), 'REPAIR')
+          run_case('REPAIR',dict(probeKinds=['REPAIR'],nextFalse=[[1,1]],nextTrue=[[0,0]]), 'REPAIR')
           run_case('OPEN',dict(budget=0),'EPISTEMIC_OPEN')
           run_case('REFUSE',dict(budget=0,lowerWorld=[0,1]),'REFUSE_ROBUST')
           # Nonexistent Lean must NEVER authorize.
@@ -62,6 +62,8 @@ jobs:
           assert not negative['authorized'] and negative['verdict']=='REFUSE_CERTIFICATE_MISSING'
           invalid=decide(dict(m,lowerWorld=[1],upperWorld=[0]),Path('/tmp/insacermo-one')/'invalid')
           assert not invalid['authorized']
+          cosmetic=decide(dict(m,probeKinds=['REPAIR']),Path('/tmp/insacermo-one')/'cosmetic_repair')
+          assert not cosmetic['authorized'] and cosmetic['verdict']=='REFUSE_INVALID_MODEL'
           print('FIVE_C3_VERDICTS_AND_FAIL_CLOSED: SUCCESS')
           PY
       - name: Independently replay exact instance, reject every tamper and fail closed
