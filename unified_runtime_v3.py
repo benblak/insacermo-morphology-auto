@@ -57,7 +57,7 @@ def check_recipe(c:Contract, x:tuple[Fraction,...]):
     if any(v<0 for v in x):raise UnifiedError("NEGATIVE_RECIPE")
     current=all(sum(c.A[i][j]*x[j] for j in range(len(x)))>=c.b[i]
                 for i in range(len(c.b)))
-    affordable=c.annual_days*sum(x)*c.scale<=c.annual_limit
+    affordable=c.annual_days*sum(x)<=c.annual_limit
     world_checks=[all(x[j]==0 or permitted for j,permitted in enumerate(world))
                   for world in c.future_worlds]
     return {"current_valid":current,"annual_budget_valid":affordable,
