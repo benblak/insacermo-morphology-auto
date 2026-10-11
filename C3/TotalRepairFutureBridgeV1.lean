@@ -22,6 +22,7 @@ namespace INSACERMO.TotalRepairFuture
 
 open INSACERMO.RecursiveC3
 open INSACERMO.C3PP
+open INSACERMO.C3
 open InsacermoExactRepair
 
 universe u v w
@@ -103,7 +104,7 @@ theorem verified_plan_preserves_all_declared_futures
           exact (hv.2.2 s hs).2.2
       | probe q next =>
           intro o
-          exact ih _ _ _ (hv.2.2.2.2 o)
+          exact ih _ _ _ (hv.2.2.2 o)
 
 /-- A constructive witness produces a verified C3 policy-tree certificate
     that includes both the annual LP constraints AND the future obligations. -/
