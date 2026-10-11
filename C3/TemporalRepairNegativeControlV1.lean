@@ -8,9 +8,11 @@ that a bad future candidate cannot accidentally be "certified" as an ACT.
 namespace INSACERMO.Regression
 open INSACERMO.TotalHistoricalMulti
 open INSACERMO.TotalRepairFuture
+open INSACERMO.LegacyC3Repair
 open INSACERMO.RecursiveC3
 open INSACERMO.C3PP
 open InsacermoExactRepair
+open InsacermoMultiProbeBudget
 
 def A : Nat → Nat → Nat := fun i j =>
   if i == 0 && j < 2 then 10 else 0
@@ -61,7 +63,7 @@ theorem bad_fails_future_contract :
   intro h
   have hg := h.2.2 () trivial
   have hf := hg.2.2
-  have hz := hf (s := ()) trivial
+  have hz : INSACERMO.TemporalValidityV1.Safe bad0 dist 0 (state () badRecipe) := hf
   have hb : bad0 true := rfl
   have inequality := hz true hb
   exact (by decide : ¬ (0 < dist (state () badRecipe) true)) inequality
