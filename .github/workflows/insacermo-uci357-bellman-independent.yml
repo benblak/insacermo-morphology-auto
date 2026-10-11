@@ -23,8 +23,8 @@ jobs:
           python3 - <<'PY'
           import json
           r=json.load(open('/tmp/insacermo_comparison.json'))
-          assert r['rows_train']==8143
-          assert r['optimized_fixed_orders_evaluated']==120
+          assert r['train']['insacermo_original']['total']==8143
+          assert r['number_orders']==120
           assert r['heldout']['datatest.txt']['methods']['insacermo_original']['correct']==1915
           assert r['heldout']['datatest.txt']['methods']['insacermo_original']['errors']==11
           assert r['heldout']['datatest2.txt']['methods']['insacermo_original']['correct']==8927
