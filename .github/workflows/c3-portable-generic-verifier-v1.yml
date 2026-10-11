@@ -27,7 +27,7 @@ jobs:
           lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
           lean C3/PortableVerifierSoundnessV1.lean
           lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
-          lean C3/PortableExactSearchV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
           lean C3/PortableDuoCertificateV1.lean
           lean C3/PortableQuadCertificateV1.lean
       - name: Reject admitted proof placeholders
