@@ -1,4 +1,4 @@
-import C3.PortableFiniteVerifierV1
+import C3.PortableExactSearchV1
 namespace PortableC3.Duo
 
 def model : PortableC3.Model := {
@@ -30,4 +30,14 @@ theorem no_cheaper_strategy : PortableC3.canFinite model 1 0 start = false := by
 theorem tampered_certificate_rejected :
     PortableC3.checkTree model 1 1 start (.act 2) = false := by
   decide +kernel
+theorem globally_minimax_in_finite_grammar :
+    PortableC3.checkTree model 1 1 start emitted = true ∧
+    (∀ b, b < 1 → PortableC3.canFinite model 1 b start = false) := by
+  constructor
+  · exact policy_certificate
+  · intro b hb
+    have hle : b ≤ 0 := by omega
+    exact PortableC3.one_infeasible_budget_excludes_all_cheaper
+      model 1 0 start no_cheaper_strategy b hle
+
 end PortableC3.Duo
