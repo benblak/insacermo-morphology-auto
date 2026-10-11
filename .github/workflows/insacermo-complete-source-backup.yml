@@ -1,7 +1,7 @@
 name: INSACERMO COMPLETE OFFLINE SOURCE BACKUP
 on:
   push:
-    branches: [insacermo-v3-dynamic-c3-lean-autoplan-v1-20261011]
+    branches: [insacermo-one-engine-c3-complete-finite-20261011]
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,12 +21,12 @@ jobs:
           git ls-files | LC_ALL=C sort > ARCHIVE_META/TRACKED_FILES.txt
           git ls-files -z | xargs -0 sha256sum > ARCHIVE_META/SOURCE_SHA256SUMS.txt
           git status --porcelain > ARCHIVE_META/GIT_STATUS.txt
-          printf 'GitHub source export from INSACERMO historical × C3 × REPAIR × auto-synth × dynamic Lean\n' > ARCHIVE_META/README.txt
+          printf 'INSACERMO one-engine FULL working GitHub tree: historical MAX TOTAL + C3 + REPAIR + Lean + tests + exact replay gate\n' > ARCHIVE_META/README.txt
           test "$(find . -path './.git' -prune -o -type f -print | wc -l)" -gt 190
           echo "ARCHIVE SOURCE EXPORT OK"
       - uses: actions/upload-artifact@v4
         with:
-          name: INSACERMO_COMPLETE_SOURCE_2026_10_11
+          name: INSACERMO_MAX_TOTAL_ONE_ENGINE_FINAL_SOURCE_2026_10_11
           path: |
             .
             !.git
