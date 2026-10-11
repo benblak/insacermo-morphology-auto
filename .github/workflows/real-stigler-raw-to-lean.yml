@@ -1,0 +1,52 @@
+name: INSACERMO TOTAL Real Raw-to-Lean Stigler
+on:
+  push:
+    branches: [insacermo-total-raw-to-lean-real-stigler-v1-20261011]
+  pull_request:
+    branches: [insacermo-stigler-exact-repair-lean-v1-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-proofs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install scientific candidate solver (UNTRUSTED)
+        run: pip install numpy scipy sympy
+      - name: Fetch pinned public real Stigler source
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/google/or-tools/stable/ortools/linear_solver/samples/stigler_diet.py -o /tmp/stigler_diet.py
+          test -s /tmp/stigler_diet.py
+      - name: Build verified generic Lean kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+      - name: Raw data to untrusted optimization to exact Lean proof files
+        run: |
+          python3 experiments/real_stigler_raw_to_lean.py /tmp/stigler_diet.py /tmp/real-stigler-lean
+          test "$(find /tmp/real-stigler-lean -name 'Stigler*.lean' | wc -l)" -eq 27
+      - name: Independently check all 27 actual dataset certificates with Lean kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          count=0
+          for f in /tmp/real-stigler-lean/Stigler*.lean; do
+            echo "PROVING $f"
+            lean "$f"
+            count=$((count+1))
+          done
+          test "$count" -eq 27
+          echo "SUCCESS — all 26 impossibility proofs + constructive proof accepted by Lean"
+      - name: No admitted escape hatches
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' lean/ExactRepairDualKernelV1.lean lean/ExactRepairCheckerV1.lean
