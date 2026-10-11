@@ -1,0 +1,30 @@
+name: INSACERMO UCI357 LOCKED BLIND
+on:
+  push:
+    branches: [insacermo-blind-uci-occupancy-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  blind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install numpy
+      - name: Obtain authentic UCI dataset
+        run: |
+          curl --retry 3 -fLsS 'https://archive.ics.uci.edu/static/public/357/occupancy+detection.zip' -o /tmp/occupancy.zip
+          test -s /tmp/occupancy.zip
+          sha256sum /tmp/occupancy.zip
+      - name: Freeze policy and run two independent heldout partitions
+        run: |
+          python experiments/uci_occupancy_locked_blind_v1.py /tmp/occupancy.zip /tmp/insacermo_uci357_blind.json
+      - name: Preserve complete blind results
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_UCI357_LOCKED_BLIND_REPORT
+          path: |
+            /tmp/insacermo_uci357_blind.json
+            experiments/uci_occupancy_locked_blind_v1.py
+            .github/workflows/insacermo-uci357-blind.yml
+          retention-days: 90
