@@ -1,0 +1,43 @@
+name: INSACERMO GEOMETRIC FUTURE EXACT LEAN DISCOVERY
+on:
+  push:
+    branches: [insacermo-free-geometric-future-discovery-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exhaustive independent graph search and policy verifier
+        run: |
+          python3 experiments/geometric_future_discovery_v1.py | tee /tmp/geometric_future.json
+          python3 - <<'PY'
+          import json
+          j=json.load(open('/tmp/geometric_future.json'))
+          assert j['minimum_certified_finite_budget']==3
+          assert j['feasible_budget']['2'] is False and j['feasible_budget']['3'] is True
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel verified exhaustive lower bound and future-safe adaptive tree
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+          lean C3/GeometricFutureDiscoveryCertificateV1.lean
+          ! grep -nE '^[[:space:]]*(axiom|sorry|admit)' C3/GeometricFutureDiscoveryCertificateV1.lean
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_GEOMETRIC_FUTURE_EXACT_PROOF_AND_DISCOVERY
+          path: |
+            /tmp/geometric_future.json
+            experiments/geometric_future_discovery_v1.py
+            C3/GeometricFutureDiscoveryCertificateV1.lean
+          retention-days: 90
