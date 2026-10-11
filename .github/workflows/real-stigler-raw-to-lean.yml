@@ -2,6 +2,8 @@ name: INSACERMO TOTAL Real Raw-to-Lean Stigler
 on:
   push:
     branches: [insacermo-total-raw-to-lean-real-stigler-v1-20261011]
+  pull_request:
+    branches: [insacermo-stigler-exact-repair-lean-v1-20261011]
   workflow_dispatch:
 permissions:
   contents: read
