@@ -26,6 +26,8 @@ jobs:
           lean --version
           lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
           lean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean C3/PortableExactSearchV1.lean
           lean C3/PortableDuoCertificateV1.lean
           lean C3/PortableQuadCertificateV1.lean
       - name: Reject admitted proof placeholders
@@ -33,7 +35,7 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
           import re
-          for name in ('PortableFiniteVerifierV1','PortableVerifierSoundnessV1','PortableDuoCertificateV1','PortableQuadCertificateV1'):
+          for name in ('PortableFiniteVerifierV1','PortableVerifierSoundnessV1','PortableExactSearchV1','PortableDuoCertificateV1','PortableQuadCertificateV1'):
               p=Path('C3')/(name+'.lean')
               s=p.read_text()
               s=re.sub(r'/\-.*?\-/', '', s, flags=re.S)
