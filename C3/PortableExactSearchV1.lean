@@ -87,7 +87,7 @@ theorem impossible_budget_rejects_every_plan (m : Model)
     (h : canFinite m n b X = false) (t : Tree) :
     checkTree m n b X t = false := by
   cases hc : checkTree m n b X t with
-  | false => exact hc
+  | false => rfl
   | true =>
       have hyes : canFinite m n b X = true :=
         (finite_search_iff_checked_tree m n b X).mpr ⟨t, hc⟩
