@@ -1,0 +1,41 @@
+name: INSACERMO UCI357 INDEPENDENT BELLMAN BENCHMARK
+on:
+  push:
+    branches: [insacermo-independent-bellman-uci357-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install original baseline dependency
+        run: pip install numpy
+      - name: Obtain original UCI 357 archive
+        run: |
+          curl --retry 3 -fLsS 'https://archive.ics.uci.edu/static/public/357/occupancy+detection.zip' -o /tmp/occupancy.zip
+          sha256sum /tmp/occupancy.zip
+      - name: Calculate original INSACERMO and independent Bellman policies on same splits
+        run: |
+          set -euo pipefail
+          python3 experiments/uci_occupancy_independent_bellman_v1.py /tmp/occupancy.zip /tmp/insacermo_comparison.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open('/tmp/insacermo_comparison.json'))
+          assert r['train']['insacermo_original']['total']==8143
+          assert r['number_orders']==120
+          assert r['heldout']['datatest.txt']['methods']['insacermo_original']['correct']==1915
+          assert r['heldout']['datatest.txt']['methods']['insacermo_original']['errors']==11
+          assert r['heldout']['datatest2.txt']['methods']['insacermo_original']['correct']==8927
+          assert r['heldout']['datatest2.txt']['methods']['insacermo_original']['errors']==421
+          print('ORIGINAL PROTOCOL REPRODUCED, no heldout tuning')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_UCI357_INDEPENDENT_BELLMAN_EXACT_COMPARE
+          path: |
+            /tmp/insacermo_comparison.json
+            experiments/uci_occupancy_independent_bellman_v1.py
+            experiments/uci_occupancy_locked_blind_v1.py
+          retention-days: 90
