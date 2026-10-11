@@ -52,7 +52,7 @@ def emitted : Plan ActId ProbeId Bool :=
     .probe 1 (fun o2 =>
       .probe 2 (fun _ =>
         .act (if o then (if o2 then 3 else 1)
-              else (if o2 then 2 else 0))))))
+              else (if o2 then 2 else 0)))))
 
 
 def checkTree : Nat → Nat → List St → Plan ActId ProbeId Bool → Bool
@@ -64,7 +64,7 @@ def checkTree : Nat → Nat → List St → Plan ActId ProbeId Bool → Bool
       checkTree n (b-1) (after X q false) (next false) &&
       checkTree n (b-1) (after X q true) (next true)
 
-/-- Compare the concrete generated tree against the independent interpreter. -/
+/- Compare generated tree against independent interpreter. -/
 set_option maxRecDepth 8192
 set_option maxHeartbeats 20000000
 theorem emitted_tree_passes : checkTree 3 3 initial emitted = true := by
