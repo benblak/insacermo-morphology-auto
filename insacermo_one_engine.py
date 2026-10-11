@@ -141,3 +141,63 @@ def decide(model,folder,*,lean_binary="lean"):
     result["receipt_sha256"]=sha(canonical(result))
     (folder/"receipt.json").write_bytes(canonical(result))
     return result
+
+def replay(folder, *, lean_binary="lean"):
+    """Reconstruct the same model and exact proof; never trust receipt hashes alone."""
+    folder=Path(folder)
+    try:
+        model=json.loads((folder/"contract.json").read_text())
+        candidate=json.loads((folder/"candidate.json").read_text())
+        receipt=json.loads((folder/"receipt.json").read_text())
+        validate(model)
+        if receipt.get("receipt_sha256")!=sha(canonical(
+                {k:v for k,v in receipt.items() if k!="receipt_sha256"})):return False
+        if receipt.get("contract_sha256")!=sha(canonical(model)):return False
+        budget=min(model["budget"],model["reserve"]-model["debt"]-1)
+        must=solve(model,model["upperWorld"],model["mustActions"],model["depth"],budget)
+        may=solve(model,model["lowerWorld"],model["mayActions"],model["depth"],budget)
+        if must is not None:
+            mode=("ACT" if "act" in must else model["probeKinds"][must["probe"]])
+            plan=must
+        elif may is None:
+            mode="REFUSE_ROBUST";plan=None
+        else:
+            mode="EPISTEMIC_OPEN";plan=may
+        if candidate!={"verdict":mode,"plan":plan,"budget":budget}:return False
+        if receipt.get("verdict")!=mode or receipt.get("plan")!=plan:return False
+        if receipt.get("authorized")!=(mode in ("ACT","PROBE","REPAIR")):return False
+        if receipt.get("budget")!=budget or receipt.get("first_step_only")!=(mode in ("PROBE","REPAIR")):return False
+        proof=lean(model,mode,plan,budget)
+        if receipt.get("source_sha256")!=sha(proof.encode()):return False
+        if (folder/"C3Decision.lean").read_text()!=proof:return False
+        env=dict(os.environ,LEAN_PATH=".:lean")
+        run=subprocess.run([lean_binary,str((folder/"C3Decision.lean").resolve())],
+                cwd=Path(__file__).resolve().parent,env=env,
+                text=True,capture_output=True,timeout=120)
+        return run.returncode==0 and "sorryAx" not in run.stdout
+    except (OSError,KeyError,ValueError,AssertionError,TypeError,subprocess.TimeoutExpired):
+        return False
+
+def main():
+    import argparse,sys
+    p=argparse.ArgumentParser(description="INSACERMO: one finite C3 engine, Lean-gated")
+    p.add_argument("contract",type=Path,help="JSON finite contract")
+    p.add_argument("receipt_directory",type=Path,help="Output and replay directory")
+    p.add_argument("--verify",action="store_true",help="Rebuild proof from JSON and re-run Lean")
+    p.add_argument("--lean",default="lean")
+    x=p.parse_args()
+    if x.verify:
+        ok=replay(x.receipt_directory,lean_binary=x.lean)
+        print("CERTIFICATE_ACCEPTED" if ok else "CERTIFICATE_REJECTED")
+        return 0 if ok else 2
+    try:
+        m=json.loads(x.contract.read_text())
+    except (OSError,ValueError):
+        print("REFUSE_INVALID_JSON")
+        return 2
+    result=decide(m,x.receipt_directory,lean_binary=x.lean)
+    print(json.dumps(result,ensure_ascii=False,indent=2))
+    return 0 if result.get("verdict") not in ("REFUSE_CERTIFICATE_MISSING","REFUSE_INVALID_MODEL") else 2
+
+if __name__=="__main__":
+    raise SystemExit(main())
