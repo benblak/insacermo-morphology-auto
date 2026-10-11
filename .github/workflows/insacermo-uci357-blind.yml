@@ -23,5 +23,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: INSACERMO_UCI357_LOCKED_BLIND_REPORT
-          path: /tmp/insacermo_uci357_blind.json
+          path: |
+            /tmp/insacermo_uci357_blind.json
+            experiments/uci_occupancy_locked_blind_v1.py
+            .github/workflows/insacermo-uci357-blind.yml
           retention-days: 90
