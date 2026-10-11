@@ -98,7 +98,7 @@ def lean(m,mode,tree,budget):
            f"theorem actual_repair_transformation : ((List.range {m['probeCount']}).all (fun q =>",
            "  !(repairSensor q) || upper.any (fun w =>",
            "    ((permits (senseAt mustActionsModel q w) false) && decide (nextAt mustActionsModel q w false ≠ w)) ||",
-           "    ((permits (senseAt mustActionsModel q w) true) && decide (nextAt mustActionsModel q w true ≠ w)))) = true := by decide +kernel",
+           "    ((permits (senseAt mustActionsModel q w) true) && decide (nextAt mustActionsModel q w true ≠ w))))) = true := by decide +kernel",
            f"theorem reserve_enforced : {m['debt']} + {budget} < {m['reserve']} ∧ {budget} ≤ {m['budget']} := by decide +kernel",
            "set_option maxRecDepth 8192","set_option maxHeartbeats 20000000",
            "theorem input_upper_ok : wellFormed mustActionsModel upper = true := by decide +kernel",
