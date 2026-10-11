@@ -1,0 +1,42 @@
+name: INSACERMO C3 Portable Generic Verifier
+on:
+  push:
+    branches: [insacermo-c3-portable-generic-verifier-v1-20261011]
+  pull_request:
+    branches: [insacermo-c3-total-executable-certificate-v1-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  portable:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile ONE generic Lean verifier and TWO different portable certificates
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean C3/PortableDuoCertificateV1.lean
+          lean C3/PortableQuadCertificateV1.lean
+      - name: Reject admitted proof placeholders
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for name in ('PortableFiniteVerifierV1','PortableDuoCertificateV1','PortableQuadCertificateV1'):
+              p=Path('C3')/(name+'.lean')
+              s=p.read_text()
+              s=re.sub(r'/\-.*?\-/', '', s, flags=re.S)
+              s=re.sub(r'--[^\n]*', '', s)
+              assert not re.search(r'\b(sorry|admit|axiom)\b',s),str(p)
+          print('No sorry, admit or custom axiom')
+          PY
