@@ -1,0 +1,58 @@
+name: INSACERMO Unified Runtime V3 Future-C3-Repair
+on:
+  push:
+    branches: [insacermo-unified-runtime-v3-live-upgrade-20261011]
+  pull_request:
+    branches: [insacermo-max-total-historical-multiprobe-integration-v1-20261011]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax
+        run: |
+          python3 -m py_compile unified_runtime_v3.py test_unified_runtime_v3.py
+      - name: Retest original history
+        run: |
+          python3 -m proof_carrying_multi_probe_runtime_v1.test_multi_probe_runtime_v2
+          python3 -m certified_online_debt_v1.test_online_debt_v1
+          python3 -m temporal_runtime.test_runtime_v1
+          python3 -m final_integration_v1.test_final_integration_v1
+      - name: New executable future-safe decision test and adversarial counterexamples
+        run: |
+          python3 test_unified_runtime_v3.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Recompile verified October legacy and new temporal bridges
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          for name in CostlyProbeMinimal SafeProbeTheorem ProbeRepairKernel ProbePriceKernel ProbeReserveDebtBridge MultiProbeBudgetKernel MultiProbePlannerKernel ProofCarryingMultiProbeRuntimeKernelV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          for name in DoubleEnvelopeKernel UnknownLawsProbeKernel AdaptiveBudgetKernel; do
+            lean -o "C3/$name.olean" "C3/$name.lean"
+          done
+          for name in DynamicJointureKernelV1 SymbolicTransformationSynthesisV1 MaxDualSynthesisCertificateV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          lean -o C3/TotalSymbolicDynamicBridgeV1.olean C3/TotalSymbolicDynamicBridgeV1.lean
+          lean -o C3/RecursiveTotalPlanKernelV1.olean C3/RecursiveTotalPlanKernelV1.lean
+          lean -o lean/ExactRepairDualKernelV1.olean lean/ExactRepairDualKernelV1.lean
+          lean -o lean/ExactRepairCheckerV1.olean lean/ExactRepairCheckerV1.lean
+          lean -o C3/TotalRepairFutureBridgeV1.olean C3/TotalRepairFutureBridgeV1.lean
+          for name in LegacyTemporalValidityKernelV1 LegacyCertifiedOnlineDebtKernelV1 LegacyFinalIntegrationKernelV1; do
+            lean -o "lean/$name.olean" "lean/$name.lean"
+          done
+          lean -o C3/LegacyTemporalRepairIntegrationV1.olean C3/LegacyTemporalRepairIntegrationV1.lean
+          lean -o C3/TotalHistoricalMultiProbeIntegrationV1.olean C3/TotalHistoricalMultiProbeIntegrationV1.lean
+          lean C3/TemporalRepairNegativeControlV1.lean
+      - name: Audit no admitted proof
+        run: |
+          ! grep -En '(^|[^A-Za-z_])(sorry|admit|axiom)([^A-Za-z_]|$)' C3/TotalHistoricalMultiProbeIntegrationV1.lean C3/TemporalRepairNegativeControlV1.lean
