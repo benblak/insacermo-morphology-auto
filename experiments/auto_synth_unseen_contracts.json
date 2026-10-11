@@ -1,0 +1,81 @@
+[
+  {
+    "A": [
+      [
+        10,
+        10
+      ]
+    ],
+    "b": [
+      1
+    ],
+    "future_worlds": [
+      [
+        false,
+        true
+      ],
+      [
+        true,
+        true
+      ]
+    ],
+    "annual_limit": 40,
+    "annual_days": 365,
+    "scale": 10,
+    "denominator": 10,
+    "max_units": 5
+  },
+  {
+    "A": [
+      [
+        10,
+        10
+      ]
+    ],
+    "b": [
+      5
+    ],
+    "future_worlds": [
+      [
+        false,
+        true
+      ],
+      [
+        true,
+        true
+      ]
+    ],
+    "annual_limit": 40,
+    "annual_days": 365,
+    "scale": 10,
+    "denominator": 10,
+    "max_units": 5
+  },
+  {
+    "A": [
+      [
+        10,
+        0
+      ],
+      [
+        0,
+        10
+      ]
+    ],
+    "b": [
+      1,
+      1
+    ],
+    "future_worlds": [
+      [
+        true,
+        true
+      ]
+    ],
+    "annual_limit": 40,
+    "annual_days": 365,
+    "scale": 10,
+    "denominator": 10,
+    "max_units": 5
+  }
+]
