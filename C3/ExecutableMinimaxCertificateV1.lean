@@ -52,7 +52,7 @@ def emitted : Plan ActId ProbeId Bool :=
     .probe 1 (fun o2 =>
       .probe 2 (fun _ =>
         .act (if o then (if o2 then 3 else 1)
-              else (if o2 then 2 else 0)))))
+              else (if o2 then 2 else 0))))))
 
 
 def checkTree : Nat → Nat → List St → Plan ActId ProbeId Bool → Bool
