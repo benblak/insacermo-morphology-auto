@@ -1,0 +1,38 @@
+name: INSACERMO COMPLETE OFFLINE SOURCE BACKUP
+on:
+  push:
+    branches: [insacermo-v3-dynamic-c3-lean-autoplan-v1-20261011]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  export-complete-tree:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Generate immutable source manifest
+        run: |
+          set -euo pipefail
+          mkdir -p ARCHIVE_META
+          git rev-parse HEAD > ARCHIVE_META/COMMIT_SHA.txt
+          git branch --show-current > ARCHIVE_META/BRANCH.txt
+          git ls-files | LC_ALL=C sort > ARCHIVE_META/TRACKED_FILES.txt
+          git ls-files -z | xargs -0 sha256sum > ARCHIVE_META/SOURCE_SHA256SUMS.txt
+          git status --porcelain > ARCHIVE_META/GIT_STATUS.txt
+          printf 'GitHub source export from INSACERMO historical × C3 × REPAIR × auto-synth × dynamic Lean\n' > ARCHIVE_META/README.txt
+          test "$(find . -path './.git' -prune -o -type f -print | wc -l)" -gt 190
+          echo "ARCHIVE SOURCE EXPORT OK"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_COMPLETE_SOURCE_2026_10_11
+          path: |
+            .
+            !.git
+            !**/__pycache__/**
+            !**/*.pyc
+          include-hidden-files: true
+          if-no-files-found: error
+          compression-level: 9
+          retention-days: 90
