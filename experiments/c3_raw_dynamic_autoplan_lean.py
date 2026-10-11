@@ -209,7 +209,7 @@ theorem CERTIFIED_NO_C3_PLAN :
     (fun _ => True) price observation transition
     y {E} dual_check budget_gap {c['depth']}
     {c['probe_budget']} initial
-    ⟨⟨{c['initial'][0]}, by decide⟩, by decide⟩
+    ⟨⟨{c['initial'][0]}, by decide⟩, by simp [initial, start]⟩
 """
     return code+f"end {ns}\n"
 
