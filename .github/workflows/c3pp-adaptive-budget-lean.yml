@@ -1,0 +1,43 @@
+name: INSACERMO C3PP Adaptive Budget Lean
+on:
+  push:
+    branches:
+      - insacermo-c3pp-adaptive-bellman-budget-kernel-v1-20261011
+  pull_request:
+    branches:
+      - insacermo-c3plus-laws-probe-kernel-v1-20261011
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  c3pp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean kernel compile all 3 stages
+        env:
+          LEAN_PATH: "."
+        run: |
+          set -euo pipefail
+          lean --version
+          lean -o C3/DoubleEnvelopeKernel.olean C3/DoubleEnvelopeKernel.lean
+          lean -o C3/UnknownLawsProbeKernel.olean C3/UnknownLawsProbeKernel.lean
+          lean C3/AdaptiveBudgetKernel.lean
+      - name: Proof escape audit
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          for p in Path('C3').glob('*Kernel.lean'):
+              source=p.read_text()
+              source=re.sub(r'/\-.*?\-/', '', source, flags=re.S)
+              source=re.sub(r'--[^\n]*', '', source)
+              assert not re.search(r'\b(?:sorry|admit|axiom)\b',source), str(p)
+          print('PASS')
+          PY
