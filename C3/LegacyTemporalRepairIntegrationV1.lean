@@ -97,6 +97,6 @@ theorem verified_future_repair_excludes_badt
             hdebt hDU (hf s hs)
       | probe q next =>
           intro o
-          exact ih _ _ (next o) (hv.2.2.2 o)
+          exact ih _ _ (next o) (hv.2.2.2 o) (hf o)
 
 end INSACERMO.LegacyC3Repair
