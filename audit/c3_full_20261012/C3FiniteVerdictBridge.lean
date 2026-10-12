@@ -25,7 +25,7 @@ theorem classify_act_iff (must may : Model) (n budget : Nat)
   · intro h
     by_cases hm : canFinite must n budget upper = true
     · exact (finite_search_complete must n budget upper).mp hm
-    · simp [classifyFinite, hm] at h
+    · cases hy : canFinite may n budget lower <;> simp [classifyFinite, hm, hy] at h
   · rintro ⟨t, ht⟩
     have hm : canFinite must n budget upper = true :=
       (finite_search_complete must n budget upper).mpr ⟨t, ht⟩
