@@ -24,6 +24,7 @@ jobs:
           import re,subprocess
           root=Path('.')
           files={p.with_suffix('').as_posix().replace('/','.'):p for p in list(Path('C3').glob('*.lean'))+list(Path('lean').glob('*.lean'))}
+          files.update({p.stem:p for p in Path('lean').glob('*.lean')})
           deps={}
           for key,p in files.items():
               deps[key]=[m for line in p.read_text().splitlines() if (s:=re.match(r'^import\s+([\w.]+)',line)) for m in [s.group(1)] if m in files]
