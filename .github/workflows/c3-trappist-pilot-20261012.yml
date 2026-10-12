@@ -1,0 +1,32 @@
+name: C3 TRAPPIST-1 astronomy pilot
+on:
+  push:
+    branches: [insacermo-astronomy-trappist-c3-pilot-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trappist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile frozen C3
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Test original engine on astronomical domain
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/trappist_c3_20261012/test.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trappist-c3-original-decisions
+          path: audit/trappist_c3_20261012/output/
