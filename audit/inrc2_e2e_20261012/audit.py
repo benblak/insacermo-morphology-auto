@@ -115,6 +115,7 @@ def oracle_verdict(m):
         return "ACT" if direct else "PROBE"
     return "EPISTEMIC_OPEN" if possible(m,m["lowerWorld"],m["mayActions"]) else "REFUSE_ROBUST"
 # Original unchanged Python package and Lean modules checked out by the runner.
+sys.path.insert(0,str(ROOT))
 import insacermo_one_engine as c3
 original_bytes=(ROOT/"insacermo_one_engine.py").read_bytes()
 assert blob(original_bytes)=="bd5310b3692bcbad4e874005b7dd8eda90616f74","ORIGINAL_ENGINE_CHANGED"
