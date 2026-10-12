@@ -5,7 +5,8 @@ from pathlib import Path
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT))
 from insacermo_one_engine import canonical,replay
-from audit.inrc2_e2e_20261012.bound_verifier import verify_bound
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from bound_verifier import verify_bound
 base=ROOT/"audit/inrc2_e2e_20261012/evidence/receipts"
 names=["01_PROBE","02_ACT_0","03_ACT_1","04_REFUSE","05_EPISTEMIC_OPEN"]
 contracts={n:json.loads((base/n/"contract.json").read_text()) for n in names}
