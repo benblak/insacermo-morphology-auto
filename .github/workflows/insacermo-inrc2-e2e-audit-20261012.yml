@@ -1,0 +1,33 @@
+name: INSACERMO source-to-C3-to-Lean E2E reproducible
+on:
+  push:
+    branches: [insacermo-inrc2-e2e-source-contract-lean-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify_source_contract_and_lean:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install frozen Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile three frozen C3 modules
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Download original public files at pinned commit and verify all five C3 receipts
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/inrc2_e2e_20261012/audit.py
+      - name: Upload reproducible evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: inrc2-e2e-input-contract-lean-receipts
+          path: audit/inrc2_e2e_20261012/evidence/
