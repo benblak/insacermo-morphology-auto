@@ -1,0 +1,29 @@
+name: INSACERMO C3 JSON LEAN TRANSLATION AUDIT
+on:
+  push:
+    branches: [insacermo-c3-json-lean-semantic-bridge-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original finite C3 kernel and external attestation chain
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+          lean -o audit/python_lean_refinement_20261012/C3PolicyAttestation.olean audit/python_lean_refinement_20261012/C3PolicyAttestation.lean
+          lean audit/c3_json_lean_20261012/C3TypedReceiptKernel.lean
+      - name: Ensure all proof declarations have no placeholders
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' audit/c3_json_lean_20261012/*.lean
