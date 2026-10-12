@@ -1,0 +1,23 @@
+name: INSACERMO Futures Lean Audit
+on:
+  push:
+    branches:
+      - insacermo-futures-lean-audit-2026-10-12
+  workflow_dispatch:
+
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan and Lean 4.33.1
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile general preservation proof
+        run: lean formal/insacermo_futures_20261012/InsacermoFutursGeneral.lean
+      - name: Compile finite numerical audit
+        run: lean formal/insacermo_futures_20261012/InsacermoFutursNumerique.lean
+      - name: Forbid placeholders
+        run: |
+          ! grep -nE '\b(sorry|admit|axiom)\b' formal/insacermo_futures_20261012/*.lean
