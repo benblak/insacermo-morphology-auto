@@ -78,12 +78,23 @@ for seed in seeds:
     # no assumption extra is better out-of-sample: it may be worse!
     extra_on_ambiguous=0
     base_lut=maplabels(train,signature)
+    refined_lut=maplabels(train,lambda r:sigextra(r,f,t))
+    sel_correct=sel_wrong=sel_refuse=0
     for r in test:
-        if base_lut.get(signature(r)) is None:extra_on_ambiguous+=1
+        bval=base_lut.get(signature(r))
+        if bval is None:
+            extra_on_ambiguous+=1
+            final=refined_lut.get(sigextra(r,f,t))
+        else:
+            final=bval
+        if final is None: sel_refuse+=1
+        elif final==r[2]:sel_correct+=1
+        else:sel_wrong+=1
+    selective=dict(correct=sel_correct,wrong=sel_wrong,refuse=sel_refuse,coverage=sel_correct+sel_wrong)
     results.append(dict(seed=seed,train_n=len(train),test_n=len(test),
         cutoff_feature=names[f],cutoff=str(t),train_certifiable=trainpure,
         search_candidates=nc,tied_train_optima=ntied,
-        base=b,refined=e,extra_query_only_if_base_refuses=extra_on_ambiguous,
+        base=b,refined=e,selective=selective,extra_query_only_if_base_refuses=extra_on_ambiguous,
         extra_query_all_test=len(test)))
 N=len(results)
 def total(which,key):return sum(z[which][key] for z in results)
@@ -93,7 +104,7 @@ summary=dict(source=URL,git_blob=BLOB,record_count=214,
   test_cases=sum(z["test_n"] for z in results),
   aggregate={k:dict(correct=total(k,"correct"),wrong=total(k,"wrong"),
          refused=total(k,"refuse"),covered=total(k,"coverage"))
-      for k in ("base","refined")},
+      for k in ("base","refined","selective")},
   selected_features=Counter(z["cutoff_feature"] for z in results),
   additional_question_counts={"always":sum(z["extra_query_all_test"] for z in results),
     "only_if_base_refuses":sum(z["extra_query_only_if_base_refuses"] for z in results)},
