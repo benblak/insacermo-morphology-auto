@@ -1,0 +1,38 @@
+name: C3 strict expected-contract binding gate
+on:
+  push:
+    branches: [insacermo-c3-bound-verifier-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  strict-verification:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched C3 formal kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Rebuild authentic INRC-II contracts and Lean certificates
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/inrc2_e2e_20261012/audit.py
+      - name: Strict external contract binding regression
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/inrc2_e2e_20261012/test_bound_verifier.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: c3-strict-bound-evidence
+          path: |
+            audit/inrc2_e2e_20261012/evidence/REPORT.json
+            audit/inrc2_e2e_20261012/evidence/bound_tests/
