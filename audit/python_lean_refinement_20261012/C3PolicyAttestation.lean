@@ -38,10 +38,8 @@ theorem attested_tree_sound_and_authorized
     (worlds : List Nat) (t : Tree)
     (h : attestPolicyTree m allowed depth budget worlds t = true) :
     Safe m depth budget worlds t ∧ PolicyTree allowed t := by
-  have hc : checkTree m depth budget worlds t = true := by
-    exact (Bool.and_eq_true.mp h).1
-  have hp : allActionsAllowed allowed t = true := by
-    exact (Bool.and_eq_true.mp h).2
+  have ⟨hc, hp⟩ : checkTree m depth budget worlds t = true ∧ allActionsAllowed allowed t = true := by
+    simpa only [attestPolicyTree, Bool.and_eq_true] using h
   exact ⟨accepted_certificate_sound m depth budget worlds t hc,
          allActionsAllowed_sound allowed t hp⟩
 
