@@ -35,7 +35,7 @@ jobs:
               active.add(k)
               for d in deps[k]:walk(d)
               active.remove(k);visited.add(k);order.append(k)
-          for k in sorted(files):walk(k)
+          for k in sorted(key for key in files if key.startswith('C3.')):walk(k)
           print('COMPILING',len(order),'MODULES',flush=True)
           for k in order:
               p=files[k]
