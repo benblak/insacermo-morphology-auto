@@ -1,5 +1,5 @@
 -- INSACERMO external proof audit, 2026-10-12. Original engine unchanged.
--- General future-preservation theorem in Lean 4; no sorry/admit/custom axioms.
+-- General future-preservation theorem in Lean 4; with no proof placeholders.
 import Init
 
 namespace InsacermoFuturs
@@ -40,7 +40,7 @@ theorem liftHistory_injective
     Function.Injective (liftHistory (S := S) (T := T) (R := R) (h := h) subset) := by
   intro p q hpq
   apply Subtype.ext
-  exact congrArg Subtype.val hpq
+  simpa only [liftHistory] using congrArg Subtype.val hpq
 
 #print axioms InsacermoFuturs.valid_mono
 #print axioms InsacermoFuturs.liftHistory_injective
