@@ -1,0 +1,36 @@
+name: C3 cross-bundle replay and expected-contract identity audit
+on:
+  push:
+    branches: [insacermo-c3-cross-bundle-audit-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched Lean C3 kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Generate five independent valid certified bundles
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/inrc2_e2e_20261012/audit.py
+      - name: Test all cross-bundle substitutions and full-bundle replacement
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/inrc2_e2e_20261012/cross_bundle.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: c3-cross-bundle-binding-audit
+          path: audit/inrc2_e2e_20261012/evidence/cross_swap/CROSS_BUNDLE_REPORT.json
