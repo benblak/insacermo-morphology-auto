@@ -2,6 +2,9 @@
 -- Recompute all reserves from the 4 physical routes. No axiom/sorry/admit.
 import Init
 
+set_option maxRecDepth 8192
+set_option maxHeartbeats 0
+
 namespace InsacermoFuturs
 
 def admissibleMasks (unlockedRoutes : List Nat) : List Nat :=
