@@ -1,0 +1,18 @@
+name: INSACERMO glass external sample prospective lock
+on:
+  push:
+    branches: [insacermo-glass-prospective-locked-protocol-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run locked retrospective-reference and independent sample provenance gates
+        run: python3 audit/glass_prospective_lock_20261012/locked_protocol.py --output audit/glass_prospective_lock_20261012/LOCK_REPORT.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: glass-external-holdout-locked-protocol
+          path: audit/glass_prospective_lock_20261012/LOCK_REPORT.json
