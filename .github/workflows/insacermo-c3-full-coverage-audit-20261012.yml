@@ -40,7 +40,8 @@ jobs:
           for k in order:
               p=files[k]
               print('LEAN',p,flush=True)
-              subprocess.run(['lean','-o',str(p.with_suffix('.olean')),str(p)],check=True)
+              output = Path('lean')/ (p.stem + '.olean') if p.parent == Path('lean/generated') else p.with_suffix('.olean')
+              subprocess.run(['lean','-o',str(output),str(p)],check=True)
           print('ALL_C3_AND_DEPENDENCIES_COMPILED',len(order),flush=True)
           PY
       - name: Verify new C3 verdict bridge
