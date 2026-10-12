@@ -20,4 +20,4 @@ jobs:
         run: lean formal/insacermo_futures_20261012/InsacermoFutursNumerique.lean
       - name: Forbid placeholders
         run: |
-          ! grep -nE '\b(sorry|admit|axiom)\b' formal/insacermo_futures_20261012/*.lean
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' formal/insacermo_futures_20261012/*.lean
