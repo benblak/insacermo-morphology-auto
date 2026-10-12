@@ -1,0 +1,69 @@
+name: INSACERMO C3 FULL FORMAL COVERAGE AUDIT
+on:
+  push:
+    branches: [insacermo-c3-total-audit-isolated-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-c3:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile all C3 and dependency modules
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re,subprocess
+          root=Path('.')
+          files={p.with_suffix('').as_posix().replace('/','.'):p for p in list(Path('C3').glob('*.lean'))+list(Path('lean').glob('*.lean'))}
+          deps={}
+          for key,p in files.items():
+              deps[key]=[m for line in p.read_text().splitlines() if (s:=re.match(r'^import\s+([\w.]+)',line)) for m in [s.group(1)] if m in files]
+          visited=set();active=set();order=[]
+          def walk(k):
+              if k in visited:return
+              if k in active:raise RuntimeError('IMPORT_CYCLE: '+k)
+              active.add(k)
+              for d in deps[k]:walk(d)
+              active.remove(k);visited.add(k);order.append(k)
+          for k in sorted(files):walk(k)
+          print('COMPILING',len(order),'MODULES',flush=True)
+          for k in order:
+              p=files[k]
+              print('LEAN',p,flush=True)
+              subprocess.run(['lean','-o',str(p.with_suffix('.olean')),str(p)],check=True)
+          print('ALL_C3_AND_DEPENDENCIES_COMPILED',len(order),flush=True)
+          PY
+      - name: Verify new C3 verdict bridge
+        env:
+          LEAN_PATH: ".:lean"
+        run: lean audit/c3_full_20261012/C3FiniteVerdictBridge.lean
+      - name: Preserve original C3 end to end validation
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from insacermo_one_engine import decide,replay
+          m=dict(worldCount=2,actionCount=2,probeCount=1,good=[[True,False],[False,True]],sense=[[1,2]],
+            nextFalse=[[0,1]],nextTrue=[[0,1]],actionCost=[0,0],probeCost=[1],lowerWorld=[0],
+            upperWorld=[0,1],mustActions=[0,1],mayActions=[0,1],probeKinds=['PROBE'],depth=1,budget=1,reserve=5,debt=0)
+          tests=[('ACT',dict(upperWorld=[0])) , ('PROBE',{}),('REPAIR',dict(probeKinds=['REPAIR'],nextFalse=[[1,1]],nextTrue=[[0,0]])), ('EPISTEMIC_OPEN',dict(budget=0)),('REFUSE_ROBUST',dict(budget=0,lowerWorld=[0,1]))]
+          for name,changes in tests:
+              case=dict(m,**changes);p=Path('/tmp/c3-full-audit')/name
+              out=decide(case,p)
+              assert out['verdict']==name,(name,out)
+              assert replay(p),name
+          print('ALL_FIVE_C3_VERDICTS_AND_REPLAY_PASS')
+          PY
+      - name: No proof placeholders in new theorem
+        run: |
+          ! grep -nE '^[[:space:]]*(sorry|admit|axiom)([[:space:]]|$)' audit/c3_full_20261012/C3FiniteVerdictBridge.lean
