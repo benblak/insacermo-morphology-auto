@@ -1,0 +1,56 @@
+name: INSACERMO INRC2 authentic histories C3 Lean
+on:
+  push:
+    branches: [insacermo-c3-inrc2-real-histories-demo-2026-10-12]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile frozen C3 verification kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Five C3 decisions with real historic schedules
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from insacermo_one_engine import decide,replay
+          # Real n005w4 H0-0 has two possible exact Monday schedules,
+          # H0-1 has one. The action order follows their union.
+          m=dict(worldCount=2,actionCount=3,probeCount=1,
+            good=[[True,True,False],[False,False,True]],
+            sense=[[1,2]],nextFalse=[[0,1]],nextTrue=[[0,1]],
+            actionCost=[0,0,0],probeCost=[1],
+            lowerWorld=[0,1],upperWorld=[0,1],
+            mustActions=[0,1,2],mayActions=[0,1,2],
+            probeKinds=['PROBE'],depth=1,budget=1,reserve=3,debt=0)
+          cases=[
+            ('PROBE',{}),
+            ('ACT0',{'lowerWorld':[0],'upperWorld':[0]}),
+            ('ACT1',{'lowerWorld':[1],'upperWorld':[1]}),
+            ('REFUSE',{'depth':0,'budget':0}),
+            ('OPEN',{'lowerWorld':[0],'depth':0,'budget':0})]
+          expected=['PROBE','ACT','ACT','REFUSE_ROBUST','EPISTEMIC_OPEN']
+          for (name,changes),verdict in zip(cases,expected):
+            contract=dict(m,**changes)
+            p=Path('/tmp/insacermo-inrc2-real-histories')/name
+            result=decide(contract,p)
+            print(name, result['verdict'],result.get('authorized'),flush=True)
+            assert result['verdict']==verdict,(name,result)
+            assert replay(p),name
+          print('FIVE_AUTHENTIC_HISTORIES_C3_LEAN_RECEIPTS_VERIFIED',flush=True)
+          PY
