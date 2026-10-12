@@ -146,7 +146,14 @@ for fname in ("contract.json","candidate.json","receipt.json","C3Decision.lean")
     path=OUT/"tamper_checks"/fname.replace(".","_")
     shutil.copytree(clean,path,dirs_exist_ok=True)
     target=path/fname
-    target.write_text(target.read_text()+"\n") # content now differs; binding checker must reject
+    if fname == "C3Decision.lean":
+        target.write_text(target.read_text()+"\n-- altered Lean source\n")
+    else:
+        obj=json.loads(target.read_text())
+        if fname == "contract.json": obj["budget"]=0
+        elif fname == "candidate.json": obj["verdict"]="ACT"
+        elif fname == "receipt.json": obj["authorized"]=False
+        target.write_text(json.dumps(obj,sort_keys=True,separators=(",",":")))
     tamper[fname]=not c3.replay(path)
     assert tamper[fname],("TAMPER ACCEPTED",fname)
 bad=c3.decide(model,OUT/"tamper_checks"/"missing_lean",lean_binary="/not-a-real-lean-binary")
