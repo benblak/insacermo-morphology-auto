@@ -40,7 +40,9 @@ for line in data.decode("utf-8").splitlines():
 assert len(records)==214 and sorted(r[0] for r in records)==list(range(1,215))
 classes=Counter(r[2] for r in records)
 assert classes==Counter({1:70,2:76,3:17,5:13,6:9,7:29})
-assert len(set(r[1] for r in records))==214, "unexpected duplicate full feature vector"
+# Repeated full laboratory profiles are legal: do not silently drop them.
+duplicate_profiles=len(records)-len(set(r[1] for r in records))
+print("REPEATED_FULL_FEATURE_PROFILES",duplicate_profiles,flush=True)
 
 def panel_signature(r):
     return tuple(int(v>cutoff) for v,cutoff in zip(r[1],original_cutoffs))
