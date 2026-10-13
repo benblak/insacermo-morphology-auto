@@ -121,4 +121,22 @@ report=dict(source_commit=COMMIT,files_authenticated=48,
       "One chemical datum read is not priced as a physical laboratory measurement",
       "No guarantee of physical chemical laws, causality, or forensic identification"])
 (OUT/"REPORT.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
+# Stress: same physical eight-world contract, but probe outcome may be
+# ambiguous for ONE of the worlds. A valid probe tree must be safe for either
+# observation result, so it must refuse where mixed-label fibers arise.
+from copy import deepcopy
+assert verdict["verdict"]=="PROBE"
+amb=deepcopy(m)
+amb["sense"][0][0]=3
+worse=decide(amb,OUT/"ambiguous_real_measure")
+assert replay(OUT/"ambiguous_real_measure")
+groups_noisy={out:[i for i in range(8) if amb["sense"][0][i]&out] for out in (1,2)}
+oracle_noisy="ACT" if common_action(range(8)) else ("PROBE" if all(common_action(v) for v in groups_noisy.values()) else "REFUSE_ROBUST")
+assert oracle_noisy=="REFUSE_ROBUST" and worse["verdict"]==oracle_noisy,(oracle_noisy,worse)
+report["ambiguous_probe_stress"]=dict(original="PROBE",ambiguous="REFUSE_ROBUST",
+   source="Synthetic observation uncertainty deliberately added to one genuine pane",
+   lean_replay=True)
+(OUT/"REPORT.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
+print("CSAFE_NOISY_PROBE_C3_LEAN",worse["verdict"],"oracle",oracle_noisy,flush=True)
+
 print("CSAFE_NOCHERRYPICK_EXPERIMENT_DONE",flush=True)
