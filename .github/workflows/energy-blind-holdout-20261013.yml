@@ -1,0 +1,32 @@
+name: INSACERMO real energy temporal holdout C3 Lean
+on:
+  push:
+    branches: [insacermo-future-energy-blind-2026-10-13]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trial:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build frozen Lean kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Audit temporal holdout and original C3 proof
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/energy_uci_temporal_20261013/audit.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: energy-real-timestamped-holdout-original-c3-lean
+          path: audit/energy_uci_temporal_20261013/evidence/
