@@ -110,8 +110,8 @@ def classical_verdict(m):
     u=m["upperWorld"];l=m["lowerWorld"]
     has_act=any(m["actionCost"][a]<=b and all(m["good"][w][a] for w in u) for a in m["mustActions"])
     if has_act:return "ACT"
-    if classical_safe(m,u,m["mustActions"],m["depth"],b):return "PROBE"
-    return "EPISTEMIC_OPEN" if classical_safe(m,l,m["mayActions"],m["depth"],b) else "REFUSE_ROBUST"
+    if classic_safe(m,u,m["mustActions"],m["depth"],b):return "PROBE"
+    return "EPISTEMIC_OPEN" if classic_safe(m,l,m["mayActions"],m["depth"],b) else "REFUSE_ROBUST"
 
 certificates={}
 for name,m in [("STRICT_ENERGY",model),("OPEN_ENVELOPE",open_model),("COSTLY_SAFETY_ACTION",safe_model)]:
