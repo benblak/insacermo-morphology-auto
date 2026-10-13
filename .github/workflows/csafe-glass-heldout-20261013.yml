@@ -1,0 +1,18 @@
+name: CSAFE glass independent 48 pane holdout
+on:
+  push:
+    branches: [insacermo-c3-csafe-floatglass-heldout-2026-10-13]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  heldout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public source and test heldout panes
+        run: python3 audit/csafe_floatglass_20261013/experiment.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: csafe-independent-glass-pane-audit
+          path: audit/csafe_floatglass_20261013/evidence/REPORT.json
