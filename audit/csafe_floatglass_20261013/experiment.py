@@ -138,7 +138,49 @@ out={
    "This dataset cannot validate the UCI RI threshold due to missing refractive index"
  ]
 }
+
+# Additional predeclared robustness challenge: 20 fixed stratified pane-level
+# splits, fully repeating train-only feature/pair selection per split.
+initial_train=train.copy();initial_test=test.copy()
+stability=[]
+for seed in range(20261013,20261033):
+    rr=Random(seed)
+    train=[];test=[]
+    for label,vs in bylabel.items():
+        v=vs.copy();rr.shuffle(v)
+        ntest=round(len(v)*.30)
+        test.extend(v[:ntest]);train.extend(v[ntest:])
+    train.sort(key=lambda x:x["pane"]);test.sort(key=lambda x:x["pane"])
+    assert not ({x["pane"] for x in train}&{x["pane"] for x in test})
+    one_i,_=select([(f,) for f in fields])
+    two_i,_=select(list(combinations(fields,2)))
+    ff1=one_i[4];ff2=two_i[4]
+    s1,_=counts(train,test,ff1)
+    s2,_=counts(train,test,ff2)
+    ca=Counter();second=0
+    for p in test:
+        first=classify(train,p,ff2[:1])
+        if first is None:second+=1
+        answer=first if first is not None else classify(train,p,ff2)
+        ca["refuse" if answer is None else ("correct" if answer==p["label"] else "wrong")]+=1
+    stability.append(dict(seed=seed,baseline_feature=ff1,pair_features=ff2,
+                          single=s1,pair=s2,
+                          adaptive={k:ca[k] for k in ("correct","wrong","refuse")},
+                          adaptive_extra_reads=second))
+train=initial_train;test=initial_test
+out["repeated_split_robustness"]={
+ "n_splits":len(stability),
+ "pooled_test_decisions":sum(sum(z["single"].values()) for z in stability),
+ "single":{k:sum(z["single"][k] for z in stability) for k in ("correct","wrong","refuse")},
+ "pair":{k:sum(z["pair"][k] for z in stability) for k in ("correct","wrong","refuse")},
+ "adaptive":{k:sum(z["adaptive"][k] for z in stability) for k in ("correct","wrong","refuse")},
+ "adaptive_extra_reads":sum(z["adaptive_extra_reads"] for z in stability),
+ "single_features_selected":dict(Counter(z["baseline_feature"][0] for z in stability)),
+ "folds":stability
+}
+
 (OUT/"REPORT.json").write_text(json.dumps(out,indent=2,ensure_ascii=False)+"\n")
+print("GLASS_CSAFE_REPEATED_SPLIT",json.dumps({k:v for k,v in out["repeated_split_robustness"].items() if k!="folds"}),flush=True)
 print("GLASS_CSAFE_EXTERNAL_PANES_COMPLETED",json.dumps({k:out[k] for k in [
 "files_verified_by_git_blob","n_panes","company_panes","train_panes","test_panes",
 "training_candidate_single","training_candidate_pairs","single_feature","two_features",
