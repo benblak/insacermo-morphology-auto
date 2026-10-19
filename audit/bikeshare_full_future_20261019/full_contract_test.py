@@ -145,7 +145,7 @@ for case,(m,expected) in specimens.items():
         replay_lean=True,source_sha256=result["source_sha256"],
         contract_sha256=result["contract_sha256"],plan=result["plan"])
     print("BIKE_FUTURE_C3_LEAN",case,result["verdict"],flush=True)
-report=dict(source=SOURCE,source_zip_sha256=shasum,
+report=dict(source_url=SOURCE,source_zip_sha256=shasum,
     source="UCI Bike Sharing Dataset; Fanaee-T & Gama, 2013; doi:10.24432/C5W894",
     original_hourly_rows=len(rows),available_dates=len(days),window_complete_dates=len(windows),
     training_days=len(train),holdout_days=len(hold),
