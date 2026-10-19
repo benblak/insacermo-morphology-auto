@@ -1,0 +1,32 @@
+name: Exact information price and C3 Lean optimality audit
+on:
+  push:
+    branches: [insacermo-exact-price-of-information-20261019]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unmodified C3 Lean modules
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Exhaustive eight-policy audit on real bike history and C3 decision proof
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/exact_information_price_20261019/exact_test.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: insacermo-exact-price-independent-lean-c3
+          path: audit/exact_information_price_20261019/evidence/
