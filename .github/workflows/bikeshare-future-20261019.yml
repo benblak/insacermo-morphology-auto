@@ -1,0 +1,32 @@
+name: UCI Bike Sharing full future C3 Lean competitor audit
+on:
+  push:
+    branches: [insacermo-full-future-bridge-bikeshare-20261019]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  compete:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched C3 Lean verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Full-future source-data audit and classical competitor
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 audit/bikeshare_full_future_20261019/full_contract_test.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bikeshare-future-comparison-lean-receipts
+          path: audit/bikeshare_full_future_20261019/evidence/
