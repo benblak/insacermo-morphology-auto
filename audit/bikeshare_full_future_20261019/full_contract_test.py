@@ -166,7 +166,7 @@ report=dict(source=SOURCE,source_zip_sha256=shasum,
         "Only 4 declared abstract worlds in certified contracts; Lean did not verify all individual rides/days.",
         "The train-derived policy can fail under dataset shift, reported honestly, without universal claim.",
         "An equivalent classical shield or fully-informed planner makes the same decisions.",
-        "No uniqueness or scientific priority proven by this single dataset.")
+        "No uniqueness or scientific priority proven by this single dataset."])
 (OUT/"FULL_REPORT.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
 print("BIKESHARE_FUTURE_AUDIT_OK",json.dumps(
     {k:report[k] for k in ["original_hourly_rows","window_complete_dates","training_days",
