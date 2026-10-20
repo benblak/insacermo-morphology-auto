@@ -26,6 +26,7 @@ jobs:
       - name: Compile Lean certificate
         run: |
           lake build
+          lake build C3Optimality12x7
           lake env lean C3Decision12x7.lean
           lake env lean C3Optimality12x7.lean
       - name: Independently check kernel
