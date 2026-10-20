@@ -1,24 +1,24 @@
 import C3.PortableVerifierSoundnessV1
 namespace INSACERMO.C3OneDecision
 open PortableC3
-def mustActionsModel : Model := { worldCount := 12
- actionCount := 12
- probeCount := 7
- good := [[true,false,false,false,false,false,false,false,false,false,false,false],[false,true,false,false,false,false,false,false,false,false,false,false],[false,false,true,false,false,false,false,false,false,false,false,false],[false,false,false,true,false,false,false,false,false,false,false,false],[false,false,false,false,true,false,false,false,false,false,false,false],[false,false,false,false,false,true,false,false,false,false,false,false],[false,false,false,false,false,false,true,false,false,false,false,false],[false,false,false,false,false,false,false,true,false,false,false,false],[false,false,false,false,false,false,false,false,true,false,false,false],[false,false,false,false,false,false,false,false,false,true,false,false],[false,false,false,false,false,false,false,false,false,false,true,false],[false,false,false,false,false,false,false,false,false,false,false,true]]
- sense := [[1,2,1,2,1,2,1,2,1,1,1,1],[1,1,2,2,1,1,1,1,2,1,1,2],[1,2,1,2,2,2,1,1,2,2,2,1],[1,1,2,1,1,1,2,2,2,2,2,1],[1,2,2,2,1,1,2,2,2,2,1,2],[2,2,1,2,1,2,2,1,2,2,1,1],[1,2,1,2,2,2,1,1,1,2,2,1]]
- nextFalse := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]]
- nextTrue := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]]
- actionCost := [0,0,0,0,0,0,0,0,0,0,0,0]
+def mustActionsModel : Model := { worldCount := 12,
+ actionCount := 12,
+ probeCount := 7,
+ good := [[true,false,false,false,false,false,false,false,false,false,false,false],[false,true,false,false,false,false,false,false,false,false,false,false],[false,false,true,false,false,false,false,false,false,false,false,false],[false,false,false,true,false,false,false,false,false,false,false,false],[false,false,false,false,true,false,false,false,false,false,false,false],[false,false,false,false,false,true,false,false,false,false,false,false],[false,false,false,false,false,false,true,false,false,false,false,false],[false,false,false,false,false,false,false,true,false,false,false,false],[false,false,false,false,false,false,false,false,true,false,false,false],[false,false,false,false,false,false,false,false,false,true,false,false],[false,false,false,false,false,false,false,false,false,false,true,false],[false,false,false,false,false,false,false,false,false,false,false,true]],
+ sense := [[1,2,1,2,1,2,1,2,1,1,1,1],[1,1,2,2,1,1,1,1,2,1,1,2],[1,2,1,2,2,2,1,1,2,2,2,1],[1,1,2,1,1,1,2,2,2,2,2,1],[1,2,2,2,1,1,2,2,2,2,1,2],[2,2,1,2,1,2,2,1,2,2,1,1],[1,2,1,2,2,2,1,1,1,2,2,1]],
+ nextFalse := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]],
+ nextTrue := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]],
+ actionCost := [0,0,0,0,0,0,0,0,0,0,0,0],
  probeCost := [1,1,1,1,1,1,1]
 }
-def mayActionsModel : Model := { worldCount := 12
- actionCount := 12
- probeCount := 7
- good := [[true,false,false,false,false,false,false,false,false,false,false,false],[false,true,false,false,false,false,false,false,false,false,false,false],[false,false,true,false,false,false,false,false,false,false,false,false],[false,false,false,true,false,false,false,false,false,false,false,false],[false,false,false,false,true,false,false,false,false,false,false,false],[false,false,false,false,false,true,false,false,false,false,false,false],[false,false,false,false,false,false,true,false,false,false,false,false],[false,false,false,false,false,false,false,true,false,false,false,false],[false,false,false,false,false,false,false,false,true,false,false,false],[false,false,false,false,false,false,false,false,false,true,false,false],[false,false,false,false,false,false,false,false,false,false,true,false],[false,false,false,false,false,false,false,false,false,false,false,true]]
- sense := [[1,2,1,2,1,2,1,2,1,1,1,1],[1,1,2,2,1,1,1,1,2,1,1,2],[1,2,1,2,2,2,1,1,2,2,2,1],[1,1,2,1,1,1,2,2,2,2,2,1],[1,2,2,2,1,1,2,2,2,2,1,2],[2,2,1,2,1,2,2,1,2,2,1,1],[1,2,1,2,2,2,1,1,1,2,2,1]]
- nextFalse := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]]
- nextTrue := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]]
- actionCost := [0,0,0,0,0,0,0,0,0,0,0,0]
+def mayActionsModel : Model := { worldCount := 12,
+ actionCount := 12,
+ probeCount := 7,
+ good := [[true,false,false,false,false,false,false,false,false,false,false,false],[false,true,false,false,false,false,false,false,false,false,false,false],[false,false,true,false,false,false,false,false,false,false,false,false],[false,false,false,true,false,false,false,false,false,false,false,false],[false,false,false,false,true,false,false,false,false,false,false,false],[false,false,false,false,false,true,false,false,false,false,false,false],[false,false,false,false,false,false,true,false,false,false,false,false],[false,false,false,false,false,false,false,true,false,false,false,false],[false,false,false,false,false,false,false,false,true,false,false,false],[false,false,false,false,false,false,false,false,false,true,false,false],[false,false,false,false,false,false,false,false,false,false,true,false],[false,false,false,false,false,false,false,false,false,false,false,true]],
+ sense := [[1,2,1,2,1,2,1,2,1,1,1,1],[1,1,2,2,1,1,1,1,2,1,1,2],[1,2,1,2,2,2,1,1,2,2,2,1],[1,1,2,1,1,1,2,2,2,2,2,1],[1,2,2,2,1,1,2,2,2,2,1,2],[2,2,1,2,1,2,2,1,2,2,1,1],[1,2,1,2,2,2,1,1,1,2,2,1]],
+ nextFalse := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]],
+ nextTrue := [[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11],[0,1,2,3,4,5,6,7,8,9,10,11]],
+ actionCost := [0,0,0,0,0,0,0,0,0,0,0,0],
  probeCost := [1,1,1,1,1,1,1]
 }
 def upper : List Nat := [0,1,2,3,4,5,6,7,8,9,10,11]
