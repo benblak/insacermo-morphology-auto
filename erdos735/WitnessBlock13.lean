@@ -6,6 +6,7 @@ set_option maxRecDepth 10000
 theorem checked_13 :
   ∀ b : Fin 50, ∀ c : Fin 735,
     ¬ forbiddenPair (b.val + 650) c.val := by
+  unfold forbiddenPair
   decide +kernel
 #print axioms checked_13
 end Erdos302Witness735
