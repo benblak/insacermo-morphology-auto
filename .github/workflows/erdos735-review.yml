@@ -26,10 +26,7 @@ jobs:
           use-github-cache: "false"
       - name: Compile all vendored and new Lean statements
         run: |
-          lake env lean KernelIsolation.lean
-          lake env lean KernelEndpoints734.lean
-          lake env lean Plateau302.lean
-          lake env lean Extension734.lean
+          lake build
           lake env lean Extension735.lean
       - name: Run independent Lean checker
         run: lake env leanchecker Extension735
