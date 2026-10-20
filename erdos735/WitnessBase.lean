@@ -24,7 +24,8 @@ theorem W_294 : W 294 = false := by decide +kernel
 theorem W_cardinal : fullCardinal W = 608 := by decide +kernel
 
 theorem W_bound (x : Nat) (hx : W x) : 0 < x ∧ x ≤ 734 := by
-  exact (show 0 < x ∧ x ≤ 734 ∧ x ∉ excluded from by simpa [W] using hx).1
+  have h : 0 < x ∧ x ≤ 734 ∧ x ∉ excluded := by simpa [W] using hx
+  exact ⟨h.1, h.2.1⟩
 
 
 def forbiddenPair (b c : Nat) : Prop :=
