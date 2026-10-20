@@ -32,7 +32,7 @@ theorem W_pair_certificate :
     W (b.val * c.val / (b.val + c.val)) →
     b.val * c.val / (b.val + c.val) < b.val → False := by
   intro b c hbc hb hc hd ha hlt
-  have bad : forbiddenPair b.val c.val := ⟨hbc, hb, hc, hd, ha, hlt⟩
+  have bad : forbiddenPair b.val c.val := ⟨hbc, hb, hc, Nat.mod_eq_zero_of_dvd hd, ha, hlt⟩
   by_cases h0 : b.val < 50
   · exact (checked_0 ⟨b.val, h0⟩ c) bad
   ·     by_cases h1 : b.val < 100
