@@ -32,95 +32,96 @@ theorem W_pair_certificate :
     W (b.val * c.val / (b.val + c.val)) →
     b.val * c.val / (b.val + c.val) < b.val → False := by
   intro b c hbc hb hc hd ha hlt
-  have bad : forbiddenPair b.val c.val := ⟨hbc, hb, hc, Nat.mod_eq_zero_of_dvd hd, ha, hlt⟩
+  have bad : forbiddenPair b.val c.val :=
+    ⟨hbc, hb, hc, Nat.mod_eq_zero_of_dvd hd, ha, hlt⟩
   by_cases h0 : b.val < 50
   · exact (checked_0 ⟨b.val, h0⟩ c) bad
   ·     by_cases h1 : b.val < 100
     · have hi : b.val - 50 < 50 := by omega
-      have heq : b.val - 50 + 50 = b.val := by omega
-      have hcheck := checked_1 ⟨b.val - 50, hi⟩ c
-      rw [heq] at hcheck
-      exact hcheck bad
-    ·       by_cases h2 : b.val < 150
-      · have hi : b.val - 100 < 50 := by omega
-        have heq : b.val - 100 + 100 = b.val := by omega
-        have hcheck := checked_2 ⟨b.val - 100, hi⟩ c
+        have heq : b.val - 50 + 50 = b.val := by omega
+        have hcheck := checked_1 ⟨b.val - 50, hi⟩ c
         rw [heq] at hcheck
         exact hcheck bad
-      ·         by_cases h3 : b.val < 200
-        · have hi : b.val - 150 < 50 := by omega
-          have heq : b.val - 150 + 150 = b.val := by omega
-          have hcheck := checked_3 ⟨b.val - 150, hi⟩ c
+    ·       by_cases h2 : b.val < 150
+      · have hi : b.val - 100 < 50 := by omega
+          have heq : b.val - 100 + 100 = b.val := by omega
+          have hcheck := checked_2 ⟨b.val - 100, hi⟩ c
           rw [heq] at hcheck
           exact hcheck bad
-        ·           by_cases h4 : b.val < 250
-          · have hi : b.val - 200 < 50 := by omega
-            have heq : b.val - 200 + 200 = b.val := by omega
-            have hcheck := checked_4 ⟨b.val - 200, hi⟩ c
+      ·         by_cases h3 : b.val < 200
+        · have hi : b.val - 150 < 50 := by omega
+            have heq : b.val - 150 + 150 = b.val := by omega
+            have hcheck := checked_3 ⟨b.val - 150, hi⟩ c
             rw [heq] at hcheck
             exact hcheck bad
-          ·             by_cases h5 : b.val < 300
-            · have hi : b.val - 250 < 50 := by omega
-              have heq : b.val - 250 + 250 = b.val := by omega
-              have hcheck := checked_5 ⟨b.val - 250, hi⟩ c
+        ·           by_cases h4 : b.val < 250
+          · have hi : b.val - 200 < 50 := by omega
+              have heq : b.val - 200 + 200 = b.val := by omega
+              have hcheck := checked_4 ⟨b.val - 200, hi⟩ c
               rw [heq] at hcheck
               exact hcheck bad
-            ·               by_cases h6 : b.val < 350
-              · have hi : b.val - 300 < 50 := by omega
-                have heq : b.val - 300 + 300 = b.val := by omega
-                have hcheck := checked_6 ⟨b.val - 300, hi⟩ c
+          ·             by_cases h5 : b.val < 300
+            · have hi : b.val - 250 < 50 := by omega
+                have heq : b.val - 250 + 250 = b.val := by omega
+                have hcheck := checked_5 ⟨b.val - 250, hi⟩ c
                 rw [heq] at hcheck
                 exact hcheck bad
-              ·                 by_cases h7 : b.val < 400
-                · have hi : b.val - 350 < 50 := by omega
-                  have heq : b.val - 350 + 350 = b.val := by omega
-                  have hcheck := checked_7 ⟨b.val - 350, hi⟩ c
+            ·               by_cases h6 : b.val < 350
+              · have hi : b.val - 300 < 50 := by omega
+                  have heq : b.val - 300 + 300 = b.val := by omega
+                  have hcheck := checked_6 ⟨b.val - 300, hi⟩ c
                   rw [heq] at hcheck
                   exact hcheck bad
-                ·                   by_cases h8 : b.val < 450
-                  · have hi : b.val - 400 < 50 := by omega
-                    have heq : b.val - 400 + 400 = b.val := by omega
-                    have hcheck := checked_8 ⟨b.val - 400, hi⟩ c
+              ·                 by_cases h7 : b.val < 400
+                · have hi : b.val - 350 < 50 := by omega
+                    have heq : b.val - 350 + 350 = b.val := by omega
+                    have hcheck := checked_7 ⟨b.val - 350, hi⟩ c
                     rw [heq] at hcheck
                     exact hcheck bad
-                  ·                     by_cases h9 : b.val < 500
-                    · have hi : b.val - 450 < 50 := by omega
-                      have heq : b.val - 450 + 450 = b.val := by omega
-                      have hcheck := checked_9 ⟨b.val - 450, hi⟩ c
+                ·                   by_cases h8 : b.val < 450
+                  · have hi : b.val - 400 < 50 := by omega
+                      have heq : b.val - 400 + 400 = b.val := by omega
+                      have hcheck := checked_8 ⟨b.val - 400, hi⟩ c
                       rw [heq] at hcheck
                       exact hcheck bad
-                    ·                       by_cases h10 : b.val < 550
-                      · have hi : b.val - 500 < 50 := by omega
-                        have heq : b.val - 500 + 500 = b.val := by omega
-                        have hcheck := checked_10 ⟨b.val - 500, hi⟩ c
+                  ·                     by_cases h9 : b.val < 500
+                    · have hi : b.val - 450 < 50 := by omega
+                        have heq : b.val - 450 + 450 = b.val := by omega
+                        have hcheck := checked_9 ⟨b.val - 450, hi⟩ c
                         rw [heq] at hcheck
                         exact hcheck bad
-                      ·                         by_cases h11 : b.val < 600
-                        · have hi : b.val - 550 < 50 := by omega
-                          have heq : b.val - 550 + 550 = b.val := by omega
-                          have hcheck := checked_11 ⟨b.val - 550, hi⟩ c
+                    ·                       by_cases h10 : b.val < 550
+                      · have hi : b.val - 500 < 50 := by omega
+                          have heq : b.val - 500 + 500 = b.val := by omega
+                          have hcheck := checked_10 ⟨b.val - 500, hi⟩ c
                           rw [heq] at hcheck
                           exact hcheck bad
-                        ·                           by_cases h12 : b.val < 650
-                          · have hi : b.val - 600 < 50 := by omega
-                            have heq : b.val - 600 + 600 = b.val := by omega
-                            have hcheck := checked_12 ⟨b.val - 600, hi⟩ c
+                      ·                         by_cases h11 : b.val < 600
+                        · have hi : b.val - 550 < 50 := by omega
+                            have heq : b.val - 550 + 550 = b.val := by omega
+                            have hcheck := checked_11 ⟨b.val - 550, hi⟩ c
                             rw [heq] at hcheck
                             exact hcheck bad
-                          ·                             by_cases h13 : b.val < 700
-                            · have hi : b.val - 650 < 50 := by omega
-                              have heq : b.val - 650 + 650 = b.val := by omega
-                              have hcheck := checked_13 ⟨b.val - 650, hi⟩ c
+                        ·                           by_cases h12 : b.val < 650
+                          · have hi : b.val - 600 < 50 := by omega
+                              have heq : b.val - 600 + 600 = b.val := by omega
+                              have hcheck := checked_12 ⟨b.val - 600, hi⟩ c
                               rw [heq] at hcheck
                               exact hcheck bad
-                            ·                               by_cases h14 : b.val < 735
-                              · have hi : b.val - 700 < 35 := by omega
-                                have heq : b.val - 700 + 700 = b.val := by omega
-                                have hcheck := checked_14 ⟨b.val - 700, hi⟩ c
+                          ·                             by_cases h13 : b.val < 700
+                            · have hi : b.val - 650 < 50 := by omega
+                                have heq : b.val - 650 + 650 = b.val := by omega
+                                have hcheck := checked_13 ⟨b.val - 650, hi⟩ c
                                 rw [heq] at hcheck
                                 exact hcheck bad
+                            ·                               by_cases h14 : b.val < 735
+                              · have hi : b.val - 700 < 35 := by omega
+                                  have heq : b.val - 700 + 700 = b.val := by omega
+                                  have hcheck := checked_14 ⟨b.val - 700, hi⟩ c
+                                  rw [heq] at hcheck
+                                  exact hcheck bad
                               · have hbnd := b.isLt
-                                omega
+                                  omega
 
 theorem W_admissible : Admissible 734 W := by
   constructor
@@ -224,7 +225,10 @@ theorem add735_admissible (S : Nat → Bool)
     · subst b
       have hs294 : S 294 := by simpa [add735] using hb
       simp [h294] at hs294
-  · have ca : a ≠ 735 := by omega
+  · have hsc : c ≤ 734 := by
+      have hh := (support c hc).2
+      omega
+    have ca : a ≠ 735 := by omega
     have cb : b ≠ 735 := by omega
     have sa : S a := by simpa [add735, ca] using ha
     have sb : S b := by simpa [add735, cb] using hb
