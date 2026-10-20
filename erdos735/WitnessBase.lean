@@ -30,7 +30,7 @@ theorem W_bound (x : Nat) (hx : W x) : 0 < x ∧ x ≤ 734 := by
 
 def forbiddenPair (b c : Nat) : Prop :=
   b < c ∧ W b ∧ W c ∧
-    (b + c) ∣ b * c ∧
+    b * c % (b + c) = 0 ∧
     W (b * c / (b + c)) ∧
     b * c / (b + c) < b
 
