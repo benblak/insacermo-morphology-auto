@@ -5,3 +5,6 @@ defaultTargets = ["C3Decision12x7"]
 name = "C3"
 [[lean_lib]]
 name = "C3Decision12x7"
+
+[[lean_lib]]
+name = "C3Optimality12x7"
