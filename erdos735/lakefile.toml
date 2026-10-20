@@ -1,0 +1,13 @@
+name = "insacermo-erdos735-review"
+version = "0.1.0"
+defaultTargets = ["Extension735"]
+[[lean_lib]]
+name = "KernelIsolation"
+[[lean_lib]]
+name = "KernelEndpoints734"
+[[lean_lib]]
+name = "Plateau302"
+[[lean_lib]]
+name = "Extension734"
+[[lean_lib]]
+name = "Extension735"

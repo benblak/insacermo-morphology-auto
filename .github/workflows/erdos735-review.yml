@@ -1,0 +1,34 @@
+name: Isolated Erdős 735 Lean review
+on:
+  push:
+    branches:
+      - research/erdos735-kernel-20261020
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lean735:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: erdos735
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: "false"
+          build: "false"
+          test: "false"
+          lint: "false"
+          use-mathlib-cache: "false"
+          use-github-cache: "false"
+      - name: Compile all vendored and new Lean statements
+        run: |
+          lake env lean KernelIsolation.lean
+          lake env lean KernelEndpoints734.lean
+          lake env lean Plateau302.lean
+          lake env lean Extension734.lean
+          lake env lean Extension735.lean
+      - name: Run independent Lean checker
+        run: lake env leanchecker Extension735
