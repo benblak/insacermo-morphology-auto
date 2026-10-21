@@ -2,7 +2,7 @@ name: C3 12x7 isolated Lean audit
 on:
   push:
     branches:
-      - research/c3-12x7-optimality-20261020
+      - research/c3-original-emitter-audit-20261021
   workflow_dispatch:
 permissions:
   contents: read
@@ -29,6 +29,7 @@ jobs:
           lake build C3Optimality12x7
           lake env lean C3Decision12x7.lean
           lake env lean C3Optimality12x7.lean
+          lake env lean C3EmitterSyntax.lean
       - name: Independently check kernel
         run: |
           lake env leanchecker C3Decision12x7
