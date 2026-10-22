@@ -36,6 +36,10 @@ jobs:
       - name: Verify all 80 declared instances with Lean kernel
         run: |
           LEAN_PATH=. lean audit_memguard_20261022/All80DeclaredInstances.lean
+      - name: Verify equal-kernel DP baseline on all 80 declared instances
+        run: |
+          LEAN_PATH=. lean -o audit_memguard_20261022/All80DeclaredInstances.olean audit_memguard_20261022/All80DeclaredInstances.lean
+          LEAN_PATH=. lean audit_memguard_20261022/All80DPComparator.lean
       - name: Reject admission placeholders
         run: |
           if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' audit_memguard_20261022/*.lean; then exit 1; fi
