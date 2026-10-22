@@ -72,7 +72,7 @@ theorem eighty_models_safe (p : Bool × Nat)
     Safe (modelFor p.1 p.2) 3 3 upper (treeFor p.1 p.2) := by
   have h : instanceOK p = true := (List.all_eq_true.mp all_eighty_plans_accepted) p hp
   have hc : checkTree (modelFor p.1 p.2) 3 3 upper (treeFor p.1 p.2) = true := by
-    have := (Bool.and_eq_true.mp h).2
-    exact this
+    simp only [instanceOK, Bool.and_eq_true] at h
+    exact h.2
   exact accepted_certificate_sound _ _ _ _ _ hc
 end MemGuardC3All80
