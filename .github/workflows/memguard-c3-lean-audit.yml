@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - insacermo-memguard-c3-lean-audit-20261022
+      - insacermo-c3-dp-fairproof-20261022
   workflow_dispatch:
 permissions:
   contents: read
