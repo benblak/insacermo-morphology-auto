@@ -2,7 +2,7 @@ name: INSACERMO MemGuard C3 Lean audit
 on:
   push:
     branches:
-      - insacermo-self-audit-no-probe-20261022
+      - insacermo-sensing-intervention-audit-20261022
   workflow_dispatch:
 permissions:
   contents: read
@@ -26,6 +26,9 @@ jobs:
       - name: Verify sensorless boundary counterexample
         run: |
           LEAN_PATH=. lean audit_self_20261022/NoProbeCounterexample.lean
+      - name: Verify sensing vs intervention counterexamples
+        run: |
+          LEAN_PATH=. lean audit_self_20261022/SensingVsIntervention.lean
       - name: Verify distinct new certificate structures
         run: |
           for name in EXIT_200 EXIT_222 NO_ENTRY_200; do
