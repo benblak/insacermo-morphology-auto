@@ -33,6 +33,9 @@ jobs:
           for name in EXIT_200 EXIT_222 NO_ENTRY_200; do
             LEAN_PATH=. lean "audit_memguard_20261022/full_$name.lean"
           done
+      - name: Verify all 80 declared instances with Lean kernel
+        run: |
+          LEAN_PATH=. lean audit_memguard_20261022/All80DeclaredInstances.lean
       - name: Reject admission placeholders
         run: |
           if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' audit_memguard_20261022/*.lean; then exit 1; fi
