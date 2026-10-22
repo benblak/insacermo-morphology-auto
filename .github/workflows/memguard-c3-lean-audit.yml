@@ -25,6 +25,11 @@ jobs:
           for name in EXIT_200 EXIT_222 NO_ENTRY_200; do
             LEAN_PATH=. lean "audit_memguard_20261022/$name.lean"
           done
+      - name: Compile full certificate structures
+        run: |
+          for name in EXIT_200 EXIT_222 NO_ENTRY_200; do
+            LEAN_PATH=. lean "audit_memguard_20261022/full_$name.lean"
+          done
       - name: Reject admission placeholders
         run: |
           if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' audit_memguard_20261022/*.lean; then exit 1; fi
