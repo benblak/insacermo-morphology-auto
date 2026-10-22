@@ -1,12 +1,17 @@
 import C3.PortableExactSearchV1
 namespace MemGuardC3Audit_NO_ENTRY_200
 open PortableC3
-def m : Model := { worldCount := 4, actionCount := 2, probeCount := 3,
- good := [[true,true],[true,true],[true,true],[true,true]],
- sense := [[2,1,1,1],[1,2,1,1],[1,1,1,2]],
- nextFalse := [[0,1,2,3],[0,1,2,3],[0,1,2,3]],
- nextTrue := [[0,1,2,3],[0,1,2,3],[0,1,2,3]],
- actionCost := [0,0], probeCost := [1,1,1] }
+def m : Model := {
+  worldCount := 4
+  actionCount := 2
+  probeCount := 3
+  good := [[true,true]
+  sense := [[2,1,1,1]
+  nextFalse := [[0,1,2,3]
+  nextTrue := [[0,1,2,3]
+  actionCost := [0,0]
+  probeCost := [1,1,1]
+}
 def upper : List Nat := [0,1,2,3]
 def choice : Tree := (Tree.act 0)
 set_option maxRecDepth 8192
