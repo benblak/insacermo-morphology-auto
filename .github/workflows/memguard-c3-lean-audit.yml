@@ -1,0 +1,30 @@
+name: INSACERMO MemGuard C3 Lean audit
+on:
+  push:
+    branches:
+      - insacermo-memguard-c3-lean-audit-20261022
+  workflow_dispatch:
+jobs:
+  kernel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          test: false
+          lint: false
+          build: false
+      - name: Compile original portable C3 foundations
+        run: |
+          lean --version
+          LEAN_PATH=. lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          LEAN_PATH=. lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          LEAN_PATH=. lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Verify distinct new certificate structures
+        run: |
+          for name in EXIT_200 EXIT_222 NO_ENTRY_200; do
+            LEAN_PATH=. lean "audit_memguard_20261022/$name.lean"
+          done
+      - name: Reject admission placeholders
+        run: |
+          if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' audit_memguard_20261022/*.lean; then exit 1; fi
