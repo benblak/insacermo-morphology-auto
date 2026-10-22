@@ -4,6 +4,9 @@ on:
     branches:
       - insacermo-memguard-c3-lean-audit-20261022
   workflow_dispatch:
+permissions:
+  contents: read
+  statuses: write
 jobs:
   kernel:
     runs-on: ubuntu-latest
@@ -33,3 +36,36 @@ jobs:
       - name: Reject admission placeholders
         run: |
           if grep -R -nE '(^|[^[:alnum:]_])(sorry|admit)([^[:alnum:]_]|$)' audit_memguard_20261022/*.lean; then exit 1; fi
+      - name: Publish verifiable result to commit status API
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          AUDIT_JOB_STATUS: ${{ job.status }}
+        run: |
+          if [ "$AUDIT_JOB_STATUS" = "success" ]; then
+            AUDIT_STATE=success
+          else
+            AUDIT_STATE=failure
+          fi
+          export AUDIT_STATE
+          python3 - <<'PY'
+          import json, os, urllib.request
+          state = os.environ["AUDIT_STATE"]
+          body = {
+              "state": state,
+              "context": "insacermo/memguard-c3-lean",
+              "description": "Lean 4.33.1 certificate audit: " + state,
+              "target_url": "https://github.com/" + os.environ["GITHUB_REPOSITORY"] + "/actions/runs/" + os.environ["GITHUB_RUN_ID"],
+          }
+          url = "https://api.github.com/repos/" + os.environ["GITHUB_REPOSITORY"] + "/statuses/" + os.environ["GITHUB_SHA"]
+          req = urllib.request.Request(
+              url,
+              data=json.dumps(body).encode(),
+              headers={"Authorization": "Bearer " + os.environ["GH_TOKEN"],
+                       "Accept": "application/vnd.github+json",
+                       "Content-Type": "application/json",
+                       "X-GitHub-Api-Version": "2022-11-28"},
+              method="POST")
+          with urllib.request.urlopen(req, timeout=30) as response:
+              print("Published commit status", response.status, body["context"], state)
+          PY
