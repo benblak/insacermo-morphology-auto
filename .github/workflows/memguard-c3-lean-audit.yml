@@ -2,7 +2,7 @@ name: INSACERMO MemGuard C3 Lean audit
 on:
   push:
     branches:
-      - insacermo-memory-future-selfaudit-20261022
+      - insacermo-recoverability-epistemic-audit-20261023
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,6 +32,9 @@ jobs:
       - name: Verify exact-horizon future-memory oscillations
         run: |
           LEAN_PATH=. lean audit_self_20261022/FutureMemoryOscillation.lean
+      - name: Verify recoverability epistemic traps
+        run: |
+          LEAN_PATH=. lean audit_self_20261023/RecoverabilityVsLost.lean
       - name: Verify distinct new certificate structures
         run: |
           for name in EXIT_200 EXIT_222 NO_ENTRY_200; do
