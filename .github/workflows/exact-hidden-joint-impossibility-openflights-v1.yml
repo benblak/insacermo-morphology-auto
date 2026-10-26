@@ -1,0 +1,14 @@
+name: INSACERMO Exact Hidden Joint Impossibility OpenFlights V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  exact-hidden-joint-impossibility:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run exact unbounded hidden joint impossibility search
+        run: python3 experiments/exact_hidden_joint_impossibility_openflights_v1.py
