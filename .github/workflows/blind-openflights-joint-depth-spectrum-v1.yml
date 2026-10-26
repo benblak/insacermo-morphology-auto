@@ -1,0 +1,15 @@
+name: INSACERMO Blind OpenFlights Joint Depth Spectrum V1
+
+on:
+  pull_request:
+    paths:
+      - 'experiments/blind_openflights_joint_depth_spectrum_v1.py'
+      - '.github/workflows/blind-openflights-joint-depth-spectrum-v1.yml'
+
+jobs:
+  blind-openflights-joint-depth-spectrum:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run fixed-before-result joint depth spectrum protocol
+        run: python3 experiments/blind_openflights_joint_depth_spectrum_v1.py
