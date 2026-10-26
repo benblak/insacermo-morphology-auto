@@ -1,0 +1,25 @@
+name: INSACERMO T-cell Common Branching Horizon Audit
+
+on:
+  pull_request:
+    branches:
+      - insacermo-core-v1-20260915
+
+jobs:
+  horizon-audit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install solver stack
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install 'z3-solver>=4.13,<5'
+      - name: Download pinned T-cell differentiation Boolean model
+        run: |
+          curl -fL --retry 3 'https://raw.githubusercontent.com/amahury/OEE-metric/26172d8807fd1e0afcb8f8a4a7e9adc83295e345/code/metric_validation/tcell_diff.bnet' -o /tmp/tcell_diff.bnet
+          sha256sum /tmp/tcell_diff.bnet
+      - name: Run post-result horizon sensitivity audit
+        env:
+          INSACERMO_TCELL_BNET: /tmp/tcell_diff.bnet
+        run: |
+          python3 experiments/audit_tcell_common_branching_horizons.py
