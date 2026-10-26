@@ -1,0 +1,22 @@
+name: INSACERMO Exact T-cell Unbounded Common Branching V1
+
+on:
+  pull_request:
+    branches: [insacermo-core-v1-20260915]
+  workflow_dispatch:
+
+jobs:
+  exact-tcell-unbounded-common-branching:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install numerical stack
+        run: python3 -m pip install --upgrade pip numpy
+      - name: Download pinned T-cell differentiation Boolean model
+        run: |
+          curl -fL --retry 3 'https://raw.githubusercontent.com/amahury/OEE-metric/26172d8807fd1e0afcb8f8a4a7e9adc83295e345/code/metric_validation/tcell_diff.bnet' -o /tmp/tcell_diff.bnet
+          sha256sum /tmp/tcell_diff.bnet
+      - name: Run exact unbounded common-branching audit
+        env:
+          INSACERMO_TCELL_BNET: /tmp/tcell_diff.bnet
+        run: python3 experiments/exact_tcell_unbounded_common_branching_v1.py
