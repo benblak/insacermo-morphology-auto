@@ -43,3 +43,6 @@ name = "WitnessBlock13"
 name = "WitnessBlock14"
 [[lean_lib]]
 name = "Extension735"
+
+[[lean_lib]]
+name = "Erdos736LeanPrecheck"
