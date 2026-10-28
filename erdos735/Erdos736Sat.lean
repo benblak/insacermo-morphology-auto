@@ -1,6 +1,5 @@
 import Std.Tactic.BVDecide
 namespace Erdos736Sat
-set_option sat.timeout 120
 set_option maxHeartbeats 0
 
 def c3 (s : BitVec 3) : BitVec 3 :=
