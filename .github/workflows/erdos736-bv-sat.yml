@@ -1,0 +1,27 @@
+name: Isolated Erdős 736 bitvector SAT exploratory test
+on:
+  push:
+    branches:
+      - research/erdos736-bv-sat-20261028
+permissions:
+  contents: read
+jobs:
+  lean736-sat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: erdos735
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: "false"
+          lake-package-directory: erdos735
+          build: "false"
+          test: "false"
+          lint: "false"
+          use-mathlib-cache: "false"
+          use-github-cache: "false"
+      - name: SAT/LRAT preliminary test
+        run: lake env lean Erdos736Sat.lean
