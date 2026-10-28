@@ -26,6 +26,5 @@ jobs:
           use-github-cache: "false"
       - name: Compile original dependency and separate partial Lean check
         run: |
-          lake build
           lake env lean Erdos736LeanPrecheck.lean
           lake env leanchecker Erdos736LeanPrecheck
