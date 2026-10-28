@@ -1,0 +1,31 @@
+name: Erdős 736 isolated Lean partial precheck
+on:
+  push:
+    branches:
+      - research/erdos736-lean-precheck-20261028
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lean736-precheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: erdos735
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          auto-config: "false"
+          lake-package-directory: erdos735
+          build: "false"
+          test: "false"
+          lint: "false"
+          use-mathlib-cache: "false"
+          use-github-cache: "false"
+      - name: Compile original dependency and separate partial Lean check
+        run: |
+          lake build
+          lake env lean Erdos736LeanPrecheck.lean
+          lake env leanchecker Erdos736LeanPrecheck
