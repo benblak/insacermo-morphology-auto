@@ -1,4 +1,4 @@
-import Extension735
+import Lean
 namespace Erdos736LeanPrecheck
 -- This file is deliberately a PARTIAL audit. It does not certify f(736)=609.
 -- It verifies the exact arithmetic around the NEW endpoint 736 independently
