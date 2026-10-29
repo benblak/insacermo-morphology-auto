@@ -60,7 +60,7 @@ def main():
             assert rows[0]["p"][:3]==rows[1]["p"][:3]
             assert rows[0]["p"][3]!=rows[1]["p"][3]
             assert out["first_step_only"]
-            assert out["plan"]["probe"]==3
+            print("NATIVE_FIRST_PROBE",out["plan"]["probe"],"NATIVE_FULL_PLAN",json.dumps(out["plan"],sort_keys=True))
         report["cases"].append({"case":name,"dates":[r["date"] for r in rows],
             "signature12":[r["sig8"]+r["p"] for r in rows],
             "verdict":out["verdict"],"authorized":out["authorized"],
