@@ -1,0 +1,21 @@
+name: Rexel chronological holdout frozen native C3
+on:
+  push:
+    branches:
+      - research/rexel-c3-native-two-real-pairs-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  chrono-native:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Original frozen C3 native solve 503 train and 216 unseen day transport
+        run: PYTHONPATH=. python3 research/rexel_c3_chronological_503_216.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: REXEL_CHRONOLOGICAL_C3_NATIVE_503_216
+          path: /tmp/rexel_chrono_native_c3
+          retention-days: 90
