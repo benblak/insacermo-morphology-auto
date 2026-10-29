@@ -31,7 +31,7 @@ jobs:
       - name: Run both Rexel real witness pairs through native C3, Lean, independent replay
         env:
           LEAN_PATH: ".:lean"
-        run: python3 research/rexel_c3_two_real_pairs_20261029.py
+        run: PYTHONPATH=. python3 research/rexel_c3_two_real_pairs_20261029.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
