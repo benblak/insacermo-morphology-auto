@@ -1,0 +1,19 @@
+name: Rexel transport guarantee isolated Lean lab
+on:
+  push:
+    branches: [research/rexel-transfer-guarantee-lab-20261029]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lean-transport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify conditional transport and counterexamples in Lean
+        run: lean research/RexelTransportBoundary.lean
