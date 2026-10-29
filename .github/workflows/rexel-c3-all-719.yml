@@ -1,0 +1,23 @@
+name: Rexel 719 complete frozen C3 search comparison
+on:
+  push:
+    branches:
+      - research/rexel-c3-native-two-real-pairs-20261029
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-all:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify delivered CSV SHA256 and reuse frozen C3 solve unchanged
+        run: |
+          PYTHONPATH=. python3 research/rexel_c3_native_all_719.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: REXEL_719_NATIVE_C3_SEARCH_130_CONTRACTS
+          path: /tmp/insacermo_rexel_native_all
+          retention-days: 90
