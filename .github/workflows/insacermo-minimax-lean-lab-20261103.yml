@@ -1,0 +1,44 @@
+name: INSACERMO Minimax Lean — isolated external laboratory
+on:
+  push:
+    branches:
+      - insacermo-minimax-lean-lab-20261103
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  lean-minimax:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: labs/insacermo_minimax_20261103
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.33.1
+        run: |
+          set -euo pipefail
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+          "$HOME/.elan/bin/lean" --version
+      - name: Download Mathlib cache
+        run: |
+          set -euo pipefail
+          lake update
+          lake exe cache get
+      - name: Compile minimax theorems with kernel
+        run: |
+          set -euo pipefail
+          lake env lean INSACERMO_Minimax_Candidat.lean
+      - name: Reject placeholders
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("INSACERMO_Minimax_Candidat.lean")
+          s=p.read_text()
+          s=re.sub(r'/\-.*?\-/', '', s, flags=re.S)
+          s=re.sub(r'--[^\n]*', '', s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print("NO_PLACEHOLDERS")
+          PY
