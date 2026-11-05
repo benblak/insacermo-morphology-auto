@@ -145,8 +145,14 @@ inductive Rewrite : List Sym → List Sym → Prop where
 theorem rewrite_preserves_process {u v : List Sym} (h : Rewrite u v)
     (q : Option (List Bool)) : process q u = process q v := by
   cases h with
-  | A x y => simp [process_append, process_matchedA]
-  | B x y => simp [process_append, process_matchedB]
+  | A x y =>
+    simp only [process_append]
+    change process (process (process q x) [.openA, .closeA]) y = process (process q x) y
+    rw [process_matchedA]
+  | B x y =>
+    simp only [process_append]
+    change process (process (process q x) [.openB, .closeB]) y = process (process q x) y
+    rw [process_matchedB]
 
 theorem rewrite_preserves_acceptance {u v : List Sym} (h : Rewrite u v) :
     accepts u ↔ accepts v := by
