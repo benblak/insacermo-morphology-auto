@@ -159,9 +159,29 @@ theorem rewrite_preserves_acceptance {u v : List Sym} (h : Rewrite u v) :
   unfold accepts residual
   rw [rewrite_preserves_process h (some [])]
 
+-- Every elementary rewrite removes exactly two symbols.
+theorem rewrite_length_decreases {u v : List Sym} (h : Rewrite u v) :
+    v.length < u.length := by
+  cases h with
+  | A x y => simp [List.length_append]; omega
+  | B x y => simp [List.length_append]; omega
+
+-- Every symbolic residual state can actually be reached by a word.
+theorem every_live_state_reachable (s : List Bool) :
+    ∃ w : List Sym, residual w = some s := by
+  exact ⟨openHistory s, residual_openHistory s⟩
+
+-- No two distinct live states may be merged without changing a possible future.
+theorem live_states_minimal (s t : List Bool) :
+    futureEq (openHistory s) (openHistory t) ↔ s = t := by
+  simpa using (future_eq_iff_residual_eq (openHistory s) (openHistory t))
+
 end InsacermoLab
 
 #print axioms InsacermoLab.future_eq_iff_residual_eq
 #print axioms InsacermoLab.all_pending_stacks_distinguishable
 #print axioms InsacermoLab.rewrite_preserves_process
 #print axioms InsacermoLab.dead_histories_not_contextually_equivalent
+#print axioms InsacermoLab.rewrite_length_decreases
+#print axioms InsacermoLab.every_live_state_reachable
+#print axioms InsacermoLab.live_states_minimal
