@@ -160,3 +160,8 @@ theorem rewrite_preserves_acceptance {u v : List Sym} (h : Rewrite u v) :
   rw [rewrite_preserves_process h (some [])]
 
 end InsacermoLab
+
+#print axioms InsacermoLab.future_eq_iff_residual_eq
+#print axioms InsacermoLab.all_pending_stacks_distinguishable
+#print axioms InsacermoLab.rewrite_preserves_process
+#print axioms InsacermoLab.dead_histories_not_contextually_equivalent
