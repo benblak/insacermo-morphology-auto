@@ -72,7 +72,8 @@ theorem close_exact (s t : List Bool) :
       cases b <;> simp [closeHistory, closer, process_cons, step]
     | cons c cs =>
       cases b <;> cases c <;>
-        simp [closeHistory, closer, process_cons, step, ih, process_none]
+        simp [closeHistory, closer, process_cons, step, process_none] <;>
+        exact ih cs
 
 theorem states_separated (a b : Option (List Bool))
     (h : ∀ z : List Sym, process a z = some [] ↔ process b z = some []) : a = b := by
@@ -127,15 +128,15 @@ theorem dead_histories_same_future : futureEq [.closeA] [.closeB] := by
 
 theorem dead_histories_not_contextually_equivalent :
     accepts [.openA, .closeA] ∧ ¬ accepts [.openA, .closeB] := by
-  decide
+  simp [accepts, residual, process, step]
 
 @[simp] theorem process_matchedA (q : Option (List Bool)) :
     process q [.openA, .closeA] = q := by
-  cases q <;> rfl
+  cases q <;> simp [process, step]
 
 @[simp] theorem process_matchedB (q : Option (List Bool)) :
     process q [.openB, .closeB] = q := by
-  cases q <;> rfl
+  cases q <;> simp [process, step]
 
 inductive Rewrite : List Sym → List Sym → Prop where
   | A (u v : List Sym) : Rewrite (u ++ [.openA, .closeA] ++ v) (u ++ v)
@@ -144,8 +145,8 @@ inductive Rewrite : List Sym → List Sym → Prop where
 theorem rewrite_preserves_process {u v : List Sym} (h : Rewrite u v)
     (q : Option (List Bool)) : process q u = process q v := by
   cases h with
-  | A x y => simp [process_append]
-  | B x y => simp [process_append]
+  | A x y => simp [process_append, process_matchedA]
+  | B x y => simp [process_append, process_matchedB]
 
 theorem rewrite_preserves_acceptance {u v : List Sym} (h : Rewrite u v) :
     accepts u ↔ accepts v := by
