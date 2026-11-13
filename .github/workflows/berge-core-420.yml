@@ -27,15 +27,16 @@ jobs:
           auto-config: false
           build: true
           leanchecker: true
-          leanchecker-args: "InsacermoBergeCore"
+          leanchecker-args: "InsacermoBergeCore InsacermoProbeCriterion"
           use-mathlib-cache: false
           use-github-cache: false
       - name: Confirm exact toolchain and no admissions
         working-directory: berge_core_audit
         run: |
           lean --version
-          if grep -nE '(sorry|admit|sorryAx|native_decide)' InsacermoBergeCore.lean; then
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' InsacermoBergeCore.lean InsacermoProbeCriterion.lean; then
             echo "Unaccepted proof admission found"
             exit 1
           fi
           lake env lean InsacermoBergeCore.lean
+          lake env lean InsacermoProbeCriterion.lean
