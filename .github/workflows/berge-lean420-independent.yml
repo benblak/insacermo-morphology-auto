@@ -1,0 +1,39 @@
+name: INSACERMO Berge isolated Lean 4.20 audit
+
+on:
+  push:
+    branches:
+      - audit/berge-lean420-20261113
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: berge_lean420_audit
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: berge_lean420_audit
+          auto-config: false
+          use-mathlib-cache: true
+      - name: Confirm pinned Lean version
+        run: |
+          lean --version
+          lake --version
+      - name: Reject admitted or incomplete proofs
+        run: |
+          if grep -nE '\\b(sorry|admit|sorryAx|native_decide)\\b' InsacermoBerge.lean; then
+            echo "Forbidden admission token in source"
+            exit 1
+          fi
+      - name: Compile independent finite reconstruction
+        run: lake env lean InsacermoBerge.lean
+      - name: Independent compiled theorem artifact
+        run: |
+          lake env lean -o InsacermoBerge.olean InsacermoBerge.lean
+          test -s InsacermoBerge.olean
