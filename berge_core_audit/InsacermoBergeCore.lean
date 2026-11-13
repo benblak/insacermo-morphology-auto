@@ -43,24 +43,33 @@ theorem finite_descent
     (B : Region W) (hB : P B) :
     ∃ M : Region W, Sub M B ∧ P M ∧
       ∀ S : Region W, Strict S M → ¬ P S := by
-  have aux : ∀ n : Nat, ∀ T : Region W, rank T = n → P T →
+  have aux : ∀ fuel : Nat, ∀ T : Region W, rank T ≤ fuel → P T →
         ∃ M : Region W, Sub M T ∧ P M ∧
           ∀ S : Region W, Strict S M → ¬ P S := by
-    intro n
-    induction n using Nat.strong_induction_on with
-    | h n ih =>
-        intro T hT hPT
+    intro fuel
+    induction fuel with
+    | zero =>
+        intro T hBound hPT
         by_cases hSmaller : ∃ S : Region W, Strict S T ∧ P S
         · obtain ⟨S, hST, hPS⟩ := hSmaller
-          have hLt : rank S < n := by
-            rw [← hT]
-            exact hRank S T hST
-          obtain ⟨M, hMS, hPM, hMin⟩ := ih (rank S) hLt S rfl hPS
+          have hImpossible : rank S < 0 := Nat.lt_of_lt_of_le (hRank S T hST) hBound
+          exact False.elim (Nat.not_lt_zero _ hImpossible)
+        · refine ⟨T, sub_refl T, hPT, ?_⟩
+          intro S hST hPS
+          exact hSmaller ⟨S, hST, hPS⟩
+    | succ n ih =>
+        intro T hBound hPT
+        by_cases hSmaller : ∃ S : Region W, Strict S T ∧ P S
+        · obtain ⟨S, hST, hPS⟩ := hSmaller
+          have hLess : rank S < n + 1 :=
+            Nat.lt_of_lt_of_le (hRank S T hST) hBound
+          have hLe : rank S ≤ n := Nat.lt_succ_iff.mp hLess
+          obtain ⟨M, hMS, hPM, hMin⟩ := ih S hLe hPS
           exact ⟨M, sub_trans hMS hST.1, hPM, hMin⟩
         · refine ⟨T, sub_refl T, hPT, ?_⟩
           intro S hST hPS
           exact hSmaller ⟨S, hST, hPS⟩
-  exact aux (rank B) B rfl hB
+  exact aux (rank B) B (Nat.le_refl _) hB
 
 def Feasible (actions : List (Region W)) (B : Region W) : Prop :=
   ∃ a : Region W, a ∈ actions ∧ Sub B a
@@ -88,8 +97,7 @@ theorem new_obstruction_contains_old
     finite_descent (fun S => ¬ Feasible oldActions S) rank hRank B hOld
   refine ⟨M, hMB, ⟨hObs, ?_⟩⟩
   intro S hSM
-  by_contra hNot
-  exact hMin S hSM hNot
+  exact Classical.byContradiction (fun hNot => hMin S hSM hNot)
 
 def Fiber (B : Region W) (p : W → Bool) (r : Bool) : Region W :=
   fun x => B x ∧ p x = r
@@ -174,12 +182,14 @@ theorem minimal_hits_candidate
   obtain ⟨x, hxT, hxE⟩ := hT.1 E (List.Mem.head _)
   have hST : Sub (Add U x) T := by
     intro y hy
-    rcases hy with hUy | hxy
-    · exact hUT y hUy
-    · subst y
-      exact hxT
+    cases hy with
+    | inl hUy => exact hUT y hUy
+    | inr hxy =>
+        subst y
+        exact hxT
   have hTS : Sub T (Add U x) := by
-    by_contra hNot
+    apply Classical.byContradiction
+    intro hNot
     exact hT.2 (Add U x) ⟨hST, hNot⟩
       (hits_add H E U x hHits hxE)
   exact ⟨U, x, ⟨hHits, hMin⟩, hxE, ⟨hTS, hST⟩⟩
@@ -196,7 +206,8 @@ theorem berge_update_iff
   · intro ht
     refine ⟨minimal_hits_candidate H E T rank hRank ht, ?_⟩
     intro S hc hST
-    by_contra hNot
+    apply Classical.byContradiction
+    intro hNot
     exact ht.2 S ⟨hST, hNot⟩ (candidate_hits H E S hc)
   · intro hc
     refine ⟨candidate_hits H E T hc.1, ?_⟩
