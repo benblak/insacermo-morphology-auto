@@ -16,18 +16,19 @@ jobs:
         working-directory: berge_lean420_audit
     steps:
       - uses: actions/checkout@v4
-      - uses: leanprover/lean-action@v1
-        with:
-          lake-package-directory: berge_lean420_audit
-          auto-config: false
-          use-mathlib-cache: true
-      - name: Confirm pinned Lean version
+      - name: Install Lean 4.20.0 via elan
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Confirm Lean and resolve pinned Mathlib
         run: |
           lean --version
           lake --version
+          lake update
+          lake exe cache get
       - name: Reject admitted or incomplete proofs
         run: |
-          if grep -nE '\\b(sorry|admit|sorryAx|native_decide)\\b' InsacermoBerge.lean; then
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' InsacermoBerge.lean; then
             echo "Forbidden admission token in source"
             exit 1
           fi
