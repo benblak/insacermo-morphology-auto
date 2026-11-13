@@ -1,0 +1,27 @@
+name: INSACERMO Complete Lean Audit Package
+
+on:
+  push:
+    branches:
+      - audit/insacermo-certified-package-20261113
+  workflow_dispatch:
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Reproduce both five-world Python benchmarks
+        run: |
+          python3 berge_core_audit/five_world_probe_audit.py
+          python3 benchmarks/insacermo_etalon_renyi_ulam.py
+      - name: Create portable audit archive and check SHA256 manifest
+        run: python3 scripts/make_audit_zip.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_AUDIT_COMPLET_LEAN420_2026-11-13
+          path: dist/INSACERMO_AUDIT_COMPLET_LEAN420_2026-11-13.zip
+          if-no-files-found: error
+          retention-days: 90
