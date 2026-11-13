@@ -45,8 +45,7 @@ def count (s : Selection) : Nat :=
   (if s.2.2.1 then 1 else 0) +
   (if s.2.2.2 then 1 else 0)
 
-/-- Full 16-case verification of the exact optimum. The proof does not
-use Classical.decEq, opaque reflection, trust-me or native_decide. -/
+/-- Full 16-case verification of the exact optimum. The proof uses structural case splits and Lean's ordinary kernel evaluation. -/
 theorem exact_minimum_three :
     ∀ s : Selection, guaranteedAction s = true ↔ 3 ≤ count s := by
   intro ⟨a, b, c, d⟩
