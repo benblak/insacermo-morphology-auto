@@ -40,3 +40,6 @@ jobs:
           fi
           lake env lean InsacermoBergeCore.lean
           lake env lean InsacermoProbeCriterion.lean
+      - name: Verify finite five-world probe library independently
+        working-directory: berge_core_audit
+        run: python3 five_world_probe_audit.py
