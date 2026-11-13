@@ -27,20 +27,20 @@ def MinimalObstruction (actions : Finset (Finset W)) (B : Finset W) : Prop :=
 private theorem extract_minimal_obstruction
     (actions : Finset (Finset W)) :
     ∀ B : Finset W, Obstruction actions B →
-    ∃ M : Finset W, M ⊆ B ∧ MinimalObstruction actions M := by
+      ∃ M : Finset W, M ⊆ B ∧ MinimalObstruction actions M := by
   classical
   intro B
   apply Finset.strongInductionOn B
   intro B ih hB
   by_cases hsmaller :
-        ∃ C : Finset W, C ⊂ B ∧ Obstruction actions C
-    · obtain ⟨C, hCB, hC⟩ := hsmaller
-      obtain ⟨M, hMC, hM⟩ := ih C hCB hC
-      exact ⟨M, hMC.trans (le_of_lt hCB), hM⟩
-    · refine ⟨B, Finset.Subset.rfl, ⟨hB, ?_⟩⟩
-      intro C hCB
-      by_contra hnot
-      exact hsmaller ⟨C, hCB, hnot⟩
+      ∃ C : Finset W, C ⊂ B ∧ Obstruction actions C
+  · obtain ⟨C, hCB, hC⟩ := hsmaller
+    obtain ⟨M, hMC, hM⟩ := ih C hCB hC
+    exact ⟨M, hMC.trans (le_of_lt hCB), hM⟩
+  · refine ⟨B, Finset.Subset.rfl, ⟨hB, ?_⟩⟩
+    intro C hCB
+    by_contra hnot
+    exact hsmaller ⟨C, hCB, hnot⟩
 
 /--
 Increasing the available action regions cannot introduce a minimal obstruction
@@ -67,7 +67,7 @@ theorem old_obstruction_card_le_new
     (B : Finset W)
     (hNew : MinimalObstruction newActions B) :
     ∃ M : Finset W,
-    MinimalObstruction oldActions M ∧ M.card ≤ B.card := by
+      MinimalObstruction oldActions M ∧ M.card ≤ B.card := by
   obtain ⟨M, hsub, hmin⟩ :=
     new_obstruction_contains_old oldActions newActions hExpand B hNew
   exact ⟨M, hmin, Finset.card_le_card hsub⟩
@@ -92,7 +92,7 @@ theorem obs_feas_iff
     (B : Finset W) (p : W → Bool)
     (actions : Finset (Finset W)) :
     ObservationFeasible B p actions ↔
-    ∀ r : Bool, Feasible actions (Fiber B p r) := by
+      ∀ r : Bool, Feasible actions (Fiber B p r) := by
   classical
   constructor
   · intro h r
