@@ -40,11 +40,12 @@ private theorem extract_minimal_obstruction
       ∃ C : Finset W, C ⊂ B ∧ Obstruction actions C
   · obtain ⟨C, hCB, hC⟩ := hsmaller
     obtain ⟨M, hMC, hM⟩ := ih C hCB hC
-    exact ⟨M, hMC.trans (le_of_lt hCB), hM⟩
+    exact ⟨M, hMC.trans hCB.subset, hM⟩
   · refine ⟨B, Finset.Subset.rfl, ⟨hB, ?_⟩⟩
     intro C hCB
-    by_contra hnot
-    exact hsmaller ⟨C, hCB, hnot⟩
+    by_cases hFC : Feasible actions C
+    · exact hFC
+    · exact False.elim (hsmaller ⟨C, hCB, hFC⟩)
 
 /--
 Increasing the available action regions cannot introduce a minimal obstruction
