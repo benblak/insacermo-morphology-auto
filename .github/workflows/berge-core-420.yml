@@ -1,0 +1,41 @@
+name: INSACERMO Berge core no-Mathlib Lean 4.20
+
+on:
+  push:
+    branches:
+      - audit/berge-core-420-20261113
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pinned Lean 4.20
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install Lake manifest for clean core project
+        working-directory: berge_core_audit
+        run: lake update
+      - name: Build with kernel and run leanchecker
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: berge_core_audit
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "InsacermoBergeCore"
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Confirm exact toolchain and no admissions
+        working-directory: berge_core_audit
+        run: |
+          lean --version
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' InsacermoBergeCore.lean; then
+            echo "Unaccepted proof admission found"
+            exit 1
+          fi
+          lake env lean InsacermoBergeCore.lean
