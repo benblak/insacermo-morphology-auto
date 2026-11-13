@@ -1,6 +1,9 @@
 name = "bergeCoreAudit"
 version = "0.1.0"
-defaultTargets = ["InsacermoBergeCore"]
+defaultTargets = ["InsacermoBergeCore", "InsacermoProbeCriterion"]
 
 [[lean_lib]]
 name = "InsacermoBergeCore"
+
+[[lean_lib]]
+name = "InsacermoProbeCriterion"
