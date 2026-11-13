@@ -65,7 +65,8 @@ theorem two_never_suffice :
   | false => rfl
   | true =>
       have hthree : 3 ≤ count s := heq.mp hs
-      omega
+      have hlt : count s < 3 := Nat.lt_of_le_of_lt h (by decide : 2 < 3)
+      exact False.elim (Nat.not_le_of_gt hlt hthree)
 
 #print axioms exact_minimum_three
 #print axioms three_suffice
