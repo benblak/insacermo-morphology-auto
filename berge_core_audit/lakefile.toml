@@ -1,0 +1,6 @@
+name = "bergeCoreAudit"
+version = "0.1.0"
+defaultTargets = ["InsacermoBergeCore"]
+
+[[lean_lib]]
+name = "InsacermoBergeCore"
