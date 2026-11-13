@@ -30,7 +30,11 @@ private theorem extract_minimal_obstruction
       ∃ M : Finset W, M ⊆ B ∧ MinimalObstruction actions M := by
   classical
   intro B
-  apply Finset.strongInductionOn B
+  refine Finset.strongInductionOn
+    (p := fun S : Finset W =>
+      Obstruction actions S →
+        ∃ M : Finset W, M ⊆ S ∧ MinimalObstruction actions M)
+    B ?_
   intro B ih hB
   by_cases hsmaller :
       ∃ C : Finset W, C ⊂ B ∧ Obstruction actions C
