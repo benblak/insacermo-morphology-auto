@@ -4,3 +4,8 @@ defaultTargets = ["BlindRecurrence"]
 
 [[lean_lib]]
 name = "BlindRecurrence"
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.20.0"
