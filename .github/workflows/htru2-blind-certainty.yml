@@ -1,0 +1,32 @@
+name: INSACERMO HTRU2 Real Data — Preregistered Blind Audit
+
+on:
+  push:
+    branches:
+      - lab/htru2-blind-certainty-20261114
+  workflow_dispatch:
+
+jobs:
+  blind-real-data-audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download unchanged dataset from UCI (official source)
+        run: |
+          mkdir -p /tmp/insacermo-htru2
+          curl -fL --retry 3 --retry-delay 2 --max-time 90             https://archive.ics.uci.edu/static/public/372/htru2.zip             -o /tmp/insacermo-htru2/htru2.zip
+          unzip -l /tmp/insacermo-htru2/htru2.zip | head -30
+          sha256sum /tmp/insacermo-htru2/htru2.zip
+      - name: Compute exact train-world guarantee and blind holdout audit
+        run: |
+          python3 lab_htru2/htru2_certified_probes.py             /tmp/insacermo-htru2/htru2.zip             /tmp/insacermo-htru2/results
+      - name: Upload unmodified numerical reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HTRU2_PRE_REGISTERED_BLIND_AUDIT
+          path: /tmp/insacermo-htru2/results/
+          if-no-files-found: warn
+          retention-days: 90
