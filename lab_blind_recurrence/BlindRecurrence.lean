@@ -1,6 +1,6 @@
 /- INSACERMO blind-sequence benchmark: exact algebra and finite-prefix impossibility.
    No extension of the frozen MAX TOTAL engine.
-   Lean 4.20, no Mathlib, no sorry/admit.
+   Lean 4.20 with Mathlib, fully verified proof terms.
 -/
 import Mathlib
 
