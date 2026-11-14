@@ -1,0 +1,6 @@
+name = "blindRecurrenceAudit"
+version = "0.1.0"
+defaultTargets = ["BlindRecurrence"]
+
+[[lean_lib]]
+name = "BlindRecurrence"
