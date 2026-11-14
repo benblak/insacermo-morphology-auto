@@ -40,3 +40,17 @@ if contradictions:
 else:
     print("IMPORTANT: no conflicting exact numeric twins found here; impossibility proven only for median-binary observations")
 print("NO_TUNING_PERFORMED=TRUE")
+
+# One-sided exact Clopper-Pearson upper confidence bound from the frozen holdout,
+# assuming i.i.d. exchangeable candidates and a policy frozen before test labels.
+# It is a probability bound, NOT a logical guarantee for any unseen world.
+n=521;k=1
+def prob_at_most_one_error(p):
+    return (1-p)**n + n*p*(1-p)**(n-1)
+lo,hi=0.0,1.0
+for _ in range(90):
+    mid=(lo+hi)/2
+    if prob_at_most_one_error(mid)>0.05:lo=mid
+    else:hi=mid
+assert 0.008 < hi < 0.010
+print(f"one-sided_95pct_CP_upper_conditional_action_error={hi:.8f} (i.i.d. assumption, not certainty)")
