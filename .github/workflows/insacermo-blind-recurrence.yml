@@ -18,7 +18,9 @@ jobs:
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
       - name: Generate Lake manifest
         working-directory: lab_blind_recurrence
-        run: lake update
+        run: |
+          lake update
+          lake exe cache get
       - name: Compile exact algebra with Lean plus external checker
         uses: leanprover/lean-action@v1
         with:
