@@ -1,0 +1,35 @@
+name: INSACERMO Dry Bean seven-class blind evaluation
+on:
+  push:
+    branches:
+      - lab/insacermo-drybean-preregistered-20261114
+  workflow_dispatch:
+jobs:
+  prospective:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download official UCI Dry Bean data (after preregistration)
+        run: |
+          mkdir -p /tmp/insacermo-drybean/results
+          curl -fL --retry 3 --max-time 90 \
+            'https://archive.ics.uci.edu/static/public/602/dry+bean+dataset.zip' \
+            -o /tmp/insacermo-drybean/drybean.zip
+          unzip -l /tmp/insacermo-drybean/drybean.zip | head -30
+          sha256sum /tmp/insacermo-drybean/drybean.zip
+      - name: Freeze 7-class risk calibration and untouched holdout
+        run: |
+          python3 -m pip install --quiet scikit-learn
+          python3 lab_drybean/drybean_preregistered.py \
+            /tmp/insacermo-drybean/drybean.zip \
+            /tmp/insacermo-drybean/results/drybean_results.json
+      - name: Archive complete numerical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_DRYBEAN_SEVENCLASS_BLIND
+          path: /tmp/insacermo-drybean/results/
+          if-no-files-found: warn
+          retention-days: 90
