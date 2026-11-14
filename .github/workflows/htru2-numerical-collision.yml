@@ -1,0 +1,21 @@
+name: HTRU2 Numerical Collision Diagnostic (Posthoc)
+
+on:
+  push:
+    branches:
+      - lab/htru2-indistinguishability-lean-20261114
+  workflow_dispatch:
+
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download official HTRU2 dataset
+        run: |
+          curl -fL --retry 3 --max-time 90 https://archive.ics.uci.edu/static/public/372/htru2.zip -o /tmp/insacermo_htru2.zip
+      - name: Reproduce binary signature collision on raw numeric features and uncertainty upper bound
+        run: |
+          python3 lab_htru2/posthoc_numerical_collision_audit.py /tmp/insacermo_htru2.zip
