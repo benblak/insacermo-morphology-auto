@@ -1,0 +1,36 @@
+name: INSACERMO OPEN WORLD - frozen calibrated selective risk
+
+on:
+  push:
+    branches:
+      - lab/insacermo-openworld-20261114
+  workflow_dispatch:
+
+jobs:
+  independent-calibration:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original UCI HTRU2 and Online Shoppers
+        run: |
+          mkdir -p /tmp/insacermo-openworld/results
+          curl -fL --retry 3 --max-time 90             "https://archive.ics.uci.edu/static/public/372/htru2.zip"             -o /tmp/insacermo-openworld/htru2.zip
+          curl -fL --retry 3 --max-time 90             "https://archive.ics.uci.edu/static/public/468/online+shoppers+purchasing+intention+dataset.zip"             -o /tmp/insacermo-openworld/shoppers.zip
+          sha256sum /tmp/insacermo-openworld/htru2.zip /tmp/insacermo-openworld/shoppers.zip
+          unzip -l /tmp/insacermo-openworld/shoppers.zip | head -40
+      - name: Evaluate preregistered HTRU2 without tuning on test
+        run: |
+          python3 lab_openworld/openworld_calibrated.py htru2             /tmp/insacermo-openworld/htru2.zip             /tmp/insacermo-openworld/results/htru2_openworld.json
+      - name: Evaluate preregistered Online Shoppers without tuning on test
+        run: |
+          python3 lab_openworld/openworld_calibrated.py shoppers             /tmp/insacermo-openworld/shoppers.zip             /tmp/insacermo-openworld/results/shoppers_openworld.json
+      - name: Archive full calibration records
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPENWORLD_CALIBRATED_REAL_DATA
+          path: /tmp/insacermo-openworld/results/
+          if-no-files-found: warn
+          retention-days: 90
