@@ -1,0 +1,6 @@
+name = "htru2BarrierLean"
+version = "0.1.0"
+defaultTargets = ["InsacermoIndistinguishability"]
+
+[[lean_lib]]
+name = "InsacermoIndistinguishability"
