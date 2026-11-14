@@ -25,6 +25,11 @@ jobs:
           python3 lab_drybean/drybean_preregistered.py \
             /tmp/insacermo-drybean/drybean.zip \
             /tmp/insacermo-drybean/results/drybean_results.json
+      - name: Independently audit all 17 exact intervals and 7-class counts
+        run: |
+          python3 lab_drybean/independent_audit.py \
+            /tmp/insacermo-drybean/results/drybean_results.json \
+            | tee /tmp/insacermo-drybean/results/INDEPENDENT_AUDIT.txt
       - name: Archive complete numerical evidence
         if: always()
         uses: actions/upload-artifact@v4
