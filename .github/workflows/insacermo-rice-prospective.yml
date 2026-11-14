@@ -28,6 +28,13 @@ jobs:
           python3 lab_rice/independent_audit.py \
             /tmp/insacermo-rice/results/rice_results.json \
             | tee /tmp/insacermo-rice/results/INDEPENDENT_AUDIT.txt
+      - name: Exploratory posthoc logistic ML benchmark with same calibration
+        run: |
+          python3 -m pip install --quiet scikit-learn
+          python3 lab_rice/exploratory_logistic_baseline.py \
+            /tmp/insacermo-rice/rice.zip \
+            /tmp/insacermo-rice/results/EXPLORATORY_LOGISTIC.json \
+            | tee /tmp/insacermo-rice/results/EXPLORATORY_LOGISTIC_LOG.txt
       - name: Upload full honest result
         if: always()
         uses: actions/upload-artifact@v4
