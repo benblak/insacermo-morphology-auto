@@ -1,6 +1,6 @@
 name = "insacermoOneExperiment"
 version = "0.1.0"
-defaultTargets = ["OneExperiment"]
+defaultTargets = ["OneExperiment", "MaxUnknownRadius"]
 
 [[require]]
 name = "mathlib"
@@ -9,3 +9,6 @@ rev = "v4.20.0"
 
 [[lean_lib]]
 name = "OneExperiment"
+
+[[lean_lib]]
+name = "MaxUnknownRadius"
