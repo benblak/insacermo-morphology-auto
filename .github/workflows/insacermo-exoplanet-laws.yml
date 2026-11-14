@@ -1,0 +1,45 @@
+name: INSACERMO NASA Exoplanet Law - preregistered data audit
+
+on:
+  push:
+    branches:
+      - lab/exoplanet-law-synthesis-20261114
+  workflow_dispatch:
+
+jobs:
+  law-search:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch NASA Exoplanet Archive PS default records
+        run: |
+          mkdir -p /tmp/insacermo-exoplanets/results
+          python3 - <<'PY'
+          from urllib.parse import urlencode
+          from urllib.request import urlopen, Request
+          from pathlib import Path
+          fields="pl_name,hostname,discoverymethod,pl_orbper,pl_orbsmax,st_mass,pl_orbpererr1,pl_orbpererr2,pl_orbsmaxerr1,pl_orbsmaxerr2,st_masserr1,st_masserr2"
+          query=f"select {fields} from ps where default_flag=1 and pl_orbper is not null and pl_orbsmax is not null and st_mass is not null"
+          url="https://exoplanetarchive.ipac.caltech.edu/TAP/sync?"+urlencode({"query":query,"format":"csv"})
+          data=urlopen(Request(url,headers={"User-Agent":"INSACERMO-independent-scientific-audit/1.0"}),timeout=100).read()
+          assert len(data)>1000, ("Unexpected TAP response",len(data),data[:200])
+          Path("/tmp/insacermo-exoplanets/nasa_ps.csv").write_bytes(data)
+          print("NASA API bytes",len(data))
+          print("First 300 bytes",data[:300])
+          PY
+          sha256sum /tmp/insacermo-exoplanets/nasa_ps.csv
+      - name: Discover and refute physical law candidates on independent hosts
+        run: |
+          python3 lab_exoplanets/exoplanet_law.py \
+            /tmp/insacermo-exoplanets/nasa_ps.csv \
+            /tmp/insacermo-exoplanets/results
+      - name: Publish complete numerical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_NASA_EXOPLANET_LAW_AUDIT
+          path: /tmp/insacermo-exoplanets/results/
+          if-no-files-found: warn
+          retention-days: 90
