@@ -1,0 +1,33 @@
+name: INSACERMO Rice real-domain prospective calibrated test
+
+on:
+  push:
+    branches:
+      - lab/insacermo-rice-prospective-20261114
+  workflow_dispatch:
+
+jobs:
+  rice-audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch original UCI Rice
+        run: |
+          mkdir -p /tmp/insacermo-rice/results
+          curl -fL --retry 3 --max-time 90             'https://archive.ics.uci.edu/static/public/545/rice+cammeo+and+osmancik.zip'             -o /tmp/insacermo-rice/rice.zip
+          unzip -l /tmp/insacermo-rice/rice.zip | head -30
+          sha256sum /tmp/insacermo-rice/rice.zip
+      - name: Freeze calibration and test on real rice data
+        run: |
+          python3 -m pip install --quiet openpyxl
+          python3 lab_rice/prospective_rice.py             /tmp/insacermo-rice/rice.zip             /tmp/insacermo-rice/results/rice_results.json
+      - name: Upload full honest result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_RICE_CALIBRATED_12_POLICY_AUDIT
+          path: /tmp/insacermo-rice/results/
+          if-no-files-found: warn
+          retention-days: 90
