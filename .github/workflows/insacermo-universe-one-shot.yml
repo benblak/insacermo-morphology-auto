@@ -1,0 +1,39 @@
+name: INSACERMO single experiment finite universe — Lean verified
+
+on:
+  push:
+    branches:
+      - lab/insacermo-universe-one-shot-20261114
+  workflow_dispatch:
+
+jobs:
+  exact:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Install pinned mathlib cache
+        working-directory: universe_lab
+        run: |
+          lake update
+          lake exe cache get
+      - name: Build and run lean4checker
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: universe_lab
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "OneExperiment"
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Reject unproved statements
+        working-directory: universe_lab
+        run: |
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' OneExperiment.lean; then exit 1; fi
+          lake env lean OneExperiment.lean
