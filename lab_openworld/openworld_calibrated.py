@@ -69,7 +69,7 @@ def load(which,location):
         raw=z.read(matches[0]).decode("utf-8-sig")
     X=[]; y=[]
     if which=="htru2":
-        for record in csv.reader(io.StringIO(raw)):
+        for record in csv.reader(raw.splitlines()):
             if not record:continue
             X.append(tuple(float(t) for t in record[:8]))
             y.append(int(record[8]))
