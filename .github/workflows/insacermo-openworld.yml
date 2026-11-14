@@ -26,6 +26,12 @@ jobs:
       - name: Evaluate preregistered Online Shoppers without tuning on test
         run: |
           python3 lab_openworld/openworld_calibrated.py shoppers             /tmp/insacermo-openworld/shoppers.zip             /tmp/insacermo-openworld/results/shoppers_openworld.json
+      - name: Independent binomial bounds and frozen-selection audit
+        run: |
+          python3 lab_openworld/independent_results_audit.py \
+            /tmp/insacermo-openworld/results/htru2_openworld.json \
+            /tmp/insacermo-openworld/results/shoppers_openworld.json \
+            | tee /tmp/insacermo-openworld/results/INDEPENDENT_AUDIT_LOG.txt
       - name: Archive full calibration records
         if: always()
         uses: actions/upload-artifact@v4
