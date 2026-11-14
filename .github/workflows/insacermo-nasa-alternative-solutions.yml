@@ -54,6 +54,12 @@ jobs:
             /tmp/insacermo-alternatives/default_ps.csv \
             /tmp/insacermo-alternatives/alternative_ps.csv \
             /tmp/insacermo-alternatives/results
+      - name: Produce conditional Kepler-compatible minimal repair witness for all 45
+        run: |
+          python3 lab_alternative_ps/conditional_repair_certificates.py \
+            /tmp/insacermo-alternatives/default_ps.csv \
+            /tmp/insacermo-alternatives/results/alternative_solutions_audit.json \
+            /tmp/insacermo-alternatives/results
       - name: Upload full traceable alternative-solutions evidence
         if: always()
         uses: actions/upload-artifact@v4
