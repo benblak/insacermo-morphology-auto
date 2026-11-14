@@ -23,6 +23,11 @@ jobs:
         run: |
           python3 -m pip install --quiet openpyxl
           python3 lab_rice/prospective_rice.py             /tmp/insacermo-rice/rice.zip             /tmp/insacermo-rice/results/rice_results.json
+      - name: Independent exact-binomial interval and selection audit
+        run: |
+          python3 lab_rice/independent_audit.py \
+            /tmp/insacermo-rice/results/rice_results.json \
+            | tee /tmp/insacermo-rice/results/INDEPENDENT_AUDIT.txt
       - name: Upload full honest result
         if: always()
         uses: actions/upload-artifact@v4
