@@ -14,7 +14,16 @@ import numpy as np
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
-from independent_audit import cp_upper
+from prospective_rice import cdf_le
+
+def cp_upper(n,k,alpha):
+    if n==0 or k==n:return 1.0
+    lo=0.0;hi=1.0
+    for _ in range(70):
+        mid=(lo+hi)/2
+        if cdf_le(k,n,mid)>alpha:lo=mid
+        else:hi=mid
+    return (lo+hi)/2
 from prospective_rice import load
 
 def main():
