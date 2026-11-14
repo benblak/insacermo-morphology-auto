@@ -58,7 +58,7 @@ def main():
              training_count=len(train),calibration_count=len(cal),test_count=len(test),
              thresholds=thresholds,calibration=cals,chosen=choice,holdout=hold,
              limitation="not preregistered; comparator chosen after seeing primary results; not an independent future dataset")
-    Path(sys.argv[2]).write_text(json.dumps(out,indent=2)+"\n")
+    Path(sys.argv[2]).write_text(json.dumps(out,indent=2,default=lambda x: x.item() if hasattr(x, 'item') else str(x))+"\n")
     print("POSTHOC_LOGISTIC_NOT_CONFIRMATORY")
     for c in cals:
         print("CAL threshold",c["threshold"],"acted",c["result"]["acted"],
