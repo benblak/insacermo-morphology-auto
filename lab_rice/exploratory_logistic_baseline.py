@@ -64,6 +64,6 @@ def main():
         print("CAL threshold",c["threshold"],"acted",c["result"]["acted"],
               "errors",c["result"]["errors"],"upper",round(c["cp_upper"],6),
               "eligible",c["eligible"])
-    print("LOGISTIC_SELECTED",choice,"TEST",json.dumps(hold))
+    print("LOGISTIC_SELECTED",choice,"TEST",json.dumps(hold,default=lambda x: x.item() if hasattr(x, "item") else str(x)))
 if __name__=="__main__":
     main()
