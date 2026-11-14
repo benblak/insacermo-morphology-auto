@@ -40,6 +40,11 @@ jobs:
           python3 lab_exoplanets/posthoc_circularity_audit.py \
             /tmp/insacermo-exoplanets/nasa_ps.csv \
             /tmp/insacermo-exoplanets/results/posthoc_circularity.json
+      - name: Export all numerical witnesses for 1-sigma disjoint NASA entries
+        run: |
+          python3 lab_exoplanets/flagged_cases.py \
+            /tmp/insacermo-exoplanets/nasa_ps.csv \
+            /tmp/insacermo-exoplanets/results
       - name: Publish complete numerical evidence
         if: always()
         uses: actions/upload-artifact@v4
