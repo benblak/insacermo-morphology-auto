@@ -58,13 +58,22 @@ def pattern (i : Fin 8) : Nat :=
       (if seedBit (i.val + 1) then 1 else 0)
 
 def observedPattern (i : Fin 8) : Fin 8 :=
-  Fin.ofNat 8 (pattern i)
+  ⟨(pattern i) % 8, Nat.mod_lt _ (by decide)⟩
 
 /-- Machine-checked fact: this single 8-cell experiment contains
     all eight 3-bit neighborhoods (each exactly once). -/
 theorem seed_covers_all_patterns :
     Function.Surjective observedPattern := by
-  decide
+  intro x
+  fin_cases x
+  · exact ⟨1, by decide⟩
+  · exact ⟨2, by decide⟩
+  · exact ⟨3, by decide⟩
+  · exact ⟨5, by decide⟩
+  · exact ⟨0, by decide⟩
+  · exact ⟨4, by decide⟩
+  · exact ⟨7, by decide⟩
+  · exact ⟨6, by decide⟩
 
 /-- Consequence: all 256 radius-one Boolean laws are uniquely identified
     from their simultaneous response to this eight-cell seed. -/
