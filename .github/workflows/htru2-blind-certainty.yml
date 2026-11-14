@@ -22,6 +22,10 @@ jobs:
       - name: Compute exact train-world guarantee and blind holdout audit
         run: |
           python3 lab_htru2/htru2_certified_probes.py             /tmp/insacermo-htru2/htru2.zip             /tmp/insacermo-htru2/results
+      - name: Independent posthoc audit of all 8! fixed orders and failure cases
+        run: |
+          python3 lab_htru2/posthoc_independent_audit.py /tmp/insacermo-htru2/results/htru2_results.json \
+            | tee /tmp/insacermo-htru2/results/POSTHOC_INDEPENDENT_AUDIT.txt
       - name: Upload unmodified numerical reports
         if: always()
         uses: actions/upload-artifact@v4
