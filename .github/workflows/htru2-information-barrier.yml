@@ -1,0 +1,41 @@
+name: INSACERMO HTRU2 Information Barrier Lean 4.20
+
+on:
+  push:
+    branches:
+      - lab/htru2-indistinguishability-lean-20261114
+  workflow_dispatch:
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.20.0
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Generate Lake manifest
+        working-directory: htru2_barrier_lean
+        run: lake update
+      - name: Compile with Lean and independent checker
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: htru2_barrier_lean
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "InsacermoIndistinguishability"
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Check proof tokens and inspect axioms
+        working-directory: htru2_barrier_lean
+        run: |
+          lean --version
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' InsacermoIndistinguishability.lean; then
+            echo "Forbidden token detected"
+            exit 1
+          fi
+          lake env lean InsacermoIndistinguishability.lean
