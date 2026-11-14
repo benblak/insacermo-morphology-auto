@@ -35,6 +35,11 @@ jobs:
           python3 lab_exoplanets/exoplanet_law.py \
             /tmp/insacermo-exoplanets/nasa_ps.csv \
             /tmp/insacermo-exoplanets/results
+      - name: Audit circularity signals by discovery technique and inspect anomalies
+        run: |
+          python3 lab_exoplanets/posthoc_circularity_audit.py \
+            /tmp/insacermo-exoplanets/nasa_ps.csv \
+            /tmp/insacermo-exoplanets/results/posthoc_circularity.json
       - name: Publish complete numerical evidence
         if: always()
         uses: actions/upload-artifact@v4
