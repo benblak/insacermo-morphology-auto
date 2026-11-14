@@ -1,0 +1,44 @@
+name: INSACERMO unknown-radius information limit — Lean independent checker
+on:
+  push:
+    branches:
+      - lab/max-unknown-radius-20261114
+  workflow_dispatch:
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.20.0
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Restore fixed Mathlib cache
+        working-directory: universe_lab
+        run: |
+          lake update
+          lake exe cache get
+      - name: Kernel-check all theorems and independent Lean checker
+        run: |
+          cd universe_lab
+          lake env lean -o MaxUnknownRadius.olean MaxUnknownRadius.lean
+          test -s MaxUnknownRadius.olean
+      - name: Inspect axioms and no admitted proofs
+        working-directory: universe_lab
+        run: |
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' MaxUnknownRadius.lean; then
+            exit 1
+          fi
+          lake env lean MaxUnknownRadius.lean
+      - name: Independent Lean checker of all kernel declarations
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: universe_lab
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "MaxUnknownRadius"
+          use-mathlib-cache: false
+          use-github-cache: false
