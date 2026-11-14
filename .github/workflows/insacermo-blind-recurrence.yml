@@ -1,0 +1,53 @@
+name: INSACERMO blind math recurrence — sealed 6 case audit + Lean
+
+on:
+  push:
+    branches:
+      - lab/insacermo-blind-recurrence-20261114
+  workflow_dispatch:
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install exact SymPy
+        run: python3 -m pip install --quiet 'sympy==1.14.0'
+      - name: Blind solver sees ONLY input, never oracle
+        run: |
+          python3 lab_blind_recurrence/02_solver.py \
+            lab_blind_recurrence/blind_input.json \
+            /tmp/blind_solver_output.json
+      - name: Compare sealed future and symbolic proof
+        run: |
+          cp /tmp/blind_solver_output.json lab_blind_recurrence/solver_output.json
+          python3 lab_blind_recurrence/03_independent_judge.py \
+            /tmp/blind_solver_output.json
+          cmp /tmp/blind_solver_output.json lab_blind_recurrence/solver_output.json
+      - name: Install Lean 4.20
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile exact algebra with Lean plus external checker
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: lab_blind_recurrence
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "BlindRecurrence"
+          use-mathlib-cache: false
+          use-github-cache: false
+      - name: Reject holes, inspect axioms
+        working-directory: lab_blind_recurrence
+        run: |
+          if grep -nE '(sorry|admit|sorryAx|native_decide)' BlindRecurrence.lean; then exit 1; fi
+          lake env lean BlindRecurrence.lean
+      - name: Upload results and sources
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_MATHS_BLIND_6_CASES
+          path: lab_blind_recurrence/
+          if-no-files-found: warn
