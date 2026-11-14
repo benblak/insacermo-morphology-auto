@@ -83,7 +83,7 @@ theorem no_set_of_probes_can_separate
   have hSame : (fun i => probes i x) = (fun i => probes i y) := by
     funext i
     exact equal_every_probe i
-  exact no_two_correct (fun i : I => probes i) label classifier x y hSame different
+  exact no_two_correct (fun w : W => fun i : I => probes i w) label classifier x y hSame different
 
 #print axioms deterministic_same_prediction
 #print axioms no_two_correct
