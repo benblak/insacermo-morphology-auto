@@ -47,7 +47,7 @@ theorem no_two_correct
 /-- Certified refusal is necessary for a classifier required to be correct
 on EVERY possible world, when two worlds are observationally indistinguishable. -/
 theorem safe_must_refuse
-    (act : O → Option Bool) (hSafe : AlwaysSafe observe label)
+    (act : O → Option Bool) (hSafe : AlwaysSafe observe label act)
     (x y : W)
     (same : observe x = observe y)
     (different : label x ≠ label y) :
@@ -61,7 +61,7 @@ theorem safe_must_refuse
 
 /-- The same refusal is forced at the other world. -/
 theorem safe_must_refuse_both
-    (act : O → Option Bool) (hSafe : AlwaysSafe observe label)
+    (act : O → Option Bool) (hSafe : AlwaysSafe observe label act)
     (x y : W)
     (same : observe x = observe y)
     (different : label x ≠ label y) :
@@ -72,7 +72,7 @@ theorem safe_must_refuse_both
 /-- Having a collection of additional probes does not help when each probe
 returns exactly the same value in both worlds. -/
 theorem no_set_of_probes_can_separate
-    {I : Type*} (probes : I → W → Bool)
+    {I : Type v} (probes : I → W → Bool)
     (x y : W)
     (equal_every_probe : ∀ i : I, probes i x = probes i y)
     (different : label x ≠ label y) :
