@@ -2,7 +2,7 @@
    No extension of the frozen MAX TOTAL engine.
    Lean 4.20, no Mathlib, no sorry/admit.
 -/
-import Init
+import Mathlib
 
 namespace BlindRecurrence
 
@@ -13,11 +13,8 @@ def Q (A B u v : Int) : Int := v*v - A*u*v - B*u*u
 
 theorem quadratic_step (A B u v : Int) :
     Q A B v (A*v + B*u) = (-B)*Q A B u v := by
-  simp only [Q, sub_eq_add_neg, mul_add, add_mul]
-  -- After multiplication has been distributed, all monomials are
-  -- identical up to commutativity; linear normalization finishes.
-  simp only [mul_assoc, mul_left_comm, mul_comm]
-  omega
+  dsimp [Q]
+  ring
 
 /-- A prediction using only a fixed observed prefix cannot be correct
 for both of two sequences with that same prefix and different next values. -/
