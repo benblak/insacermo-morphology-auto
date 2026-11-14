@@ -1,0 +1,64 @@
+name: INSACERMO NASA Alternative Solutions - Frozen 45 Flags
+
+on:
+  push:
+    branches:
+      - lab/nasa-exoplanet-alternative-solution-audit-20261114
+  workflow_dispatch:
+
+jobs:
+  alternative-solutions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download original NASA default solutions and alternatives for FROZEN flagged planets
+        run: |
+          mkdir -p /tmp/insacermo-alternatives/results
+          python3 - <<'PY'
+          from urllib.parse import urlencode
+          from urllib.request import urlopen,Request
+          from pathlib import Path
+          import csv,io,hashlib
+          fields="pl_name,hostname,discoverymethod,pl_orbper,pl_orbsmax,st_mass,pl_orbpererr1,pl_orbpererr2,pl_orbsmaxerr1,pl_orbsmaxerr2,st_masserr1,st_masserr2"
+          base="select "+fields+" from ps where default_flag=1 and pl_orbper is not null and pl_orbsmax is not null and st_mass is not null"
+          def download(query):
+              url="https://exoplanetarchive.ipac.caltech.edu/TAP/sync?"+urlencode({"query":query,"format":"csv"})
+              data=urlopen(Request(url,headers={"User-Agent":"INSACERMO-frozen-reference-audit/1.0"}),timeout=110).read()
+              assert len(data)>100,repr(data[:100])
+              return data
+          raw=download(base)
+          dest=Path("/tmp/insacermo-alternatives/default_ps.csv")
+          dest.write_bytes(raw)
+          print("DEFAULT_SHA",hashlib.sha256(raw).hexdigest())
+          # Fail rather than silently re-benchmark on a changed catalogue snapshot.
+          assert hashlib.sha256(raw).hexdigest()=="d3a1e8be5b13b64a407b53b56fe3633a762dcb9ec0d49d0cfcafbbb12cc0094a", "NASA catalogue changed; freeze original CSV first, do not reinterpret old 45 flags"
+          from sys import path
+          path.insert(0,"lab_exoplanets")
+          from exoplanet_law import filter_data,interval
+          rows,info=filter_data(dest)
+          flags=[r["pl_name"] for r in rows if r["split"]=="test" and (v:=interval(r)) is not None and not (v[0]<=1<=v[1])]
+          assert len(flags)==45,(len(flags),flags)
+          names=",".join("'"+v.replace("'","''")+"'" for v in flags)
+          alt_fields=fields+",default_flag,pl_refname"
+          query=f"select {alt_fields} from ps where pl_name in ({names})"
+          alt=download(query)
+          Path("/tmp/insacermo-alternatives/alternative_ps.csv").write_bytes(alt)
+          print("ALTERNATIVE_BYTES",len(alt),"ALTERNATIVE_SHA",hashlib.sha256(alt).hexdigest())
+          print("ALTERNATIVE_ROWS",len(list(csv.DictReader(io.StringIO(alt.decode("utf-8-sig"))))))
+          PY
+      - name: Audit all 45 originally flagged planets against complete alternatives
+        run: |
+          python3 lab_alternative_ps/audit_alternative_solutions.py \
+            /tmp/insacermo-alternatives/default_ps.csv \
+            /tmp/insacermo-alternatives/alternative_ps.csv \
+            /tmp/insacermo-alternatives/results
+      - name: Upload full traceable alternative-solutions evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_NASA_45_FLAGGED_ALTERNATIVE_REFERENCES
+          path: /tmp/insacermo-alternatives/results/
+          if-no-files-found: warn
+          retention-days: 90
