@@ -1,0 +1,57 @@
+name: INSACERMO Concrete Recipe-Heldout 24-Query C3 Lean
+on:
+  push:
+    branches:
+      - lab/c3-concrete-heldout-mixtures-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  measured-concrete:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure historical C3 source unchanged
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/concrete_24_queries_c3.py
+      - name: Install numpy and Lean 4.33.1
+        run: |
+          python3 -m pip install numpy
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 verification kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Physical concrete independent formulation test and C3 proof
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/concrete_24_queries_c3.py /tmp/insacermo_concrete
+      - name: Verify fixed budget holdout and receipts
+        run: |
+          python3 - <<'PY'
+          import json,math
+          from pathlib import Path
+          p=Path("/tmp/insacermo_concrete")
+          r=json.loads((p/"report.json").read_text())
+          assert r["total_rows"]==1030
+          assert r["heldout_rows"]>=150
+          assert r["observed_target_budget"]==24
+          assert r["C3"]["certificates_replayed"]==6
+          assert len(list(p.rglob("receipt.json")))==6
+          assert math.isfinite(r["active_holdout"]["mae_mpa"])
+          print("INSACERMO_CONCRETE_PRECOMMITTED_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_REAL_CONCRETE_24_QUERY_6_LEAN_AUDIT
+          path: /tmp/insacermo_concrete/
+          retention-days: 90
