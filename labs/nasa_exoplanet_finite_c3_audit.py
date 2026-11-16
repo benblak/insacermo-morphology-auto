@@ -117,8 +117,12 @@ def run(root):
     # Valid ACT for 8 strictly reliable planets, but only under declared
     # eight-row world set: not a universal claim about exoplanets.
     folder2=root/"C3_Lean_receipts"/"eight_good_world_act"
-    good_more=sorted((x for x in test if x["safe"]),key=lambda r:(r["relative_error"],r["name"]))[:8]
-    assert len({r["host"] for r in good_more})==8, "CHOOSE_DIFFERENT_STARS"
+    good_more=[]; selected_hosts=set()
+    for x in sorted((x for x in test if x["safe"]),key=lambda r:(r["relative_error"],r["name"])):
+        if x["host"] in selected_hosts:continue
+        good_more.append(x);selected_hosts.add(x["host"])
+        if len(good_more)==8:break
+    assert len(good_more)==8, "INSUFFICIENT_DISTINCT_HOSTS"
     act=decide(c3_contract(good_more),folder2)
     assert act["verdict"]=="ACT" and act["authorized"] and replay(folder2)
     # Negative controls
