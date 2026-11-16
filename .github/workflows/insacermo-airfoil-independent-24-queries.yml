@@ -1,0 +1,56 @@
+name: INSACERMO NASA Airfoil 24 Queries Lean C3
+on:
+  push:
+    branches:
+      - lab/c3-nasa-airfoil-independent-measurements-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  acoustic-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Frozen C3 unchanged and standalone lab syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/airfoil_24_query_blind_c3.py
+      - name: Install numerical tools and original Lean
+        run: |
+          python3 -m pip install numpy
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile historical C3 portable verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run full measured NASA airfoil experiment and Lean
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/airfoil_24_query_blind_c3.py /tmp/insacermo_airfoil
+      - name: Check sample and certificate totals
+        run: |
+          python3 - <<'PY'
+          import json,math
+          from pathlib import Path
+          p=Path("/tmp/insacermo_airfoil")
+          s=json.loads((p/"report.json").read_text())
+          assert (s["n_total"],s["n_train_pool"],s["n_heldout"])==(1503,1038,465)
+          assert s["budget_acoustic_target_queries"]==24
+          assert s["C3"]["Lean_receipts"]==6
+          assert len(list(p.rglob("receipt.json")))==6
+          assert math.isfinite(s["active_heldout"]["mae_db"])
+          print("REAL_NASA_AIRFOIL_BOUNDED_QUERY_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_NASA_AIRFOIL_24_MEASUREMENTS_6_LEAN_CERTS
+          path: /tmp/insacermo_airfoil/
+          retention-days: 90
