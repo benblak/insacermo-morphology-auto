@@ -1,0 +1,55 @@
+name: INSACERMO Frozen C3 Open World Falsification
+on:
+  push:
+    branches:
+      - lab/c3-open-world-autofalsification-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical unchanged engine and client
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile insacermo_one_engine.py labs/unknown_oracle_query_only.py labs/open_world_autofalsification_c3.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile frozen C3 verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run blind oracle campaign plus original C3 Lean decisions
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/open_world_autofalsification_c3.py /tmp/insacermo_open_world
+      - name: Independent output and proof counts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/insacermo_open_world")
+          s=json.loads((p/"audit.json").read_text())
+          assert [r.get("counterexamples_count") for r in s["cases"]]==[0,1,2,None]
+          assert s["cases"][-1]["outcome"]=="REFUSE_NONSTATIONARY_DATA"
+          assert s["c3"]["lean_replayed_contracts"]==3
+          assert len(list(p.rglob("receipt.json")))==3
+          assert len(list(p.rglob("C3Decision.lean")))==3
+          print("OPEN_WORLD_C3_AUDIT_VALIDATED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPEN_WORLD_SYNTHESIS_FALSIFICATION_LEAN
+          path: /tmp/insacermo_open_world/
+          retention-days: 90
