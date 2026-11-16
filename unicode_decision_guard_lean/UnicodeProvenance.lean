@@ -67,7 +67,6 @@ theorem authorized_decision_sound (p : Packet) (trusted : Bool) (a t : Nat)
   split at h <;> try simp_all
   split at h <;> try simp_all
   split at h <;> try simp_all
-  simp_all
 
 theorem lossy_view_forces_refusal
     {W O : Type} (observe : W → O) (actual : W → Bool)
