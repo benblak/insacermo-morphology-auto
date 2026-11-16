@@ -1,0 +1,54 @@
+name: INSACERMO Frozen C3 Three Domain Lean E2E
+on:
+  push:
+    branches:
+      - lab/c3-frozen-engine-three-domains-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  three-domains:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify unmodified historical engine and Python syntax
+        run: |
+          python3 -m py_compile insacermo_one_engine.py labs/three_domains_frozen_c3_audit.py
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+      - name: Install Lean 4.33.1 historical toolchain
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unmodified portable verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Fifteen historical runtime calls, certificates and independent replays
+        env:
+          LEAN_PATH: ".:lean"
+        run: python3 labs/three_domains_frozen_c3_audit.py /tmp/insacermo_three_domains
+      - name: Check exact summary and artifact counts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/insacermo_three_domains')
+          v=json.loads((p/'audit.json').read_text())
+          assert v['all_certificates_replayed']
+          assert len(v['domains'])==3
+          assert all(len(x['cases'])==5 for x in v['domains'].values())
+          assert len(list(p.rglob('C3Decision.lean')))==15
+          assert len(list(p.rglob('receipt.json')))==15
+          assert len(v['negative_controls'])==4
+          print('FROZEN_C3_THREE_DOMAINS: PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_FROZEN_C3_THREE_DOMAINS_15_LEAN_CERTS
+          path: /tmp/insacermo_three_domains/
+          retention-days: 90
