@@ -81,8 +81,15 @@ theorem file_refusal (act : String → Option Bool)
 theorem money_cannot_guess (classifier : Nat → Bool) :
     ¬ (classifier (moneyObserved .below) = moneyTruth .below ∧
        classifier (moneyObserved .above) = moneyTruth .above) := by
-  exact no_two_correct moneyObserved moneyTruth classifier
-    .below .above money_observation_collision money_truth_opposite
+  intro h
+  have hSame : classifier (moneyObserved .below) =
+      classifier (moneyObserved .above) :=
+    congrArg classifier money_observation_collision
+  apply money_truth_opposite
+  calc
+    moneyTruth .below = classifier (moneyObserved .below) := h.1.symm
+    _ = classifier (moneyObserved .above) := hSame
+    _ = moneyTruth .above := h.2
 
 #print axioms shared_refusal_rule
 #print axioms unicode_refusal
