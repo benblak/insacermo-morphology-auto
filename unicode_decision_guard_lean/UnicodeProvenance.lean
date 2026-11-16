@@ -62,11 +62,7 @@ theorem authorized_decision_sound (p : Packet) (trusted : Bool) (a t : Nat)
     (h : authorizedDecision p trusted a t consumed = some v) :
     v = truth p.expr := by
   unfold authorizedDecision at h
-  split at h <;> try simp_all
-  split at h <;> try simp_all
-  split at h <;> try simp_all
-  split at h <;> try simp_all
-  split at h <;> try simp_all
+  split at h <;> simp_all
 
 theorem lossy_view_forces_refusal
     {W O : Type} (observe : W → O) (actual : W → Bool)
