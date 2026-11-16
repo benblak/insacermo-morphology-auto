@@ -32,7 +32,7 @@ jobs:
           lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
           lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
           lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
-      - name: Run original C3: 90 independent comparisons and 24 Lean verified decisions
+      - name: "Run original C3 - 90 independent comparisons and 24 Lean verified decisions"
         env:
           LEAN_PATH: ".:lean"
           PYTHONPATH: "."
