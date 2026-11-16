@@ -1,0 +1,57 @@
+name: INSACERMO C3 Hidden Laws Active Refutation Lean
+on:
+  push:
+    branches:
+      - lab/c3-unknown-law-active-refutation-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ensure historic unchanged runtime
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile insacermo_one_engine.py labs/c3_unknown_law_active_refutation.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Build original frozen verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run blind law challenge with exact Lean receipts
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: |
+          python3 labs/c3_unknown_law_active_refutation.py /tmp/insacermo_unknown_law
+      - name: Independently verify run output totals
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/insacermo_unknown_law")
+          r=json.loads((p/"audit.json").read_text())
+          assert r["candidate_laws"]==8
+          assert r["independent_minimax_worst"]==3
+          assert r["fixed_order_best_worst"]==4
+          assert r["Lean_certificates_replayed"]==32
+          assert r["unknown_law"]["post_identification_falsifier_found"]
+          assert len(list((p/"certificates").rglob("receipt.json")))==32
+          print("C3_ACTIVE_REFUTATION_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_C3_UNKNOWN_LAWS_32_LEAN_CERTS
+          path: /tmp/insacermo_unknown_law/
+          retention-days: 90
