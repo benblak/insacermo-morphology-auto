@@ -26,7 +26,7 @@ FEATURE_NAMES=["ln(frequency)","angle","ln(chord)","ln(velocity)","ln(thickness)
 TERMS=tuple(tuple(x) for k in (1,2,3) for x in itertools.combinations(range(10),k))
 
 def git_blob(content):
-    return hashlib.sha1(b"blob "+str(len(content)).encode()+b"\\0"+content).hexdigest()
+    return hashlib.sha1(b"blob "+str(len(content)).encode()+bytes([0])+content).hexdigest()
 
 def dataset(out):
     with urllib.request.urlopen(urllib.request.Request(
