@@ -15,9 +15,26 @@ jobs:
       - name: Check historical C3 source unchanged and script syntax
         run: |
           git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
-          python3 -m py_compile labs/nasa_exoplanet_blind_law.py
+          python3 -m py_compile labs/nasa_exoplanet_blind_law.py labs/nasa_exoplanet_finite_c3_audit.py
       - name: Retrieve NASA Exoplanet Archive and test blind mathematical laws
         run: python3 labs/nasa_exoplanet_blind_law.py /tmp/insacermo_nasa
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 portable kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run original frozen C3 on real NASA holdout boundary
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/nasa_exoplanet_finite_c3_audit.py /tmp/insacermo_nasa
       - name: Validate independent report and held out sample
         run: |
           python3 - <<'PY'
@@ -30,7 +47,11 @@ jobs:
           assert report['additional_active_queries']==8
           assert len(report['counterexamples_worst_holdout'])==8
           assert math.isfinite(report['active_holdout']['median_relative_error'])
-          print("NASA_EXOPLANETS_EMPIRICAL_AUDIT_PASS")
+          c=json.loads((p/'C3_nasa_audit.json').read_text())
+          assert c['C3_certificates_verified']==6
+          assert c['eight_world_model']=='REFUSE_ROBUST'
+          assert len(list(p.rglob('receipt.json')))==6
+          print("NASA_EXOPLANETS_EMPIRICAL_AND_C3_LEAN_AUDIT_PASS")
           PY
       - uses: actions/upload-artifact@v4
         with:
