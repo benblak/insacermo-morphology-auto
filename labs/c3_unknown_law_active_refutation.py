@@ -139,10 +139,10 @@ def main(out):
     assert manipulated!=saved
     try:
         p.write_bytes(manipulated)
-        assert not replay(p)
+        assert not replay(p.parent)
     finally:p.write_bytes(saved)
-    assert replay(p)
-    assert not replay(p,lean_binary="/missing-lean")
+    assert replay(p.parent)
+    assert not replay(p.parent,lean_binary="/missing-lean")
     report=dict(
         objective="Finite closed-class active model discrimination (not universal law discovery)",
         engine_git_blob=blob,truth_table_inputs=64,
