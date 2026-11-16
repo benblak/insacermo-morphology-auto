@@ -31,6 +31,7 @@ jobs:
       - name: Fifteen historical runtime calls, certificates and independent replays
         env:
           LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
         run: python3 labs/three_domains_frozen_c3_audit.py /tmp/insacermo_three_domains
       - name: Check exact summary and artifact counts
         run: |
