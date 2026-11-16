@@ -1,0 +1,6 @@
+name = "unicode_decision_guard_lean"
+version = "0.1.0"
+defaultTargets = ["UnicodeDecisionGuard"]
+
+[[lean_lib]]
+name = "UnicodeDecisionGuard"
