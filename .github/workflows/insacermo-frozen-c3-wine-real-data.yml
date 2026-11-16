@@ -1,0 +1,57 @@
+name: INSACERMO Frozen C3 Wine 178 real measurements
+on:
+  push:
+    branches:
+      - lab/c3-frozen-wine-realdata-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  wine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check untouched historical engine and source syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile insacermo_one_engine.py labs/frozen_c3_real_wine.py
+      - name: Install UCI Wine source library
+        run: |
+          python3 -m pip install --disable-pip-version-check "scikit-learn==1.8.0"
+      - name: Install historical Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 portable kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run original C3: 90 independent comparisons and 24 Lean verified decisions
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/frozen_c3_real_wine.py /tmp/insacermo_frozen_wine
+      - name: Validate receipt and dataset totals
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          folder=Path("/tmp/insacermo_frozen_wine")
+          r=json.loads((folder/"summary.json").read_text())
+          assert r["oracle_cases"]==90 and r["lean_certificates"]==24
+          assert r["samples"]==178 and r["groups"]==45
+          assert len(list(folder.rglob("C3Decision.lean")))==24
+          assert len(list(folder.rglob("receipt.json")))==24
+          print("REAL_UCI_WINE_FROZEN_C3_CERTIFICATES_VALIDATED")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_WINE_178_REAL_24_LEAN_CERTIFICATES
+          path: /tmp/insacermo_frozen_wine/
+          retention-days: 90
