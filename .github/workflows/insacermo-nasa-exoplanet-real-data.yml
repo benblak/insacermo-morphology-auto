@@ -1,0 +1,39 @@
+name: INSACERMO NASA Exoplanet Symbolic Search Real Data
+on:
+  push:
+    branches:
+      - lab/c3-nasa-exoplanets-blind-law-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exoplanets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check historical C3 source unchanged and script syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/nasa_exoplanet_blind_law.py
+      - name: Retrieve NASA Exoplanet Archive and test blind mathematical laws
+        run: python3 labs/nasa_exoplanet_blind_law.py /tmp/insacermo_nasa
+      - name: Validate independent report and held out sample
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json,math
+          p=Path('/tmp/insacermo_nasa')
+          report=json.loads((p/'report.json').read_text())
+          assert report['n_filtered'] >= 100
+          assert report['host_disjoint_holdout_size'] >= 50
+          assert report['additional_active_queries']==8
+          assert len(report['counterexamples_worst_holdout'])==8
+          assert math.isfinite(report['active_holdout']['median_relative_error'])
+          print("NASA_EXOPLANETS_EMPIRICAL_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_NASA_EXOPLANET_REAL_DATA_AUDIT
+          path: /tmp/insacermo_nasa/
+          retention-days: 90
