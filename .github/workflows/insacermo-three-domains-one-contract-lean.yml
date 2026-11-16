@@ -1,0 +1,41 @@
+name: INSACERMO three domains one contract Lean 4.20
+on:
+  push:
+    branches:
+      - lab/cross-domain-one-contract-lean-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original and cross-domain theorem
+        working-directory: unicode_decision_guard_lean
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean --version
+          lake update
+          lake build
+          lake env lean CrossDomainReuse.lean
+      - name: Reject proof holes and custom axioms
+        working-directory: unicode_decision_guard_lean
+        run: |
+          if grep -nE '(^|[^A-Za-z_])(sorry|admit|sorryAx|native_decide|axiom)([^A-Za-z_]|$)' CrossDomainReuse.lean; then
+            echo "Forbidden token detected"; exit 1
+          fi
+      - name: Independent Lean checker
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: unicode_decision_guard_lean
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "CrossDomainReuse"
+          use-mathlib-cache: false
+          use-github-cache: false
