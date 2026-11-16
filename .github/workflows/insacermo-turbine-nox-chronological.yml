@@ -1,0 +1,58 @@
+name: INSACERMO MAX Turbine NOx Chronological Discovery and Lean
+on:
+  push:
+    branches:
+      - lab/c3-openworld-turbine-nox-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-emissions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen historical runtime and script
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/turbine_nox_24_queries_c3.py
+      - name: Install numpy and Lean 4.33.1
+        run: |
+          python3 -m pip install numpy
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 portable verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Test real measured NOx law and historical C3 certificates
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: |
+          python3 labs/turbine_nox_24_queries_c3.py /tmp/insacermo_turbine_nox
+      - name: Audit locked chronological predictions and receipts
+        run: |
+          python3 - <<'PY'
+          import json, math
+          from pathlib import Path
+          folder=Path('/tmp/insacermo_turbine_nox')
+          r=json.loads((folder/'audit.json').read_text())
+          assert r['label_policy']['actual_train_labels']==24
+          assert r['label_policy']['actual_calibration_labels']==24
+          assert r['label_policy']['final_locked_test_year']==2015
+          assert r['C3']['lean_certificates']==6
+          assert len(list((folder/'lean_receipts').rglob('receipt.json')))==6
+          assert math.isfinite(r['active_test']['mae'])
+          print('UCI_NOX_CHRONOLOGICAL_C3_AUDIT_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_REAL_TURBINE_NOX_24_QUERIES_6_LEAN
+          path: /tmp/insacermo_turbine_nox/
+          retention-days: 90
