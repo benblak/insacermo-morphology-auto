@@ -1,0 +1,45 @@
+name: INSACERMO Unicode provenance - Lean 4.20 Lab
+on:
+  push:
+    branches:
+      - lab/unicode-authenticated-provenance-20261116
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean 4.20.0
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain leanprover/lean4:v4.20.0
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original Unicode theorems and provenance theorems
+        working-directory: unicode_decision_guard_lean
+        run: |
+          export PATH="$HOME/.elan/bin:$PATH"
+          lean --version
+          lake update
+          lake env lean UnicodeDecisionGuard.lean
+          lake build
+          lake env lean UnicodeProvenance.lean
+      - name: Reject proof holes and custom axioms
+        working-directory: unicode_decision_guard_lean
+        run: |
+          if grep -nE '(^|[^A-Za-z_])(sorry|admit|sorryAx|native_decide|axiom)([^A-Za-z_]|$)' UnicodeProvenance.lean; then
+            echo "Forbidden proof token detected"
+            exit 1
+          fi
+      - name: Independent Lean checker
+        uses: leanprover/lean-action@v1
+        with:
+          lake-package-directory: unicode_decision_guard_lean
+          auto-config: false
+          build: true
+          leanchecker: true
+          leanchecker-args: "UnicodeProvenance"
+          use-mathlib-cache: false
+          use-github-cache: false
