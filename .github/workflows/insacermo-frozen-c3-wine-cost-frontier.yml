@@ -1,0 +1,56 @@
+name: INSACERMO Frozen C3 Wine Cost Frontier Lean 4.33
+on:
+  push:
+    branches:
+      - lab/c3-frozen-wine-cost-frontier-20261116
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check frozen historical engine and script
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile insacermo_one_engine.py labs/frozen_c3_wine_cost_frontier.py
+      - name: Install pinned Wine source library
+        run: python3 -m pip install "scikit-learn==1.8.0"
+      - name: Install historical Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 portable kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run original C3 cost frontier 90 checks and Lean certificates
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/frozen_c3_wine_cost_frontier.py /tmp/insacermo_wine_cost
+      - name: Independently check totals and receipts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('/tmp/insacermo_wine_cost')
+          r=json.loads((p/'summary.json').read_text())
+          assert r['oracle_cases']==90 and r['certified_Lean_cases']==24
+          assert (r['metrics']['exact']['adaptive_total_worst_cost'],r['metrics']['exact']['best_fixed_total_worst_cost'])==(67,96)
+          assert (r['metrics']['uncertain']['adaptive_total_worst_cost'],r['metrics']['uncertain']['best_fixed_total_worst_cost'])==(64,88)
+          assert len(list((p/'certificates').rglob('receipt.json')))==24
+          print('COST_FRONTIER_VALIDATED')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_C3_WINE_COST_FRONTIER_LEAN_CERTS
+          path: /tmp/insacermo_wine_cost/
+          retention-days: 90
