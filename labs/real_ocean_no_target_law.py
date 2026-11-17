@@ -58,7 +58,7 @@ def parse(raw,station,year):
     for k in fields:d[k]=pd.to_numeric(d[k],errors="coerce")
     yr="YYYY" if "YYYY" in fields else "YY"
     years=d[yr].astype("float64")
-    if yr=="YY":years=np.where(years<70,years+2000,years+1900)
+    if yr=="YY":years=np.where(years>=100,years,np.where(years<70,years+2000,years+1900))
     minute="mm" if "mm" in fields else None
     required=["MM","DD","hh"]
     if not all(x in fields for x in required):raise RuntimeError("NO_DATE_FIELDS")
