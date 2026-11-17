@@ -1,0 +1,61 @@
+name: INSACERMO 24-Bit Unknown Monotone Law — Lean Frontier
+on:
+  push:
+    branches:
+      - lab/c3-monotone-open-world-exact-coverage-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original C3 code and standalone experiment syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/monotone_24bit_private_oracle.py labs/monotone_24bit_discovery_c3.py
+      - name: Install historical Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched C3 verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Discover unknown law, count 2^24 possibilities symbolically and test C3
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/monotone_24bit_discovery_c3.py /tmp/insacermo_monotone
+      - name: Independently verify experiment claims and all receipts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=Path("/tmp/insacermo_monotone")
+          j=json.loads((d/"audit.json").read_text())
+          f=j["final"]
+          assert j["total_input_configurations"]==16777216
+          assert j["oracle_unique_queries"]<512
+          assert f["unresolved_configurations"]==0
+          assert f["certified_positive_configurations"]+f["certified_negative_configurations"]==16777216
+          assert j["independent_exact_count_verified"]
+          assert j["all_generated_clauses_recovered"]
+          assert j["monotonicity_falsification_control"]["monotonicity_contradicted"]
+          assert not j["monotonicity_falsification_control"]["global_certificate_authorized"]
+          assert len(j["compact_historical_C3_Lean_certificates"])==3
+          assert len(list(d.rglob("receipt.json")))==3
+          print("24_BIT_MONOTONE_EXACT_COVERAGE_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_24_BIT_UNKNOWN_MONOTONE_LAW_3_LEAN_CERTS
+          path: /tmp/insacermo_monotone/
+          retention-days: 90
