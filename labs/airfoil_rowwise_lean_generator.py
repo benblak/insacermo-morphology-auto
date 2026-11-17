@@ -220,7 +220,9 @@ theorem any_squared_errors_inside_certified_intervals
     trueModel < 25 * 281 * 1000000 ∧
     100 * trueModel < 81 * trueBaseline := by
   constructor
-  · exact lt_of_le_of_lt hm certified_five_db_gate
+  · calc
+      trueModel ≤ modelSseUpper := hm
+      _ < 25 * 281 * 1000000 := certified_five_db_gate
   · calc
       100 * trueModel ≤ 100 * modelSseUpper := Nat.mul_le_mul_left 100 hm
       _ < 81 * baselineSseLower := certified_ten_percent_gate
