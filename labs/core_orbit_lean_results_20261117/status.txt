@@ -1,2 +1,3 @@
 lean_exit=0
+proof_source_sha256=0cb0359551ea1b6dfde9e022c00a7829453fc4fc63e3c16f85cfb90bf6af7ef6
 result=PASS
