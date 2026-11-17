@@ -1,0 +1,54 @@
+name: INSACERMO CORE — Coordinate-free abstraction Lean
+on:
+  push:
+    branches:
+      - lab/c3-abstraction-isomorphism-self-repair-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert historical engine frozen
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile actual reversible-coordinate proof and 7 exact finite certificates
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_orbit_lean
+          set +e
+          lean --version > /tmp/insacermo_orbit_lean/lean.log 2>&1
+          lean labs/OrbitCert.lean >> /tmp/insacermo_orbit_lean/lean.log 2>&1
+          result=$?
+          echo "lean_exit=$result" > /tmp/insacermo_orbit_lean/status.txt
+          if [ "$result" -eq 0 ]; then
+            echo "result=PASS" >> /tmp/insacermo_orbit_lean/status.txt
+          else
+            echo "result=FAIL" >> /tmp/insacermo_orbit_lean/status.txt
+          fi
+          cat /tmp/insacermo_orbit_lean/lean.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_CORE_COORDINATE_FREE_LEAN
+          path: /tmp/insacermo_orbit_lean
+          retention-days: 90
+      - name: Publish status including Lean errors on lab branch
+        if: always()
+        run: |
+          mkdir -p labs/core_orbit_lean_results_20261117
+          cp /tmp/insacermo_orbit_lean/* labs/core_orbit_lean_results_20261117/ || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/core_orbit_lean_results_20261117
+          git commit -m "lab: publish signed-permutation Lean certification diagnostic [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-abstraction-isomorphism-self-repair-20261117
