@@ -27,6 +27,41 @@ jobs:
           sha256sum labs/inverse_noaa_clock.py | sed 's/^/source_sha256=/' >> /tmp/insacermo_inverse_clock/status.txt
           cat /tmp/insacermo_inverse_clock/run.log
           exit 0
+      - name: Independent raw NOAA audit of all 15 source-channel measurements
+        shell: bash
+        run: |
+          set +e
+          python labs/inverse_noaa_clock_independent_audit.py /tmp/insacermo_inverse_clock > /tmp/insacermo_inverse_clock/independent.log 2>&1
+          rc=$?
+          echo "independent_exit=$rc" >> /tmp/insacermo_inverse_clock/status.txt
+          cat /tmp/insacermo_inverse_clock/independent.log
+          if [ "$rc" -eq 0 ]; then
+            echo "independent_result=PASS" >> /tmp/insacermo_inverse_clock/status.txt
+          else
+            echo "independent_result=FAIL" >> /tmp/insacermo_inverse_clock/status.txt
+          fi
+          exit 0
+      - name: Install Lean 4.33.1
+        shell: bash
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile formal finite clock and epistemic-limit theorems
+        shell: bash
+        run: |
+          set +e
+          lean labs/InverseNoaaClock.lean > /tmp/insacermo_inverse_clock/lean.log 2>&1
+          rc=$?
+          echo "lean_exit=$rc" >> /tmp/insacermo_inverse_clock/status.txt
+          sha256sum labs/InverseNoaaClock.lean | cut -d' ' -f1 | sed 's/^/lean_source_sha256=/' >> /tmp/insacermo_inverse_clock/status.txt
+          if [ "$rc" -eq 0 ]; then
+            echo "lean_result=PASS" >> /tmp/insacermo_inverse_clock/status.txt
+          else
+            echo "lean_result=FAIL" >> /tmp/insacermo_inverse_clock/status.txt
+          fi
+          cat /tmp/insacermo_inverse_clock/lean.log
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -37,7 +72,7 @@ jobs:
         if: always()
         run: |
           mkdir -p labs/inverse_clock_results_20261117
-          for name in audit.json sealed_before_validation.json run.log status.txt; do
+          for name in audit.json sealed_before_validation.json run.log status.txt independent.log independent_receipt.json lean.log; do
             if [ -f "/tmp/insacermo_inverse_clock/$name" ]; then
               cp "/tmp/insacermo_inverse_clock/$name" labs/inverse_clock_results_20261117/
             fi
