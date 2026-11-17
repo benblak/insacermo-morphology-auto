@@ -1,0 +1,405 @@
+{
+  "architecture": "SINGLE ORCHESTRATOR, FROZEN ORIGINAL FINITE C3 GATE, LEAN-SAME-INPUT PROOF",
+  "c3_certificates": {
+    "REAL_ACT_NET_ENDPOINT_CHANGE": {
+      "authorized": true,
+      "contract_sha256": "1b2c5fd339109312bea4e7ea30c1698391a99e0e9f0437e93ae49f8a0bcd2aa2",
+      "receipt_sha256": "66785aae69b36c584393bb41c4aeda9d4b7b9ef01bb9ff87aa8219c1675f19f9",
+      "source_sha256": "942c8b604165f93d8f2f475e92b02a0b1f90ec56aec7b5f488a6314a85e28eba",
+      "verdict": "ACT"
+    },
+    "REAL_REFUSE_UNOBSERVED_CENTER": {
+      "authorized": false,
+      "contract_sha256": "03125b04565288fedc244e412f7f4269e338d886dda45bec27d217f7af4e2700",
+      "receipt_sha256": "1f71c8eff7d946503790acc02b07e341f2183cddd862d4d1ccd0f2d9fe3ec99c",
+      "source_sha256": "a31f6235eb71bcc8ab6d5fd2d71aef6fcfb3764db6abefb837efc8088f176bb5",
+      "verdict": "REFUSE_ROBUST"
+    },
+    "SYNTHETIC_ACT_AFTER_PROBE": {
+      "contract_sha256": "d9b842c8df8b2be0f6264975045c08addecd897db858d34fed43473351d6a873",
+      "receipt_sha256": "5cf958ee1d0609787a75af24b7ebfecaf22f4eae3be98aecb4819d8febcd7b1f",
+      "source_sha256": "a695d2b16b9e631ddadc4f2c038fff168c0cb6cd8caaf07e9b85f775cfdc3551",
+      "verdict": "ACT"
+    },
+    "SYNTHETIC_PROBE": {
+      "contract_sha256": "e90c8c8c51d7b6ff2c5793a9c78daa23ca62df1a4b69b1e948032937fbded25c",
+      "receipt_sha256": "a89fe3227e1016ed551024cc18497bd8eecce14052144641d5bb335f7373f13f",
+      "source_sha256": "f8d8e0af9d0825f4f120e63088b01b39d07445d1f2397e07879d7b979c61bd1d",
+      "verdict": "PROBE"
+    },
+    "SYNTHETIC_STATE_REPAIR": {
+      "contract_sha256": "cdc7dc81a989a9c25c190fcfefd9991055bec6bcd61b58a3190d757e5f57fb85",
+      "receipt_sha256": "4c1a89bd229d4b94f4c811b1fdcedf84a6b1304f2d97f30b3b4358a77613187c",
+      "source_sha256": "d818df79dc94da60cec7a0ce33fa416d713756fff3ef5d22aa9b384d03deaa53",
+      "verdict": "REPAIR"
+    }
+  },
+  "engine_git_blob": "bd5310b3692bcbad4e874005b7dd8eda90616f74",
+  "global_law_claim": "REFUSE_UNCONDITIONAL",
+  "lean_evidence_sha256": "cdbb101a09f410ea57b0358d33d474a1fbac6be1066b0aa98d87caebccecdff4",
+  "n_stages": 14,
+  "prereg_commit": "705c722dc3ae6093500892909047d78b2e2da01e",
+  "proof_boundaries": [
+    "C3 formal worlds and labels are dynamically generated from observed question, but bridge to NOAA raw bytes requires an independent raw-data auditor.",
+    "Global monotonicity and invented exception patch are not Lean-proven for all 24-bit inputs; only finite local C3 contracts are certified.",
+    "Simulated REPAIR is not physical actuation. The alternate device is an explicitly changed synthetic oracle variant.",
+    "Active-probe input is fresh for the alternate device but chosen as a predetermined full-ones control, not a learned optimal query.",
+    "No world-first physical law was discovered. These data were previously analyzed in separate labs.",
+    "Not all previous experimental methods have been independently ported into the one orchestrator."
+  ],
+  "real_noaa": {
+    "clock_fit": {
+      "bic_advantage": 65786.20230706432,
+      "candidates": [
+        {
+          "bic": 66790.43070181506,
+          "period_minutes": 20
+        },
+        {
+          "bic": 993.3602574958918,
+          "period_minutes": 30
+        },
+        {
+          "bic": 66812.1673807947,
+          "period_minutes": 40
+        },
+        {
+          "bic": 66823.00578879374,
+          "period_minutes": 50
+        },
+        {
+          "bic": 1029.9509012837877,
+          "period_minutes": 60
+        },
+        {
+          "bic": 66844.65009647675,
+          "period_minutes": 70
+        },
+        {
+          "bic": 66855.63318096189,
+          "period_minutes": 80
+        },
+        {
+          "bic": 1061.4615393444342,
+          "period_minutes": 90
+        },
+        {
+          "bic": 66877.34449030437,
+          "period_minutes": 100
+        },
+        {
+          "bic": 66888.21113681777,
+          "period_minutes": 110
+        },
+        {
+          "bic": 1103.3148478198768,
+          "period_minutes": 120
+        },
+        {
+          "bic": 66909.94273488912,
+          "period_minutes": 130
+        },
+        {
+          "bic": 66920.68844970515,
+          "period_minutes": 140
+        },
+        {
+          "bic": 1135.0382673193558,
+          "period_minutes": 150
+        },
+        {
+          "bic": 66942.56482902609,
+          "period_minutes": 160
+        },
+        {
+          "bic": 66953.4103309302,
+          "period_minutes": 170
+        },
+        {
+          "bic": 1170.4095861425903,
+          "period_minutes": 180
+        }
+      ],
+      "model": {
+        "bic": 993.3602574958918,
+        "period_slots": 3,
+        "phase_counts": [
+          [
+            17506,
+            0
+          ],
+          [
+            74,
+            17438
+          ],
+          [
+            17508,
+            0
+          ]
+        ],
+        "phase_probability": [
+          5.711674663011195e-05,
+          0.9957177115450496,
+          5.711022272986865e-05
+        ],
+        "train_loglik": -480.37653340181834
+      },
+      "null": {
+        "bic": 66779.56256456021,
+        "period_slots": 1,
+        "phase_counts": [
+          [
+            35088,
+            17438
+          ]
+        ],
+        "phase_probability": [
+          0.33199436491014317
+        ],
+        "train_loglik": -33384.346750498065
+      },
+      "status": "PERIODIC",
+      "train_rate": 0.33198796786353424,
+      "train_size": 52526
+    },
+    "clock_training_rows": 52526,
+    "clock_validation": {
+      "actual_present": 17436,
+      "brier": 0.001140124555628578,
+      "brier_relative_gain": 0.9948617804174926,
+      "confusion": {
+        "fn": 1,
+        "fp": 59,
+        "tn": 34969,
+        "tp": 17435
+      },
+      "f1": 0.998282278843401,
+      "logloss": 0.007783100798409933,
+      "logloss_relative_gain": 0.98775905603658,
+      "null_brier": 0.22189097552585055,
+      "null_logloss": 0.6358252126362506,
+      "phase_counts": [
+        [
+          17482,
+          0
+        ],
+        [
+          59,
+          17435
+        ],
+        [
+          17487,
+          1
+        ]
+      ],
+      "precision": 0.9966274151137533,
+      "prevalence": 0.33234217749313816,
+      "recall": 0.9999426473961918,
+      "rows": 52464
+    },
+    "clock_validation_rows": 52464,
+    "endpoint": {
+      "center_utc": "2023-02-23T10:10:00+00:00",
+      "central_height": "UNKNOWN",
+      "measured_left_dm": 74,
+      "measured_right_dm": 80,
+      "observed_minimum_net_difference_dm": 6,
+      "source_gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+      "station": "46002",
+      "year": 2023
+    },
+    "sources": [
+      {
+        "decompressed_bytes": 4727518,
+        "decompressed_sha256": "9426a6ba74c225b2af3097b55ce03c61de84ca9bfffca15c017cead701c30454",
+        "filename": "41002h2023.txt.gz",
+        "gzip_sha256": "187185a0fc30bb0407760703239034427be331518051ca7e5192247138b04e8e",
+        "station": "41002",
+        "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/41002h2023.txt.gz",
+        "year": 2023
+      },
+      {
+        "decompressed_bytes": 4717527,
+        "decompressed_sha256": "d020db8d59f8f90e64cd4b06b40d98b2a98318733b9e3d9a14a64f6f1ee5862f",
+        "filename": "42002h2023.txt.gz",
+        "gzip_sha256": "1b9906c76b1da6cb6abccf521db4e6e59d035cf341f86f2b3351507c9db54f0b",
+        "station": "42002",
+        "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/42002h2023.txt.gz",
+        "year": 2023
+      },
+      {
+        "gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+        "station": "46002",
+        "year": 2023
+      }
+    ]
+  },
+  "real_noaa_claim": "ONLY ACT ON MEASURED ENDPOINT DIFFERENCE",
+  "stages": [
+    {
+      "payload": {
+        "example": {
+          "center_utc": "2023-02-23T10:10:00+00:00",
+          "central_height": "UNKNOWN",
+          "measured_left_dm": 74,
+          "measured_right_dm": 80,
+          "observed_minimum_net_difference_dm": 6,
+          "source_gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+          "station": "46002",
+          "year": 2023
+        },
+        "source_count": 3,
+        "train": 52526,
+        "validation": 52464
+      },
+      "sequence": 0,
+      "stage": "OBSERVE_REAL_NOAA"
+    },
+    {
+      "payload": {
+        "inferred_minutes": 30,
+        "train_bic_advantage": 65786.20230706432
+      },
+      "sequence": 1,
+      "stage": "DISCOVER_UNKNOWN_CLOCK"
+    },
+    {
+      "payload": {
+        "brier_gain": 0.9948617804174926,
+        "f1": 0.998282278843401,
+        "station": "42002",
+        "year": 2023
+      },
+      "sequence": 2,
+      "stage": "FALSIFY_ON_OTHER_REAL_STATION"
+    },
+    {
+      "payload": {
+        "authorized": true,
+        "contract_sha256": "1b2c5fd339109312bea4e7ea30c1698391a99e0e9f0437e93ae49f8a0bcd2aa2",
+        "receipt_sha256": "66785aae69b36c584393bb41c4aeda9d4b7b9ef01bb9ff87aa8219c1675f19f9",
+        "source_sha256": "942c8b604165f93d8f2f475e92b02a0b1f90ec56aec7b5f488a6314a85e28eba",
+        "verdict": "ACT"
+      },
+      "sequence": 3,
+      "stage": "REAL_ACT_NET_ENDPOINT_CHANGE"
+    },
+    {
+      "payload": {
+        "authorized": false,
+        "contract_sha256": "03125b04565288fedc244e412f7f4269e338d886dda45bec27d217f7af4e2700",
+        "receipt_sha256": "1f71c8eff7d946503790acc02b07e341f2183cddd862d4d1ccd0f2d9fe3ec99c",
+        "source_sha256": "a31f6235eb71bcc8ab6d5fd2d71aef6fcfb3764db6abefb837efc8088f176bb5",
+        "verdict": "REFUSE_ROBUST"
+      },
+      "sequence": 4,
+      "stage": "REAL_REFUSE_UNOBSERVED_CENTER"
+    },
+    {
+      "payload": {
+        "conditional_positive_terms": 4,
+        "global_claim": false,
+        "query_count": 212
+      },
+      "sequence": 5,
+      "stage": "DISCOVER_SYNTHETIC_LAW_CONDITIONALLY"
+    },
+    {
+      "payload": {
+        "labels": [
+          1,
+          0
+        ],
+        "subset": 214032,
+        "superset": 8388607
+      },
+      "sequence": 6,
+      "stage": "FALSIFY_MONOTONICITY_ON_ALTERNATE_DEVICE"
+    },
+    {
+      "payload": {
+        "repaired_at": 8388607,
+        "scope": "LOCAL_ONLY"
+      },
+      "sequence": 7,
+      "stage": "LOCAL_REPAIR_OF_REPRESENTATION"
+    },
+    {
+      "payload": {
+        "input": 16777215,
+        "kind": "SYNTHETIC",
+        "proof": "a89fe3227e1016ed551024cc18497bd8eecce14052144641d5bb335f7373f13f"
+      },
+      "sequence": 8,
+      "stage": "CERTIFIED_ACTIVE_PROBE"
+    },
+    {
+      "payload": {
+        "answer": 1,
+        "input": 16777215
+      },
+      "sequence": 9,
+      "stage": "ACQUIRE_PROBE_RESPONSE"
+    },
+    {
+      "payload": {
+        "label": 1,
+        "receipt": "5cf958ee1d0609787a75af24b7ebfecaf22f4eae3be98aecb4819d8febcd7b1f",
+        "scope": "SINGLE_INPUT"
+      },
+      "sequence": 10,
+      "stage": "CERTIFIED_ACT_AFTER_OBSERVED_PROBE"
+    },
+    {
+      "payload": {
+        "change": "SIMULATED 2-STATE TRANSITION TO GOOD STATE",
+        "physical_action": false,
+        "receipt": "4c1a89bd229d4b94f4c811b1fdcedf84a6b1304f2d97f30b3b4358a77613187c"
+      },
+      "sequence": 11,
+      "stage": "CERTIFIED_STATE_REPAIR"
+    },
+    {
+      "payload": {
+        "proof_sha256": "cdbb101a09f410ea57b0358d33d474a1fbac6be1066b0aa98d87caebccecdff4",
+        "raw_data_file_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+        "source": "ORIGINAL NOAA OBSERVATION, SEPARATELY AUDITED"
+      },
+      "sequence": 12,
+      "stage": "LEAN_CERTIFY_DYNAMIC_REAL_DATA_FACTS"
+    },
+    {
+      "payload": {
+        "missing_compiler_rejected": true,
+        "restored_original_reverified": true,
+        "tampered_rejected": true
+      },
+      "sequence": 13,
+      "stage": "CERTIFICATE_TAMPERING_AND_MISSING_LEAN_REJECTED"
+    }
+  ],
+  "synthetic_structure": {
+    "conditional_coverage": true,
+    "contradictory_under_monotonicity": true,
+    "global_law_certified": false,
+    "local_exception_patch": 8388607,
+    "minimal_positive_count": 4,
+    "original_conditional_terms": [
+      214032,
+      524584,
+      1048577,
+      4194436
+    ],
+    "patched_witnesses_replayed": true,
+    "premise": "MONOTONICITY_UNVERIFIED",
+    "symbolic_queries": 212,
+    "witness_answers": [
+      1,
+      0
+    ],
+    "witness_negative_superset": 8388607,
+    "witness_positive_subset": 214032
+  },
+  "unknown_physical_midpoint": "REFUSE_ROBUST",
+  "verdict": "INTEGRATED_C3_LEAN_CHAIN_PASS"
+}

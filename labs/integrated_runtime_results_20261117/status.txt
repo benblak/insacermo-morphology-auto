@@ -1,3 +1,3 @@
-runtime_exit=1
-runtime_source_sha256=66a1ea47c0ffc6595fc5762d286d149dd6e9534e00be1b12904f5a9492050c0a
-independent_exit=1
+runtime_exit=0
+runtime_source_sha256=00aa759c56c1f1f145075cf32d60f99e3d680a737e27cc84ede11a6285d2f7a4
+independent_exit=0

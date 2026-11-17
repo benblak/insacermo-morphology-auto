@@ -1,17 +1,15 @@
 INTEGRATED_STAGE 0 OBSERVE_REAL_NOAA
 INTEGRATED_STAGE 1 DISCOVER_UNKNOWN_CLOCK
 INTEGRATED_STAGE 2 FALSIFY_ON_OTHER_REAL_STATION
-INTEGRATED_CHAIN_FAILED AssertionError()
-Traceback (most recent call last):
-  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/labs/integrated_proof_carrying_runtime.py", line 288, in <module>
-    try:execute(root)
-        ~~~~~~~^^^^^^
-  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/labs/integrated_proof_carrying_runtime.py", line 161, in execute
-    act_model=model([[True],[True]])
-  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/labs/integrated_proof_carrying_runtime.py", line 41, in model
-    validate(obj);return obj
-    ~~~~~~~~^^^^^
-  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/insacermo_one_engine.py", line 19, in validate
-    assert type(W)==int and 1<=W<=8 and type(A)==int and 1<=A<=12 and type(Q)==int and 1<=Q<=8
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError
+INTEGRATED_STAGE 3 REAL_ACT_NET_ENDPOINT_CHANGE
+INTEGRATED_STAGE 4 REAL_REFUSE_UNOBSERVED_CENTER
+INTEGRATED_STAGE 5 DISCOVER_SYNTHETIC_LAW_CONDITIONALLY
+INTEGRATED_STAGE 6 FALSIFY_MONOTONICITY_ON_ALTERNATE_DEVICE
+INTEGRATED_STAGE 7 LOCAL_REPAIR_OF_REPRESENTATION
+INTEGRATED_STAGE 8 CERTIFIED_ACTIVE_PROBE
+INTEGRATED_STAGE 9 ACQUIRE_PROBE_RESPONSE
+INTEGRATED_STAGE 10 CERTIFIED_ACT_AFTER_OBSERVED_PROBE
+INTEGRATED_STAGE 11 CERTIFIED_STATE_REPAIR
+INTEGRATED_STAGE 12 LEAN_CERTIFY_DYNAMIC_REAL_DATA_FACTS
+INTEGRATED_STAGE 13 CERTIFICATE_TAMPERING_AND_MISSING_LEAN_REJECTED
+INTEGRATED_C3_LEAN_CHAIN_PASS 14 C3_RECEIPTS 5 REAL_NOAA_F1 0.998282278843401
