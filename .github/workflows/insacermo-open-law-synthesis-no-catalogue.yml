@@ -1,0 +1,62 @@
+name: INSACERMO Open-Law Synthesis Without Catalogue — C3 Lean
+on:
+  push:
+    branches:
+      - lab/c3-open-law-synthesis-without-catalogue-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  blind-science:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen historical C3 and compile experiment
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/open_law_private_oracle_v2.py labs/open_law_synthesis_c3_v2.py
+      - name: Generate a secret unknown to discovery client
+        run: |
+          python3 labs/open_law_private_oracle_v2.py --make-secret /tmp/insacermo_private_laws.json
+          test -s /tmp/insacermo_private_laws.json
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched C3 portable kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Discover laws, challenge them and Lean certify the local boundary
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: |
+          python3 labs/open_law_synthesis_c3_v2.py /tmp/insacermo_open_law_v2 /tmp/insacermo_private_laws.json
+      - name: Audit independence and all results
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=Path("/tmp/insacermo_open_law_v2")
+          a=json.loads((d/"audit.json").read_text())
+          assert len(a["cases"])==4
+          assert sorted(c["max_identified_degree"] for c in a["cases"])==[2,3,4,6]
+          assert a["layer_cumulative_questions"]==[1,7,22,42,57,63,64]
+          assert a["historical_C3_certificates"]["lean_certificates_replayed"]==2
+          assert all(c["last_point_undetermined_after_63_queries"] for c in a["cases"])
+          assert all(s["discovered_equals_true"] for s in a["secret_reveal"])
+          assert len(list(d.rglob("receipt.json")))==2
+          print("BLIND_OPEN_LAW_GROUNDED_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_OPEN_LAW_ANF_4_SECRETS_2_LEAN
+          path: /tmp/insacermo_open_law_v2
+          retention-days: 90
