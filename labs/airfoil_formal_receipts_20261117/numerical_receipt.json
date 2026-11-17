@@ -1,0 +1,20 @@
+{
+  "rows": 281,
+  "quantization_dB": 0.001,
+  "sse_selected_millidB_squared": 4767051237,
+  "sse_linear_millidB_squared": 6260019001,
+  "model_rmse_recomputed": 4.1188042587163,
+  "linear_rmse_recomputed": 4.71990106862522,
+  "quantized_model_rmse": 4.118809919074463,
+  "quantized_linear_rmse": 4.719920305512738,
+  "integer_ten_percent_test": true,
+  "integer_five_dB_test": true,
+  "conservative_rounding_acceptance": true,
+  "holdout_indices_sha256": "9b029a1cc4ca916c0d774fc8c95cc737269eefc38ad575d8e406683cbc788ea6",
+  "source_sha256": "10ee06e6cfb27dae6b44213d421d217012fb1f9b697592e73a4e4016b52d425f",
+  "limits": [
+    "Lean certifies finite integer arithmetic only; Python reconstructs observations and floating-point predictions.",
+    "No formal IEEE floating-point verification or new physical law proof.",
+    "The original INSACERMO C3 engine and historical Lean corpus are unchanged."
+  ]
+}
