@@ -1,0 +1,56 @@
+name: INSACERMO Robust Action Without Knowing Physical Law
+on:
+  push:
+    branches:
+      - lab/c3-robust-action-many-unknown-laws-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  robust:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen historical C3
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/robust_aggregate_unknown_laws_ccpp.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched C3 verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Real CCPP 8-sample contracts with no law catalogue
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: |
+          python3 labs/robust_aggregate_unknown_laws_ccpp.py /tmp/insacermo_robust_aggregate
+      - name: Independently audit exact completions and receipt count
+        run: |
+          python3 - <<'PY'
+          import json,math
+          from pathlib import Path
+          root=Path('/tmp/insacermo_robust_aggregate')
+          r=json.loads((root/'audit.json').read_text())
+          assert r['records']==9568 and r['groups']==1196
+          assert r['violations_against_full_labels']==0
+          assert r['C3_Lean_certificates']==8
+          assert len(list(root.rglob('receipt.json')))==8
+          assert r['target_queries_for_full_identification']>r['actual_query_count']
+          assert r['actions_at_least_6']+r['actions_less_than_6']==1196
+          print('REAL_UNKNOWN_LAW_ROBUST_AGGREGATE_AUDIT_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_REAL_POWER_ROBUST_ACTION_8_LEAN
+          path: /tmp/insacermo_robust_aggregate/
+          retention-days: 90
