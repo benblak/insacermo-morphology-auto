@@ -27,6 +27,32 @@ jobs:
           sha256sum labs/inverse_wave_dropout_mechanism.py | sed 's/^/source_sha256=/' >> /tmp/insacermo_wave_dropout/status.txt
           cat /tmp/insacermo_wave_dropout/run.log
           exit 0
+      - name: Independently audit real raw NOAA samples, all 5 transition tables
+        shell: bash
+        run: |
+          set +e
+          python labs/inverse_wave_dropout_independent_audit.py /tmp/insacermo_wave_dropout > /tmp/insacermo_wave_dropout/independent.log 2>&1
+          exitcode=$?
+          echo "independent_exit=$exitcode" >> /tmp/insacermo_wave_dropout/status.txt
+          test "$exitcode" -eq 0 && echo "independent_result=PASS" >> /tmp/insacermo_wave_dropout/status.txt || echo "independent_result=FAIL" >> /tmp/insacermo_wave_dropout/status.txt
+          cat /tmp/insacermo_wave_dropout/independent.log
+          exit 0
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check exact dropout counts and observation nonidentifiability
+        shell: bash
+        run: |
+          set +e
+          lean labs/DropoutLogicalBoundary.lean > /tmp/insacermo_wave_dropout/lean.log 2>&1
+          exitcode=$?
+          echo "lean_exit=$exitcode" >> /tmp/insacermo_wave_dropout/status.txt
+          sha256sum labs/DropoutLogicalBoundary.lean | cut -d' ' -f1 | sed 's/^/lean_source_sha256=/' >> /tmp/insacermo_wave_dropout/status.txt
+          test "$exitcode" -eq 0 && echo "lean_result=PASS" >> /tmp/insacermo_wave_dropout/status.txt || echo "lean_result=FAIL" >> /tmp/insacermo_wave_dropout/status.txt
+          cat /tmp/insacermo_wave_dropout/lean.log
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -38,7 +64,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p labs/wave_dropout_results_20261117
-          for file in run.log status.txt audit.json model_sealed_before_holdouts.json; do
+          for file in run.log status.txt audit.json model_sealed_before_holdouts.json independent.log independent_receipt.json lean.log; do
             test ! -f "/tmp/insacermo_wave_dropout/$file" || cp "/tmp/insacermo_wave_dropout/$file" labs/wave_dropout_results_20261117/
           done
           git config user.name "github-actions[bot]"
