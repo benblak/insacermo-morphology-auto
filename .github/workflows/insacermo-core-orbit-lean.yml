@@ -29,6 +29,7 @@ jobs:
           lean labs/OrbitCert.lean >> /tmp/insacermo_orbit_lean/lean.log 2>&1
           result=$?
           echo "lean_exit=$result" > /tmp/insacermo_orbit_lean/status.txt
+          sha256sum labs/OrbitCert.lean | cut -d" " -f1 | sed "s/^/proof_source_sha256=/" >> /tmp/insacermo_orbit_lean/status.txt
           if [ "$result" -eq 0 ]; then
             echo "result=PASS" >> /tmp/insacermo_orbit_lean/status.txt
           else
