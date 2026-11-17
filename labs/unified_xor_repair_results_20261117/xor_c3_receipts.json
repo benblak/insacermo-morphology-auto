@@ -1,0 +1,21 @@
+{
+  "verdict": "XOR_LEAN_AND_C3_SCOPED_VERDICTS_PASS",
+  "all_quadratic_identical_for_all_24bit_inputs_under_declared_model": true,
+  "original_oracle_global_truth_certified": false,
+  "c3": {
+    "XOR_ACT_EXACT_WITHIN_DECLARED_QUADRATIC": {
+      "verdict": "ACT",
+      "receipt_sha256": "66785aae69b36c584393bb41c4aeda9d4b7b9ef01bb9ff87aa8219c1675f19f9",
+      "contract_sha256": "1b2c5fd339109312bea4e7ea30c1698391a99e0e9f0437e93ae49f8a0bcd2aa2",
+      "Lean_proof_sha256": "942c8b604165f93d8f2f475e92b02a0b1f90ec56aec7b5f488a6314a85e28eba"
+    },
+    "XOR_REFUSE_UNRESTRICTED_ORACLE_LAW": {
+      "verdict": "REFUSE_ROBUST",
+      "receipt_sha256": "1f71c8eff7d946503790acc02b07e341f2183cddd862d4d1ccd0f2d9fe3ec99c",
+      "contract_sha256": "03125b04565288fedc244e412f7f4269e338d886dda45bec27d217f7af4e2700",
+      "Lean_proof_sha256": "a31f6235eb71bcc8ab6d5fd2d71aef6fcfb3764db6abefb837efc8088f176bb5"
+    }
+  },
+  "source_seal_sha256": "92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d",
+  "proof_source_sha256": "c5524bd893e3298227f4e1249f8445030e9c9b860468ef79a0a7cf152aadf15a"
+}

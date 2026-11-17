@@ -1,0 +1,14 @@
+{
+  "verdict": "INSACERMO_UNIFIED_XOR_LEAN_C3_REAL_SOFTWARE_REPAIR_PASS",
+  "original_engine_blob": "bd5310b3692bcbad4e874005b7dd8eda90616f74",
+  "original_integrated_steps": 14,
+  "original_c3_receipts": 5,
+  "xor_oracle_queries": 5309,
+  "xor_quadratic_models_with_forall_bitvec_proofs": 7,
+  "new_c3_scope_certificates": 2,
+  "global_unknown_oracle_law": "REFUSE_UNCONDITIONAL",
+  "repaired_real_derived_csv_sha256": "c6a2b1b40e75d5c1645a6cacfea0397e362857bd42b71b5c57031fbc87b324b4",
+  "input_raw_noaa_immutable": true,
+  "actual_hardware_repaired": false,
+  "full_python_algorithm_Lean_verified": false
+}

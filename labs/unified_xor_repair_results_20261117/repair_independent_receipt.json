@@ -1,0 +1,21 @@
+{
+  "verdict": "INDEPENDENT_DERIVED_CSV_REPAIR_PASS",
+  "raw_exact_noaa_endpoints_m": [
+    7.36,
+    8.04
+  ],
+  "derived_rounded_decimeters": [
+    74,
+    80
+  ],
+  "rounding_not_confused_with_raw_data": true,
+  "source_was_untouched": true,
+  "wrong_zero_rejected": true,
+  "true_middle_height": null,
+  "observed_endpoints_m": [
+    7.4,
+    8.0
+  ],
+  "source_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+  "corrected_sha256": "c6a2b1b40e75d5c1645a6cacfea0397e362857bd42b71b5c57031fbc87b324b4"
+}

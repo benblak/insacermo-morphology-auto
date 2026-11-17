@@ -1,0 +1,15 @@
+{
+  "proof_sha256": "c5524bd893e3298227f4e1249f8445030e9c9b860468ef79a0a7cf152aadf15a",
+  "source_seal_sha256": "92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d",
+  "verified_models": [
+    "source_0",
+    "source_1",
+    "source_2",
+    "target_0",
+    "target_1",
+    "target_2",
+    "target_rare"
+  ],
+  "domain": 16777216,
+  "scope": "IDENTITY BETWEEN TWO DECLARED QUADRATIC POLYNOMIALS, NOT UNKNOWN ORACLE"
+}
