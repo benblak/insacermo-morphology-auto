@@ -1,0 +1,56 @@
+name: INSACERMO core — Self-inferred XOR feature algebra Lean 4.33.1
+on:
+  push:
+    branches:
+      - lab/c3-self-inferred-xor-quotient-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify frozen historical MAX TOTAL engine
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+      - name: Install Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check generic coordinate algebra theorems
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_xor_lean
+          lean --version > /tmp/insacermo_xor_lean/lean.log 2>&1
+          set +e
+          lean labs/XorCoordinateAlgebra.lean >> /tmp/insacermo_xor_lean/lean.log 2>&1
+          rc=$?
+          echo "lean_exit=$rc" > /tmp/insacermo_xor_lean/status.txt
+          sha256sum labs/XorCoordinateAlgebra.lean | cut -d" " -f1 | sed "s/^/source_sha256=/" >> /tmp/insacermo_xor_lean/status.txt
+          if [ "$rc" -eq 0 ]; then
+            echo "result=PASS" >> /tmp/insacermo_xor_lean/status.txt
+          else
+            echo "result=FAIL" >> /tmp/insacermo_xor_lean/status.txt
+          fi
+          cat /tmp/insacermo_xor_lean/lean.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_XOR_QUOTIENT_LEAN_DIAGNOSTIC
+          path: /tmp/insacermo_xor_lean
+          retention-days: 90
+      - name: Publish final diagnosis even on Lean error
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p labs/xor_quotient_lean_results_20261117
+          cp /tmp/insacermo_xor_lean/* labs/xor_quotient_lean_results_20261117/ || exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/xor_quotient_lean_results_20261117
+          git commit -m "lab: archive XOR algebra proof outcome [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-self-inferred-xor-quotient-20261117
