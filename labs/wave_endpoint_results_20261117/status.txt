@@ -1,0 +1,2 @@
+program_exit=0
+program_sha256=b79a3984da8176bc6214a134c9f98ff533b2c29e53565c1e34d6c6f661ca1f3a  labs/inverse_wave_endpoint_certificates.py
