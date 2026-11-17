@@ -1,0 +1,12 @@
+{
+  "all_catalogue_rows": 6470,
+  "valid_all_feature_rows": 5506,
+  "unique_host_rows": 4071,
+  "source_sha256": "2d35f6c7b82e55957f33e64adf010e26f5131996460634774aeb82d0ab0f3252",
+  "counts": {
+    "discovery": 1981,
+    "challenge": 661,
+    "transit_test": 661,
+    "rv_test": 768
+  }
+}
