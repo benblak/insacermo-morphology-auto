@@ -97,9 +97,9 @@ def run(folder):
             known=np.concatenate([D,H[observed]],axis=0) if observed else D
             current=ranking(known,t) if observed else order
             best=current[0];src=best[2]
-            assert trace["current_model"]["target"]==t
-            assert trace["current_model"]["sources"]==src
-            same_num(trace["current_model"]["score"],best[0])
+            assert trace["before"]["target"]==t
+            assert trace["before"]["sources"]==src
+            same_num(trace["before"]["score"],best[0])
             available=np.array([i for i in range(len(H)) if i not in observed],int)
             if rng is not None:
                 chosen=int(rng.choice(available))
