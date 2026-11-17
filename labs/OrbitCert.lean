@@ -105,4 +105,25 @@ theorem common_abstraction_transfers (left right shared : Nat → Bool)
   have b := hright (decodeL x)
   simpa [hinv x] using a.trans b.symm
 
+/-- No decoder can be uniformly right about a privileged latent parameter
+    when two different parameter descriptions generate EXACTLY the same
+    observations, even if the entire observation function is available. -/
+theorem no_uniform_unique_parameter_decoder
+    (representation : Nat → Nat → Bool) (decoder : (Nat → Bool) → Nat)
+    (p q : Nat) (distinct : p ≠ q)
+    (indistinguishable : ∀ x, representation p x = representation q x) :
+    decoder (representation p) ≠ p ∨ decoder (representation q) ≠ q := by
+  classical
+  by_cases hp : decoder (representation p) = p
+  · right
+    intro hq
+    have equal_observation_functions : representation p = representation q :=
+      funext indistinguishable
+    apply distinct
+    calc
+      p = decoder (representation p) := hp.symm
+      _ = decoder (representation q) := by rw [equal_observation_functions]
+      _ = q := hq
+  · exact Or.inl hp
+
 end InsacermoOrbit
