@@ -9,8 +9,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-COLS=("WSPD","GST","WVHT","APD","PRES","ATMP","WTMP")
-TARGETS=("WSPD","WVHT","PRES","ATMP","WTMP")
+COLS=("WSPD","GST","WVHT","APD","PRES","ATMP")
+TARGETS=("WSPD","WVHT","PRES","ATMP")
 BOUNDS={"WSPD":(0,75),"GST":(0,95),"WVHT":(0,40),
  "APD":(1,25),"PRES":(870,1085),"ATMP":(-45,50),"WTMP":(-5,40)}
 SOURCES=("41002","42002","46002")
@@ -20,7 +20,7 @@ VALIDATION_YEAR=2024
 HOLDOUT_YEAR=2025
 SEED=20261117
 URL="https://www.ndbc.noaa.gov/data/historical/stdmet/{}h{}.txt.gz"
-PREREG_COMMIT="3252c6ef494206d74fc02ee20ed1a076e8469d4f"
+PREREG_COMMIT="129a11c1be64b6d48483188ddab3fa6cd6381823"
 RAW=[]
 
 def fetch(station,year,root):
