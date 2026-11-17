@@ -9,14 +9,15 @@ namespace InsacermoOrbit
 set_option maxRecDepth 12000
 set_option maxHeartbeats 8000000
 
-def twist {α : Type} (f : α → Bool) (recode : α ≃ α) (flip : Bool) : α → Bool :=
-  fun x => (f (recode x)) != flip
+def twist (f : Nat → Bool) (encode : Nat → Nat) (flip : Bool) : Nat → Bool :=
+  fun x => (f (encode x)) != flip
 
-theorem twist_is_reversible {α : Type} (f : α → Bool) (recode : α ≃ α) (flip : Bool) :
-    ∀ x, twist (twist f recode flip) recode.symm flip x = f x := by
+theorem twist_is_reversible (f : Nat → Bool) (encode decode : Nat → Nat) (flip : Bool)
+    (h : ∀ x, encode (decode x) = x) :
+    ∀ x, twist (twist f encode flip) decode flip x = f x := by
   intro x
-  change ((f (recode (recode.symm x)) != flip) != flip) = f x
-  rw [recode.apply_symm_apply]
+  change ((f (encode (decode x)) != flip) != flip) = f x
+  rw [h x]
   cases flip <;> cases hx : f x <;> decide
 
 def bit (x i : Nat) : Nat := (x / (2 ^ i)) % 2
@@ -39,14 +40,14 @@ def localToCanon (perm : Array Nat) (polarity i : Nat) : Nat :=
 
 def tableBit (table idx : Nat) : Bool := bit table idx == 1
 
-def verifyOrbit (local canon : Nat) (perm : Array Nat) (polarity : Nat) (flip : Bool) : Bool :=
+def verifyOrbit (observed canon : Nat) (perm : Array Nat) (polarity : Nat) (flip : Bool) : Bool :=
   (List.range 32).all (fun j =>
-    ((tableBit local (canonToLocal perm polarity j)) != flip) == tableBit canon j)
+    ((tableBit observed (canonToLocal perm polarity j)) != flip) == tableBit canon j)
 
 def modelEval (canon : Nat) (support perm extras : Array Nat)
     (polarity connector x : Nat) : Bool :=
-  let local := project x support
-  let coordinate := localToCanon perm polarity local
+  let observed := project x support
+  let coordinate := localToCanon perm polarity observed
   let hv := bit canon coordinate
   let other := project x extras
   tableBit connector (hv * 2 ^ extras.size + other)
