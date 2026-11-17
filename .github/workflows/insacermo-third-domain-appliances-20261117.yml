@@ -1,0 +1,61 @@
+name: INSACERMO C3 — Third Domain Preregistered Transfer
+on:
+  push:
+    branches:
+      - lab/c3-third-domain-appliances-preregistered-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical engine and preregistered lab script
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/robust_aggregate_unknown_laws_ccpp.py labs/calibrated_probe_order_two_power_domains.py labs/third_domain_appliances_preregistered.py
+          test -f labs/THIRD_DOMAIN_APPLIANCES_PREREG_20261117.md
+      - name: Install historical Lean version
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 portable verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run ONE preregistered test; never tune on holdout
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: ".:labs"
+        run: python3 labs/third_domain_appliances_preregistered.py /tmp/insacermo_third_domain
+      - name: Independent receipt and arithmetic assertions
+        run: |
+          python3 - <<'PY'
+          import json,math
+          from pathlib import Path
+          out=Path("/tmp/insacermo_third_domain")
+          d=json.loads((out/"audit.json").read_text())
+          assert d["source_rows"]==19735
+          assert d["calibration_labels"]==256
+          assert d["evaluated_groups"]==2434
+          assert d["evaluated_rows"]==19472
+          assert d["excluded_unmatched_rows"]==7
+          assert d["contradicted_decisions"]==0
+          assert d["C3_local_Lean_certificates"]==8
+          assert len(list(out.rglob("receipt.json")))==8
+          assert math.isclose(d["net_saved_after_256_calibration"],d["queries_random_expectation_exact"]-d["queries_selected"]-256,abs_tol=1e-6)
+          assert d["transfer_pass"] == (d["net_saved_after_256_calibration"]>0 and d["contradicted_decisions"]==0)
+          print("THIRD_DOMAIN_INDEPENDENT_RECEIPT_PASS", "TRANSFER",d["transfer_pass"])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_THIRD_DOMAIN_APPLIANCES_PREREG_TRANSFER
+          path: /tmp/insacermo_third_domain
+          retention-days: 90
