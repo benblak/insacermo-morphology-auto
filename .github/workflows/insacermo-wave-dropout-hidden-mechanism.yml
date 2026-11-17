@@ -1,0 +1,48 @@
+name: INSACERMO inverse wave sensor dropout true observation audit
+on:
+  push:
+    branches:
+      - lab/c3-inverse-why-measurements-fail-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical engine unchanged and source syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python -m py_compile labs/inverse_wave_dropout_mechanism.py
+      - name: Run sealed NOAA dropout mechanism study and retain failures
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_wave_dropout
+          set +e
+          python labs/inverse_wave_dropout_mechanism.py /tmp/insacermo_wave_dropout > /tmp/insacermo_wave_dropout/run.log 2>&1
+          status=$?
+          echo "exit_code=$status" > /tmp/insacermo_wave_dropout/status.txt
+          sha256sum labs/inverse_wave_dropout_mechanism.py | sed 's/^/source_sha256=/' >> /tmp/insacermo_wave_dropout/status.txt
+          cat /tmp/insacermo_wave_dropout/run.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_WAVE_DROPOUT_RAW_AND_SCORES
+          path: /tmp/insacermo_wave_dropout
+          retention-days: 90
+      - name: Publish result including unsuccessful attempts
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p labs/wave_dropout_results_20261117
+          for file in run.log status.txt audit.json model_sealed_before_holdouts.json; do
+            test ! -f "/tmp/insacermo_wave_dropout/$file" || cp "/tmp/insacermo_wave_dropout/$file" labs/wave_dropout_results_20261117/
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/wave_dropout_results_20261117
+          git commit -m "lab: archive honest result of NOAA dropout mechanism test [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-inverse-why-measurements-fail-20261117
