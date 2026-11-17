@@ -1,0 +1,61 @@
+name: INSACERMO Calibrated Probe Order — Two Real Power Domains
+on:
+  push:
+    branches:
+      - lab/c3-calibrated-query-order-two-power-domains-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  experiment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical frozen C3 and both laboratory scripts
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/robust_aggregate_unknown_laws_ccpp.py labs/calibrated_probe_order_two_power_domains.py
+      - name: Install historical Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile untouched C3 portable verifier
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run exact all-completion experimental contracts and C3 Lean
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: ".:labs"
+        run: python3 labs/calibrated_probe_order_two_power_domains.py /tmp/insacermo_calibrated_orders
+      - name: Independent run and receipt assertions
+        run: |
+          python3 - <<'PY'
+          import json,math
+          from pathlib import Path
+          d=Path("/tmp/insacermo_calibrated_orders")
+          r=json.loads((d/"audit.json").read_text())
+          assert len(r["domains"])==2
+          assert r["C3_local_Lean_certificates"]==8
+          assert len(list(d.rglob("receipt.json")))==8
+          assert r["calibrated_query_budget_per_domain"]==256
+          assert [x["test_groups"] for x in r["domains"]]==[1164,923]
+          for x in r["domains"]:
+            assert x["wrong_decisions"]==0
+            assert x["actual_query_count_calibrated"]<=8*x["test_groups"]
+            assert x["actual_query_count_calibrated"]>=3*x["test_groups"]
+            assert math.isfinite(x["exact_random_mean_query_count"])
+            assert x["calibration_model"]["measured_calibration"]==256
+          print("TWO_REAL_DOMAIN_CALIBRATED_CONTRACT_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_TWO_DOMAINS_CALIBRATED_EXACT_8_LEAN
+          path: /tmp/insacermo_calibrated_orders
+          retention-days: 90
