@@ -1,0 +1,6 @@
+INSACERMO: preregistered isolated CORE experiment on self-discovered reusable Boolean abstractions, Nov 17 2026.
+
+Full protocol is stored in current-conversation artifact INSACERMO_CORE_ABSTRACTION_REUSE_20261117/PREREG.md
+SHA256 8e0d9fc6ebed173cbae80377aeefd4a286510049aa0716e2efc8f17cd7dffdd9.
+
+Before any new outcomes: 3 source oracles, no given latent truth table, infer support via 16 base contexts plus 24 flips, synthesize full projected truth, extract maximal common cofactor function from all three. Five target oracles: one-gate transfer; different one-gate transfer; two-gate transfer; one-point rare exception; unrelated control. Challenge 2×32 fresh points before model sealing, 1024 independent holdouts. The algorithm should escalate connector arity from 1 to 2 on falsification, learning 4- or 8-cell truth tables instead of picking from named AND/OR/XOR list. 4000 query cap per target. Rebuild baseline independently per target using identical 16 base + 24 flips and complete quotient. Audit replays all oracles and checks model/score integrity. Source costs not free. Always REFUSE_UNCONDITIONAL. Success >=2/3 clean target transfers, 2-gate expansion and correct common cofactor; failures recorded. Synthetic only; generic Shannon/truth-table basis IS supplied; historical INSACERMO/C3 frozen.
