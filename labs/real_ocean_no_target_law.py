@@ -70,6 +70,11 @@ def parse(raw,station,year):
         lo,hi=BOUNDS[k]
         v[k]=v[k].where((v[k]>=lo)&(v[k]<=hi))
     v["time"]=ts
+    print("NOAA_PARSE_DIAGNOSTIC",station,year,"header",fields,
+        "raw_rows",len(v),"valid_time",int(v["time"].notna().sum()),
+        "per_sensor_valid",{k:int(v[k].notna().sum()) for k in COLS},
+        "all_sensor_complete",int(v.dropna(subset=["time"]+list(COLS)).shape[0]),
+        "first_line",repr(lines[2][:200] if len(lines)>2 else ""),flush=True)
     v=v.dropna(subset=["time"]+list(COLS))
     v=v.sort_values("time").drop_duplicates("time",keep="last")
     v=v.set_index("time")
