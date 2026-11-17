@@ -29,7 +29,9 @@ def main(base,out):
             seen[dt]=h if 0<=h<=40 else None
         except (ValueError,IndexError):pass
     t=datetime(2023,2,23,10,10,tzinfo=timezone.utc)
-    assert [seen[t+timedelta(minutes=m)] for m in (-30,0,30)]==[7.4,None,8.0]
+    independently_parsed=[seen[t+timedelta(minutes=m)] for m in (-30,0,30)]
+    print("NOAA_INDEPENDENT_THREE_VALUES",repr(independently_parsed),flush=True)
+    assert independently_parsed==[7.4,None,8.0], "NOAA_SOURCE_VALUES_DISAGREE"
     bad=out/"before_repair_bad.csv";fixed=out/"derived_wave_triplet.csv"
     before=list(csv.DictReader(bad.open(newline="")))
     after=list(csv.DictReader(fixed.open(newline="")))
