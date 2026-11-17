@@ -1,6 +1,6 @@
 {
   "verdict": "INFEASIBLE",
-  "reason": "DATA_UNAVAILABLE 46002 2023 https://www.ndbc.noaa.gov/data/historical/stdmet/46002h2023.txt.gz: RuntimeError: TOO_FEW_COMPLETE_6H_OBSERVATIONS 46002 2023: 316",
+  "reason": "DATA_UNAVAILABLE 46002 2024 https://www.ndbc.noaa.gov/data/historical/stdmet/46002h2024.txt.gz: HTTPError: HTTP Error 404: Not Found",
   "raw_downloads": [
     {
       "station": "41002",
@@ -27,20 +27,20 @@
       "bytes": 3447221
     },
     {
-      "station": "46002",
-      "year": 2023,
-      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/46002h2023.txt.gz",
-      "gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
-      "raw_sha256": "6c7f65083b199f48d02381e89ad78e4aeb3b96aaf903d77ea4d359505b0a495b",
-      "bytes": 3447221
+      "station": "41002",
+      "year": 2024,
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/41002h2024.txt.gz",
+      "gzip_sha256": "ea3578e57bb19e68924cb543c3940c0a1bdd0bd46d76ff90a5b21c6856ac73d7",
+      "raw_sha256": "1215e391a226bebd1da794732ef7622f2ab54770f7704617302b3e6a0bcd77e1",
+      "bytes": 4723943
     },
     {
-      "station": "46002",
-      "year": 2023,
-      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/46002h2023.txt.gz",
-      "gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
-      "raw_sha256": "6c7f65083b199f48d02381e89ad78e4aeb3b96aaf903d77ea4d359505b0a495b",
-      "bytes": 3447221
+      "station": "42002",
+      "year": 2024,
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/42002h2024.txt.gz",
+      "gzip_sha256": "b6671bb26e0f1503d2af1a27af4d89c99f933c29dc1f3d752afef7030a1e947a",
+      "raw_sha256": "aea8a8531d10cef15438e5a16bdd9c81f0383e189b9b08637a4716a595b66bfa",
+      "bytes": 3639951
     }
   ],
   "pre_holdout_sealed": false
