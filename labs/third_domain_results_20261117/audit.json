@@ -1,0 +1,236 @@
+{
+  "study": "One pre-registered independent-domain calibrated probe order transfer",
+  "prereg_commit": "743b9430c7c804f60d65fd97530a4a2174e672a8",
+  "source_url": "https://raw.githubusercontent.com/LuisM78/Appliances-energy-prediction-data/e3e4c27a4ae2b41b21f84b4c9ac2d822d3d0ace1/energydata_complete.csv",
+  "source_commit": "e3e4c27a4ae2b41b21f84b4c9ac2d822d3d0ace1",
+  "source_sha256": "2820bf712ad0275cb18b85a05250926100d8e65ebb9f4d2d016ca91ea152a25d",
+  "source_git_blob": "7535108143b2f78a0fbaa38b99ff20be5f475f96",
+  "C3_frozen_git_blob": "bd5310b3692bcbad4e874005b7dd8eda90616f74",
+  "source_rows": 19735,
+  "calibration_first_date": "2016-01-11 17:00:00",
+  "calibration_last_date": "2016-01-13 11:30:00",
+  "holdout_first_date": "2016-01-13 11:40:00",
+  "holdout_last_date": "2016-05-27 18:00:00",
+  "threshold_wh": 100.0,
+  "target": "Appliances",
+  "excluded_proxy_columns": [
+    "Appliances",
+    "date",
+    "lights",
+    "rv1",
+    "rv2"
+  ],
+  "candidate_feature_columns": [
+    "T1",
+    "RH_1",
+    "T2",
+    "RH_2",
+    "T3",
+    "RH_3",
+    "T4",
+    "RH_4",
+    "T5",
+    "RH_5",
+    "T6",
+    "RH_6",
+    "T7",
+    "RH_7",
+    "T8",
+    "RH_8",
+    "T9",
+    "RH_9",
+    "T_out",
+    "Press_mm_hg",
+    "RH_out",
+    "Windspeed",
+    "Visibility",
+    "Tdewpoint"
+  ],
+  "calibration_labels": 256,
+  "calibrated_proxy": {
+    "feature_index": 9,
+    "feature_name": "RH_5",
+    "positive_direction": 1,
+    "measured_calibration": 256,
+    "calibration_class_positive": 56,
+    "calibration_class_negative": 200,
+    "ranked_features": [
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.883734991685107
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.7802535438516149
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.6216600095626855
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.5681811277212612
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.5561353768207763
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.5144486640749104
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.513791617637637
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.502254005675272
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.49685619728399555
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.4843717994241464
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.4738106389592912
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.46914144669799746
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.43035361901497
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.4198610080304015
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.34151373741553676
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.3051602892537409
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.30097852652851925
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.2985492172491811
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.24432414131882313
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.17680558255814502
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.13028836440883618
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": -0.07388416173709982
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.032993684501940825
+      },
+      {
+        "feature": "RH_5",
+        "standardized_positive_minus_negative": 0.012863855136534383
+      }
+    ]
+  },
+  "evaluated_groups": 2434,
+  "evaluated_rows": 19472,
+  "excluded_unmatched_rows": 7,
+  "group_size": 8,
+  "contract_positive_at_least": 6,
+  "success_groups": 10,
+  "failure_groups": 2424,
+  "queries_selected": 9937,
+  "queries_random_expectation_exact": 9905.12142857146,
+  "mean_selected": 4.0825801150369765,
+  "mean_random_exact": 4.069482920530591,
+  "gross_saved_vs_random": -31.878571428540454,
+  "net_saved_after_256_calibration": -287.87857142854045,
+  "percent_reduction_vs_random": -0.3218392793912276,
+  "full_reading_queries": 19472,
+  "contradicted_decisions": 0,
+  "all_completions_checked": true,
+  "independent_prefix_minimality_checked": true,
+  "C3_local_Lean_certificates": 8,
+  "C3_receipts": [
+    {
+      "positive_in_first_seven": 4,
+      "eighth_probe_available": false,
+      "verdict": "ACT",
+      "receipt_hash": "acde3dc2408b6aaed815b5885bc9e1e42497757eb57f730f42c19011ebf9316e"
+    },
+    {
+      "positive_in_first_seven": 4,
+      "eighth_probe_available": true,
+      "verdict": "ACT",
+      "receipt_hash": "3137d5022210075a246b4d55eb35a86e71bc43a7b1748dbffcc1983132f6b194"
+    },
+    {
+      "positive_in_first_seven": 5,
+      "eighth_probe_available": false,
+      "verdict": "REFUSE_ROBUST",
+      "receipt_hash": "fa7f148f4200c9c79c94ab76fadb75dacb6c1467ec7cfbc7accca1bf591e0680"
+    },
+    {
+      "positive_in_first_seven": 5,
+      "eighth_probe_available": true,
+      "verdict": "PROBE",
+      "receipt_hash": "7f67f78a044a321e1e97f417f87d5c97b71eacd1a372e588872ff15ff8626ad1"
+    },
+    {
+      "positive_in_first_seven": 6,
+      "eighth_probe_available": false,
+      "verdict": "ACT",
+      "receipt_hash": "67d680f1192a53798b1935702e93fdedf4e07b7ec8b809bf87610b8056fca30b"
+    },
+    {
+      "positive_in_first_seven": 6,
+      "eighth_probe_available": true,
+      "verdict": "ACT",
+      "receipt_hash": "91a4a541f2be8d541ed14335275682eec4f4f13bf4d3182a7ed31704960b232d"
+    },
+    {
+      "positive_in_first_seven": 7,
+      "eighth_probe_available": false,
+      "verdict": "ACT",
+      "receipt_hash": "67d680f1192a53798b1935702e93fdedf4e07b7ec8b809bf87610b8056fca30b"
+    },
+    {
+      "positive_in_first_seven": 7,
+      "eighth_probe_available": true,
+      "verdict": "ACT",
+      "receipt_hash": "91a4a541f2be8d541ed14335275682eec4f4f13bf4d3182a7ed31704960b232d"
+    }
+  ],
+  "transfer_pass": false,
+  "limitations": [
+    "Retrospective public archive, not a prospective physical campaign",
+    "The fixed cutoff of 100 Wh is an illustrative research contract",
+    "Supervised single-feature calibration is EXTERNAL to the frozen C3 engine",
+    "Efficiency may fail under chronological or domain distribution shift",
+    "Logical correctness only certifies the aggregate class of archived eight-record groups",
+    "C3 Lean verifies eight local declared contracts, not the whole Python pipeline",
+    "Input measurements of other sensors are assumed available without charging their own cost",
+    "Exactly 256 labelled target calibration measurements are charged to selected policy only"
+  ]
+}
