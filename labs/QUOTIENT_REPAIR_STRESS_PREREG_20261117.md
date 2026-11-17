@@ -1,0 +1,8 @@
+## ADDITIONAL EXPLORATORY STRESS PROTOCOL — compiled before this stress run
+Scope: explicitly test whether the learner really expands its synthesized representation when challenged by an unseen conditional interaction. Do not rebrand the original six cases as a repair success.
+
+Two of the 24 instrument input controls are unavailable during discovery; all 100 contexts and toggle sweeps keep those two controls OFF. They become accessible during 192 later falsification queries. The learner is not told the formula or the two control identities. The oracle is a fixed pure Boolean rule throughout (not changed at stage transition).
+
+A seventh synthetic oracle is the fixed reference Boolean rule XOR a conjunction of the two initially inaccessible bits and one original relevant variable, i.e. a predictable conditional interaction. This is a designed distribution shift and counterexample target, NOT a random unseen-world guarantee. The learner starts from a previously discovered support subset and fully re-builds its canonical Shannon decision DAG after a counterexample. Evaluate: report every mismatch, which new bits were added, and whether the repaired model matches independent sampled full-input truths and all of its projected assignments. Budget <=6000 oracle calls. Unconditional universality remains REFUSE.
+
+The masked controls and stage transition are deliberately imposed by the test designer (important limit) so this constitutes an adversarial **representation-repair demonstration**, not proof that the learner will locate every rare exception on its own. Do not tune after scoring. Historical kernel frozen.
