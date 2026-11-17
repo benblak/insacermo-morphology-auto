@@ -1,0 +1,59 @@
+name: INSACERMO — Preregistered Exoplanet Unknown Invariant
+on:
+  push:
+    branches:
+      - lab/c3-exoplanet-unknown-invariant-blind-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze historic INSACERMO engine and preregistration
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          test -s labs/EXOPLANET_UNKNOWN_LAW_PREREG_20261117.md
+          python3 -m py_compile labs/exoplanet_target_free_discovery.py
+      - name: Install minimal numerical dependencies
+        run: python3 -m pip install --disable-pip-version-check numpy
+      - name: Run NASA exoplanet invariant hunt and archive raw output
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_exoplanet
+          set +e
+          python3 labs/exoplanet_target_free_discovery.py /tmp/insacermo_exoplanet > /tmp/insacermo_exoplanet/execution.log 2>&1
+          result=$?
+          echo "exit_code=$result" > /tmp/insacermo_exoplanet/status.txt
+          cat /tmp/insacermo_exoplanet/execution.log
+          if [ "$result" -ne 0 ]; then
+            echo "status=EXECUTION_ERROR" >> /tmp/insacermo_exoplanet/status.txt
+          elif grep -q EXOPLANET_INFEASIBLE /tmp/insacermo_exoplanet/execution.log; then
+            echo "status=INFEASIBLE" >> /tmp/insacermo_exoplanet/status.txt
+          else
+            echo "status=EXECUTED_AWAIT_AUDIT" >> /tmp/insacermo_exoplanet/status.txt
+          fi
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_EXOPLANET_UNKNOWN_INVARIANT_COMPLETE
+          path: /tmp/insacermo_exoplanet
+          retention-days: 90
+      - name: Publish outcome on isolated branch, including failures
+        if: always()
+        run: |
+          test -f /tmp/insacermo_exoplanet/status.txt || exit 0
+          mkdir -p labs/exoplanet_results_20261117
+          cp /tmp/insacermo_exoplanet/status.txt labs/exoplanet_results_20261117/
+          cp /tmp/insacermo_exoplanet/execution.log labs/exoplanet_results_20261117/ || true
+          cp /tmp/insacermo_exoplanet/audit.json labs/exoplanet_results_20261117/ || true
+          cp /tmp/insacermo_exoplanet/provenance.json labs/exoplanet_results_20261117/ || true
+          cp /tmp/insacermo_exoplanet/sealed_before_holdout.json labs/exoplanet_results_20261117/ || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/exoplanet_results_20261117
+          git commit -m "lab: archive untouched exoplanet discovery outcome [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-exoplanet-unknown-invariant-blind-20261117
