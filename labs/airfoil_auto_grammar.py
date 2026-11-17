@@ -17,7 +17,7 @@ SPEED_HOLD=31.7
 PREREG="08efec5710224a45069da2ee1375e750142bf52b"
 RIDGE=1.
 def digest(b):
-    return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\\0"+b).hexdigest()
+    return hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
 def rmse(y,p):
     return float(np.sqrt(np.mean((np.asarray(y)-p)**2)))
 def fit(Z,y,cols,lam=RIDGE):
@@ -79,7 +79,7 @@ def main(output):
     assert digest(data)==EXPECTED_BLOB,("SOURCE_UNEXPECTED",digest(data))
     rows=np.asarray([[float(v) for v in line.split()] for line in data.decode().splitlines() if line.strip()],float)
     assert rows.shape==(1503,6),rows.shape
-    (out/"source_data_sha256.txt").write_text(hashlib.sha256(data).hexdigest()+"\\n")
+    (out/"source_data_sha256.txt").write_text(hashlib.sha256(data).hexdigest()+"\n")
     X=rows[:,:5]; y=rows[:,5];speeds=X[:,3]
     hold=np.flatnonzero(np.isclose(speeds,SPEED_HOLD))
     known=np.flatnonzero(~np.isclose(speeds,SPEED_HOLD))
@@ -120,8 +120,8 @@ def main(output):
         mean=mu.tolist(),std=sd.tolist(),challenge_indices=chosen,
         discovery_indices=discovery.tolist(),holdout_row_ids=hold.tolist(),
         dataset_git_blob=EXPECTED_BLOB)
-    (out/"sealed_model_before_holdout.json").write_text(json.dumps(sealed,indent=2)+"\\n")
-    (out/"query_trace.json").write_text(json.dumps(query_trace,indent=2)+"\\n")
+    (out/"sealed_model_before_holdout.json").write_text(json.dumps(sealed,indent=2)+"\n")
+    (out/"query_trace.json").write_text(json.dumps(query_trace,indent=2)+"\n")
     # The first holdout access is here.
     ph=pred(Z[hold],selected,coef)
     linear_coef=fit(Z[train],y[train],list(range(5)))
@@ -144,8 +144,8 @@ def main(output):
         "Restricted programmer-defined basis grammar, not unconstrained discovery",
         "No Lean verification of learned aerodynamic model",
         "Absolute errors and predictive transfer are empirical, not mathematical proofs"])
-    (out/"audit.json").write_text(json.dumps(result,indent=2)+"\\n")
-    (out/"search_trace.json").write_text(json.dumps(search_trace,indent=2)+"\\n")
+    (out/"audit.json").write_text(json.dumps(result,indent=2)+"\n")
+    (out/"search_trace.json").write_text(json.dumps(search_trace,indent=2)+"\n")
     print("AIRFOIL_RESULT",json.dumps({k:result[k] for k in ("holdout_records","holdout_rmse_dB","linear_rmse_dB","improvement_vs_linear_pct","verdict")}),flush=True)
 if __name__=="__main__":
     import sys
