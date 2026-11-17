@@ -1,0 +1,130 @@
+name: INSACERMO - Untrusted researcher, 2107 observed labels and universal XOR Lean proofs
+on:
+  push:
+    branches:
+      - lab/c3-untrusted-python-formal-evidence-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    env:
+      LEAN_PATH: ".:lean"
+      PYTHONPATH: ".:labs"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert original kernel frozen and compile scripts
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          test -s labs/UNTRUSTED_PYTHON_PROOF_CARRYING_PREREG_20261117.md
+          python3 -m py_compile labs/unified_xor_discovery.py labs/unified_xor_independent_audit.py labs/proof_carrying_untrusted_generator.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          lean --version
+      - name: Re-run untrusted discoverer and separately verify real oracle transcripts
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_untrusted
+          python3 labs/unified_xor_discovery.py /tmp/insacermo_untrusted > /tmp/insacermo_untrusted/discovery.log 2>&1
+          python3 labs/unified_xor_independent_audit.py /tmp/insacermo_untrusted > /tmp/insacermo_untrusted/independent.log 2>&1
+          cat /tmp/insacermo_untrusted/discovery.log
+          cat /tmp/insacermo_untrusted/independent.log
+          test "$(sha256sum /tmp/insacermo_untrusted/xor_sealed_before_holdout.json | cut -d' ' -f1)" = "92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d"
+      - name: Generate untrusted certificates without accessing private oracle code
+        shell: bash
+        run: |
+          set -e
+          d=/tmp/insacermo_untrusted
+          python3 labs/proof_carrying_untrusted_generator.py "$d/xor_sealed_before_holdout.json" "$d/TraceCertificate.lean"
+          python3 labs/proof_carrying_untrusted_generator.py "$d/xor_sealed_before_holdout.json" "$d/TraceCertificate_mutated_label.lean" --attack label
+          python3 labs/proof_carrying_untrusted_generator.py "$d/xor_sealed_before_holdout.json" "$d/TraceCertificate_mutated_coordinate.lean" --attack coordinate
+          sha256sum "$d/"TraceCertificate*.lean > "$d/proof_sources.sha256"
+      - name: KERNEL CERTIFICATION - all 2107 basis observations, seven universal 24-bit formulas, impossibility theorem
+        shell: bash
+        run: |
+          set +e
+          d=/tmp/insacermo_untrusted
+          timeout 900 lean "$d/TraceCertificate.lean" > "$d/lean_positive.log" 2>&1
+          rc=$?
+          echo "lean_main_exit=$rc" > "$d/proof_status.txt"
+          cat "$d/lean_positive.log"
+          exit "$rc"
+      - name: NEGATIVE ATTACK - tampered actual source label must fail Lean
+        shell: bash
+        run: |
+          set +e
+          d=/tmp/insacermo_untrusted
+          timeout 120 lean "$d/TraceCertificate_mutated_label.lean" > "$d/lean_mutated_label.log" 2>&1
+          rc=$?
+          echo "lean_mutated_label_exit=$rc" >> "$d/proof_status.txt"
+          if [ "$rc" -eq 0 ]; then
+            echo "FATAL: tampered oracle label was formally accepted"
+            exit 1
+          fi
+          echo "EXPECTED_REJECTION_LABEL rc=$rc"
+          grep -m 2 -E "error:|failed|error" "$d/lean_mutated_label.log" || true
+      - name: NEGATIVE ATTACK - corrupted XOR input mask must fail Lean
+        shell: bash
+        run: |
+          set +e
+          d=/tmp/insacermo_untrusted
+          timeout 120 lean "$d/TraceCertificate_mutated_coordinate.lean" > "$d/lean_mutated_coordinate.log" 2>&1
+          rc=$?
+          echo "lean_mutated_coordinate_exit=$rc" >> "$d/proof_status.txt"
+          if [ "$rc" -eq 0 ]; then
+            echo "FATAL: corrupted representation was formally accepted"
+            exit 1
+          fi
+          echo "EXPECTED_REJECTION_COORDINATE rc=$rc"
+          grep -m 2 -E "error:|failed|error" "$d/lean_mutated_coordinate.log" || true
+      - name: Final validate no false global law claim and unchanged finite C3
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          d=Path("/tmp/insacermo_untrusted")
+          x=json.loads((d/"xor_independent_receipt.json").read_text())
+          c=json.loads((d/"TraceCertificate.json").read_text())
+          status=(d/"proof_status.txt").read_text()
+          assert x["result"]=="INDEPENDENT_XOR_UNIFIED_PASS" and x["queries_replayed"]==5309
+          assert c["recorded_basis_observations"]==2107 if "recorded_basis_observations" in c else c["recorded_basis_observations"]==2107
+          assert c["source_seal_sha256"]==x["models_sha256"] if "models_sha256" in x else c["source_seal_sha256"]==hashlib.sha256((d/"xor_sealed_before_holdout.json").read_bytes()).hexdigest()
+          assert "lean_main_exit=0" in status
+          assert "lean_mutated_label_exit=" in status and "lean_mutated_label_exit=0" not in status
+          assert "lean_mutated_coordinate_exit=" in status and "lean_mutated_coordinate_exit=0" not in status
+          report={"verdict":"UNTRUSTED_RESEARCHER_PROOF_CARRYING_EVIDENCE_PASS",
+             "original_engine_unchanged":True,"independent_oracle_queries_checked":5309,
+             "basis_labels_kernel_certified":2107,"polynomial_formulas_kernel_verified":7,
+             "input_domain_for_conditional_formulas":16777216,
+             "tampered_label_rejected":True,"tampered_coordinate_rejected":True,
+             "global_unknown_oracle_truth":"REFUSE_UNCONDITIONAL",
+             "python_algorithm_formally_verified":False,
+             "source_seal_sha256":c["source_seal_sha256"],
+             "lean_proof_sha256":c["lean_source_sha256"]}
+          (d/"final_audit.json").write_text(json.dumps(report,indent=2)+"\n")
+          print(report["verdict"])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_UNTRUSTED_PYTHON_TRACE_CARRYING_LEAN
+          path: /tmp/insacermo_untrusted/
+          retention-days: 90
+      - name: Publish SOURCE-bound failures as well as PASS
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p labs/untrusted_trace_results_20261117
+          for name in final_audit.json proof_status.txt proof_sources.sha256 TraceCertificate.lean TraceCertificate.json lean_positive.log lean_mutated_label.log lean_mutated_coordinate.log xor_independent_receipt.json; do
+            test ! -f /tmp/insacermo_untrusted/$name || cp /tmp/insacermo_untrusted/$name labs/untrusted_trace_results_20261117/
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/untrusted_trace_results_20261117
+          git commit -m "lab: archive certified data-bound results, tampering attacks and failure logs [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-untrusted-python-formal-evidence-20261117
