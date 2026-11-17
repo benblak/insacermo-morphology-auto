@@ -36,6 +36,31 @@ jobs:
             echo "status=EXECUTED_AWAIT_AUDIT" >> /tmp/insacermo_exoplanet/status.txt
           fi
           exit 0
+      - name: Independent replay of all 216 oracle probes and held-out metrics
+        shell: bash
+        run: |
+          set +e
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          d=Path('/tmp/insacermo_exoplanet/nasa_source.csv')
+          assert d.exists()
+          assert hashlib.sha256(d.read_bytes()).hexdigest() == '2d35f6c7b82e55957f33e64adf010e26f5131996460634774aeb82d0ab0f3252', 'NASA snapshot changed: do not overwrite original outcome'
+          PY
+          source_ok=$?
+          if [ "$source_ok" -ne 0 ]; then
+            echo "independent_audit=SOURCE_MISMATCH" >> /tmp/insacermo_exoplanet/status.txt
+          else
+            python3 labs/exoplanet_independent_audit.py /tmp/insacermo_exoplanet > /tmp/insacermo_exoplanet/independent.log 2>&1
+            audit_ok=$?
+            cat /tmp/insacermo_exoplanet/independent.log
+            if [ "$audit_ok" -eq 0 ]; then
+              echo "independent_audit=PASS" >> /tmp/insacermo_exoplanet/status.txt
+            else
+              echo "independent_audit=FAIL" >> /tmp/insacermo_exoplanet/status.txt
+            fi
+          fi
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -48,6 +73,8 @@ jobs:
           test -f /tmp/insacermo_exoplanet/status.txt || exit 0
           mkdir -p labs/exoplanet_results_20261117
           cp /tmp/insacermo_exoplanet/status.txt labs/exoplanet_results_20261117/
+          cp /tmp/insacermo_exoplanet/independent_receipt.json labs/exoplanet_results_20261117/ || true
+          cp /tmp/insacermo_exoplanet/independent.log labs/exoplanet_results_20261117/ || true
           cp /tmp/insacermo_exoplanet/execution.log labs/exoplanet_results_20261117/ || true
           cp /tmp/insacermo_exoplanet/audit.json labs/exoplanet_results_20261117/ || true
           cp /tmp/insacermo_exoplanet/provenance.json labs/exoplanet_results_20261117/ || true
