@@ -1,0 +1,131 @@
+{
+  "model_seal_sha256": "6a43db4c88213cba6d71ca1d7aeb52f5704a1084804e2a10a19b1c0c2dbc8455",
+  "selected": "previous_dropout",
+  "training": {
+    "baseline_brier": 0.003589086716279829,
+    "baseline_logloss": 0.023862087282009517,
+    "brier": 0.003511556498676424,
+    "brier_gain": 0.021601656279781056,
+    "delta_event_rate": 0.1398146629489913,
+    "dropouts": 63,
+    "logloss": 0.02223002463889494,
+    "logloss_gain": 0.06839563630064527,
+    "n": 17490,
+    "rate_0": 0.00304247990815155,
+    "rate_1": 0.14285714285714285,
+    "table": [
+      [
+        17367,
+        53
+      ],
+      [
+        60,
+        10
+      ]
+    ]
+  },
+  "transfer": [
+    {
+      "baseline_brier": 0.0031368154374000505,
+      "baseline_logloss": 0.02130753140036333,
+      "brier": 0.0029873328624217595,
+      "brier_gain": 0.04765424614914204,
+      "delta_event_rate": 0.23395330637798356,
+      "dropouts": 55,
+      "logloss": 0.018762202361835786,
+      "logloss_gain": 0.11945677754505823,
+      "n": 17480,
+      "rate_0": 0.0024103299856527978,
+      "rate_1": 0.23636363636363636,
+      "station": "42002",
+      "table": [
+        [
+          17383,
+          42
+        ],
+        [
+          42,
+          13
+        ]
+      ],
+      "year": 2023
+    },
+    {
+      "baseline_brier": 0.0030464966449310696,
+      "baseline_logloss": 0.020797385359034748,
+      "brier": 0.0029642181865426375,
+      "brier_gain": 0.02700756573138896,
+      "delta_event_rate": 0.1530396344925789,
+      "dropouts": 39,
+      "logloss": 0.019091543342520598,
+      "logloss_gain": 0.08202194588720746,
+      "n": 12764,
+      "rate_0": 0.002515921062976649,
+      "rate_1": 0.15555555555555556,
+      "station": "46002",
+      "table": [
+        [
+          12687,
+          32
+        ],
+        [
+          38,
+          7
+        ]
+      ],
+      "year": 2023
+    },
+    {
+      "baseline_brier": 0.0021694185963771345,
+      "baseline_logloss": 0.015843400898320936,
+      "brier": 0.0021491947250422477,
+      "brier_gain": 0.0093222540678225,
+      "delta_event_rate": 0.09810844892812107,
+      "dropouts": 38,
+      "logloss": 0.0149482791777471,
+      "logloss_gain": 0.05649807931507311,
+      "n": 17496,
+      "rate_0": 0.0018915510718789407,
+      "rate_1": 0.1,
+      "station": "41002",
+      "table": [
+        [
+          17413,
+          33
+        ],
+        [
+          45,
+          5
+        ]
+      ],
+      "year": 2024
+    },
+    {
+      "baseline_brier": 0.0036215344036753115,
+      "baseline_logloss": 0.024045360982004202,
+      "brier": 0.0036178008963831496,
+      "brier_gain": 0.0010309186317194463,
+      "delta_event_rate": 0.07828244460380936,
+      "dropouts": 49,
+      "logloss": 0.0234757286214164,
+      "logloss_gain": 0.023689906797993987,
+      "n": 13481,
+      "rate_0": 0.0033502084574151283,
+      "rate_1": 0.08163265306122448,
+      "station": "42002",
+      "table": [
+        [
+          13387,
+          45
+        ],
+        [
+          45,
+          4
+        ]
+      ],
+      "year": 2024
+    }
+  ],
+  "verdict": "MECHANISM_ASSOCIATION_TRANSFER_PASS",
+  "warning": "Dropout association is not causation; physical wave height at missing records remains unknowable."
+}
