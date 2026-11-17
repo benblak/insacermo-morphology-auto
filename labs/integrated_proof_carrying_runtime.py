@@ -26,7 +26,7 @@ def write_json(path,obj):
     path.write_text(json.dumps(obj,ensure_ascii=False,indent=2,sort_keys=True)+"\n")
 def model(good,*,sense=None,nfalse=None,ntrue=None,kind=None,depth=0,budget=0,
           lower=None,upper=None,must=None,may=None):
-    w=len(good);a=len(good[0]);sense=sense or [];q=len(sense)
+    w=len(good);a=len(good[0]);sense=sense if sense is not None else [[3]*w];q=len(sense)
     obj=dict(worldCount=w,actionCount=a,probeCount=q,
       good=good,sense=sense,
       nextFalse=nfalse if nfalse is not None else [[i for i in range(w)] for _ in range(q)],
