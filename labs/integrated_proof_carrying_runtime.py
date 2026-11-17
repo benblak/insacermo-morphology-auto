@@ -105,7 +105,7 @@ def discover_challenge():
           patched_witnesses_replayed=True,
           global_law_certified=False,
           original_conditional_terms=description["minimal_positive_terms"]),
-          alternate,context)
+          alternate,FULL)
     except Exception:
         alternate.close()
         raise
@@ -199,11 +199,11 @@ def execute(out):
         source_sha256=probe["source_sha256"])
     event("CERTIFIED_ACTIVE_PROBE",dict(input=probe_input,kind="SYNTHETIC",
         proof=probe["receipt_sha256"]))
-    # Use same query-only alternate oracle; earlier challenge read this x, but
-    # C3 gate precedes *this* replay of observed value. Distinct phase, declared.
+    # This full-ones input was NOT queried on the *alternate* device before
+    # certified PROBE: it is a genuinely fresh query in this local world.
     try: observed=alternate.ask(probe_input)
     finally:alternate.close()
-    assert observed==0
+    assert observed==1
     event("ACQUIRE_PROBE_RESPONSE",dict(input=probe_input,answer=observed))
     # New local world matches actually observed answer. It does not certify other x.
     act_after_model=model([[True,False]] if observed==0 else [[False,True]])
@@ -273,7 +273,7 @@ def execute(out):
         "C3 formal worlds and labels are dynamically generated from observed question, but bridge to NOAA raw bytes requires an independent raw-data auditor.",
         "Global monotonicity and invented exception patch are not Lean-proven for all 24-bit inputs; only finite local C3 contracts are certified.",
         "Simulated REPAIR is not physical actuation. The alternate device is an explicitly changed synthetic oracle variant.",
-        "Active-probe input had been used in an earlier challenge phase; its query-specific C3 verdict is still genuine but this is not a novel strategically chosen unseen query.",
+        "Active-probe input is fresh for the alternate device but chosen as a predetermined full-ones control, not a learned optimal query.",
         "No world-first physical law was discovered. These data were previously analyzed in separate labs.",
         "Not all previous experimental methods have been independently ported into the one orchestrator."
       ])
