@@ -1,0 +1,58 @@
+name: INSACERMO Airfoil — 281 Rowwise Lean Verification
+on:
+  push:
+    branches:
+      - lab/c3-airfoil-rowwise-fixedpoint-lean-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check frozen historical kernel and generator
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/airfoil_rowwise_lean_generator.py
+      - name: Install numpy and Lean 4.33.1
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Independent source replay and rowwise witness generation
+        run: python3 labs/airfoil_rowwise_lean_generator.py /tmp/airfoil_rowwise
+      - name: Lean kernel verify all 281 rowwise fixed-point calculations
+        run: |
+          lean --version
+          lean -T 3000000 /tmp/airfoil_rowwise/Airfoil281RowCertificate.lean
+      - name: Check receipt without assuming success
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          r=json.loads(Path('/tmp/airfoil_rowwise/rowwise_receipt.json').read_text())
+          assert r['holdout_records']==281
+          assert r['mathematical_5db_test']
+          assert r['mathematical_10pct_test']
+          assert r['max_fixedpoint_prediction_deviation_dB']<.001
+          print("ROW_WISE_LEAN_CONTRACT_VERIFIED",r['worst_case_improvement_percent'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_AIRFOIL_281_ROWS_LEAN_FIXEDPOINT
+          path: /tmp/airfoil_rowwise
+          retention-days: 90
+      - name: Archive successful local arithmetic proof only
+        if: success()
+        run: |
+          mkdir -p labs/airfoil_rowwise_lean_receipts_20261117
+          cp /tmp/airfoil_rowwise/rowwise_receipt.json labs/airfoil_rowwise_lean_receipts_20261117/
+          cp /tmp/airfoil_rowwise/Airfoil281RowCertificate.lean labs/airfoil_rowwise_lean_receipts_20261117/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/airfoil_rowwise_lean_receipts_20261117
+          git commit -m "lab: archive kernel-checked 281-record proof [skip ci]"
+          git push origin HEAD:lab/c3-airfoil-rowwise-fixedpoint-lean-20261117
