@@ -1,0 +1,20 @@
+# INSACERMO CORE — falsify and extend coordinate algebra, no domain detour
+2026-11-17. ISOLATED lab. Commit BEFORE executing or reading any new oracle answers. Historical MAX TOTAL/C3/Lean and all prior results unchanged.
+
+## Single unresolved scientific claim
+Can the learner recognize the **same self-discovered five-bit abstract concept** when hidden input coordinates are not mere renamed/flipped raw bits but overlapping XOR mixtures, by learning the representation change from answers rather than being handed a list of exact transforms?
+
+Synthetic Boolean hidden oracles, 24-bit inputs. Exactly the previously discovered five-input concept `H(a,b,c,d,e)=a⊕b⊕c⊕d⊕e⊕ab⊕cd`; in each clean case each latent input is an unknown GF(2) XOR of multiple raw controls. Fixed seed 73913, generated secrets in a separate oracle process; no learner import of oracle code or hidden masks. Source cases `source_0,1,2`, target cases `target_0,1,2`; `target_rare` includes a *precommitted single flipped* 24-bit input; `target_cubic` has one cubic interaction and `target_rank2` a different quadratic class. Negative controls must be refused as transfers.
+
+## Discover the representation family, not a named operator menu
+Start with no target formula or source/target coordinate map. Build a degree ladder from the generic algebra of Boolean functions (XOR, AND), which is disclosed as a **programmed mathematical primitive**, not created ex nihilo. Degree d coefficients identified by querying 24-bit inputs of Hamming weight ≤d. At each degree check 64 unseen randomized contexts, escalating to degree d+1 only after a counterexample. Use up to degree 3; higher-degree contradictions => `REFUSE_UNDER_BUDGET`.
+
+For degree-2 candidates, generate the bilinear *derivative* from learned coefficients, and infer its rank. Construct symplectic paired contrasts from a learned rank-4 bilinear form using deterministic elimination. Infer the residual affine invariant without the masks or a pre-enumerated transformation catalogue. If the resulting five automatically synthesized linear XOR features are independent and the exact quadratic polynomial agrees with the canonical 5-bit expression, declare `TRANSFER_CANDIDATE` relative to the prior discovered abstract concept. If not, refuse. This method searches *general linear XOR coordinates*, not the previous signed-permutation family. It does still rely on the generic GF(2) algebra provided by designers.
+
+Budget ≤3,000 unique oracle queries per case. Discovery model+query transcript must be sealed before querying 1,024 fresh 24-bit withheld inputs per target. Independent verifier reads secret and all model/trace files only AFTER sealing; checks every coefficient and every holdout prediction, including hidden rare exception. Verify newly inferred linear-feature masks and full algebraic polynomial identity by independent coefficient comparison. Compare with previous signed-permutation search: its 5-bit raw-support premise must fail for at least three clean targets.
+
+## Pass gates frozen BEFORE results
+(1) at least 2/3 distinct clean source functions and 3/3 clean target functions discover a rank-4, five-coordinate quotient carrying same latent algebraic primitive; (2) 1024/1024 correct new test points for 3/3 clean targets; (3) both negative target controls refused, including degree-3 law with observed refutation; (4) one-point rare exception remains globally uncertifiable, regardless of whether discovered; (5) independent audit PASS; (6) Lean formalizes correctness of algebraic transports and identifiability boundaries, with source-bound compile receipt. No claims of universal scientific discovery, asymptotic optimality, or Lean proving equivalence to inaccessible oracle secrets.
+
+## Honest failure cases
+The designed hidden laws are synthetic and the common quadratic class is seeded deliberately; discovery of this class is not an historical theorem. No finite nonexhaustive experiment can prove a general arbitrary oracle truly quadratic: all 24-bit global verdicts `REFUSE_UNCONDITIONAL`. Querying d≤3 masks can be costly. A fixed 1024-point holdout is probabilistic, not universal.
