@@ -1,0 +1,17 @@
+{
+  "result": "INDEPENDENT_XOR_UNIFIED_PASS",
+  "queries_replayed": 5309,
+  "accepted_conditional_quadratics": [
+    "source_0",
+    "source_1",
+    "source_2",
+    "target_0",
+    "target_1",
+    "target_2",
+    "target_rare"
+  ],
+  "holds_1024_each": true,
+  "hidden_counterexample": 978436,
+  "global_law": "REFUSE_UNCONDITIONAL",
+  "verified_coefficients_per_model": 301
+}

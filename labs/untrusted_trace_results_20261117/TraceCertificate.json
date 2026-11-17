@@ -1,0 +1,27 @@
+{
+  "status": "GENERATED_NOT_YET_VERIFIED",
+  "source_seal_sha256": "92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d",
+  "lean_source_sha256": "0391a960ecdc0197da27fc8fe08ebf938a8c5384792c5961b6822a9dea0f3093",
+  "attack": "none",
+  "models": 7,
+  "recorded_basis_observations": 2107,
+  "model_names": [
+    "source_0",
+    "source_1",
+    "source_2",
+    "target_0",
+    "target_1",
+    "target_2",
+    "target_rare"
+  ],
+  "labels_hashes": {
+    "source_0": "6e57420b7e4997ca3c5931e8dddd52e93e338c62af1e189f11a64b3ec92a9718",
+    "source_1": "1d881dfd2c054046500b31535220bf50c81b70a960fbd8f62d8c5984ec317b49",
+    "source_2": "65bc5daa3597890ba324cd26ce4edca7aa6604af6992a84326a0fce0789fc060",
+    "target_0": "a766283e47371bbc614a31aed18fbf822d03ff251caacfd0d73d6cf060eb533d",
+    "target_1": "5a6b4fd0de8b13b71baf1caa0fc6f059c2020e81b0ec167bf186e213720cc089",
+    "target_2": "5d7ec2ba94b12e169847317e0c8b86ba30b2d497e3571019ae2726fe9891bbdd",
+    "target_rare": "b0e59ca1e31b76d850b664a1b7aa7d7b372faa9f5aee076256d4e95c3b307a9a"
+  },
+  "scope": "2107 stated oracle labels plus 7 all-24-bit POLYNOMIAL EQUIVALENCES; not arbitrary oracle global correctness"
+}

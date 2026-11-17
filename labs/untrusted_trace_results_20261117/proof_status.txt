@@ -1,0 +1,1 @@
+lean_main_exit=1
