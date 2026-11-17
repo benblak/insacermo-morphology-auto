@@ -1,0 +1,58 @@
+name: INSACERMO Hidden Monotonicity — Detect or Refuse
+on:
+  push:
+    branches:
+      - lab/c3-hidden-structure-monotonicity-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical unchanged C3 and standalone experiment syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/hidden_structure_24bit_oracle.py labs/hidden_structure_24bit_c3.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original portable C3 verification kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Test monotone, obvious and hidden rare counterexamples plus C3
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: ".:labs"
+        run: python3 labs/hidden_structure_24bit_c3.py /tmp/insacermo_hidden_structure
+      - name: Check nonclaim of universal guarantee and C3 proof count
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("/tmp/insacermo_hidden_structure")
+          data=json.loads((root/"audit.json").read_text())
+          assert data["n_possible_inputs"]==16777216
+          assert not data["unconditional_monotonicity_certified"]
+          assert data["mode_obvious"]["violation_detected"]
+          assert data["mode_fixed_needle"]["exception_precommitted_before_queries"]
+          assert not data["mode_fixed_needle"]["observations_differing_from_clean"]
+          assert data["verified_lean_certificates"]==4
+          assert len(list(root.rglob("receipt.json")))==4
+          assert data["adversarial_posthoc_completion"]["indistinguishable_on_every_observed_query"]
+          print("HIDDEN_STRUCTURAL_ASSUMPTION_C3_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_HIDDEN_STRUCTURE_MONOTONICITY_4_LEAN
+          path: /tmp/insacermo_hidden_structure/
+          retention-days: 90
