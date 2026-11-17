@@ -1,0 +1,49 @@
+name: INSACERMO inverse — extract an unknown NOAA acquisition clock
+on:
+  push:
+    branches:
+      - lab/c3-inverse-observation-hidden-clock-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inverse:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze original INSACERMO kernel and validate Python syntax
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python -m py_compile labs/inverse_noaa_clock.py
+      - name: Discover cadence without supplied period, then falsify on four other primary sources
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_inverse_clock
+          set +e
+          python labs/inverse_noaa_clock.py /tmp/insacermo_inverse_clock > /tmp/insacermo_inverse_clock/run.log 2>&1
+          rc=$?
+          echo "program_exit=$rc" > /tmp/insacermo_inverse_clock/status.txt
+          sha256sum labs/inverse_noaa_clock.py | sed 's/^/source_sha256=/' >> /tmp/insacermo_inverse_clock/status.txt
+          cat /tmp/insacermo_inverse_clock/run.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_REAL_NOAA_INVERSE_CLOCK_RAW_AND_AUDIT
+          path: /tmp/insacermo_inverse_clock
+          retention-days: 90
+      - name: Publish original sealed model and audit, including negative outcomes
+        if: always()
+        run: |
+          mkdir -p labs/inverse_clock_results_20261117
+          for name in audit.json sealed_before_validation.json run.log status.txt; do
+            if [ -f "/tmp/insacermo_inverse_clock/$name" ]; then
+              cp "/tmp/insacermo_inverse_clock/$name" labs/inverse_clock_results_20261117/
+            fi
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/inverse_clock_results_20261117
+          git commit -m "lab: archive inverse observation verdict and original sealed model [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-inverse-observation-hidden-clock-20261117
