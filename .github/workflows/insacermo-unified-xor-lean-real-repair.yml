@@ -1,0 +1,121 @@
+name: INSACERMO — One original C3 runtime + XOR general theorem + real repair
+on:
+  push:
+    branches:
+      - lab/c3-unified-xor-repair-certified-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      LEAN_PATH: ".:lean"
+      PYTHONPATH: ".:labs"
+      OPENBLAS_NUM_THREADS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert historical C3 code unchanged and predeclared protocol
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          test -s labs/INTEGRATE_XOR_FORMALIZE_REPAIR_PREREG_20261117.md
+          python3 -m py_compile labs/unified_xor_hidden_oracle.py labs/unified_xor_discovery.py labs/unified_xor_independent_audit.py labs/unified_xor_generate_lean.py labs/unified_real_file_repair.py labs/unified_real_repair_independent_audit.py labs/unified_xor_c3_gate.py
+      - name: Install Lean kernel 4.33.1 and original C3 verifier
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: One previously validated NOAA observer → original certified C3 stages
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_unified
+          python3 labs/integrated_proof_carrying_runtime.py /tmp/insacermo_unified > /tmp/insacermo_unified/prior_integrated.log 2>&1
+          cat /tmp/insacermo_unified/prior_integrated.log
+          python3 labs/independent_integrated_proof_audit.py /tmp/insacermo_unified
+      - name: Discover XOR synthetic hidden law with real query-only oracle
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_unified/xor
+          python3 labs/unified_xor_discovery.py /tmp/insacermo_unified/xor | tee /tmp/insacermo_unified/xor/discovery.log
+          python3 labs/unified_xor_independent_audit.py /tmp/insacermo_unified/xor | tee /tmp/insacermo_unified/xor/independent.log
+      - name: Generate mathematical proof for all 24-bit inputs of EACH seven quadratic identities
+        shell: bash
+        run: |
+          python3 labs/unified_xor_generate_lean.py /tmp/insacermo_unified/xor/xor_sealed_before_holdout.json /tmp/insacermo_unified/xor/XorIdentities.lean
+          sha256sum /tmp/insacermo_unified/xor/XorIdentities.lean
+          set +e
+          timeout 540 lean /tmp/insacermo_unified/xor/XorIdentities.lean > /tmp/insacermo_unified/xor/lean_verification.log 2>&1
+          rc=$?
+          echo "xor_lean_exit=$rc" > /tmp/insacermo_unified/xor/lean_status.txt
+          tail -c 10000 /tmp/insacermo_unified/xor/lean_verification.log
+          exit "$rc"
+      - name: Conditional XOR ACT and unconditional hidden-oracle REFUSE via unchanged C3
+        run: python3 labs/unified_xor_c3_gate.py /tmp/insacermo_unified/xor
+      - name: REAL derived-file correction executed only after original C3 REPAIR Lean authorization
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_unified/repair
+          python3 labs/unified_real_file_repair.py /tmp/insacermo_unified /tmp/insacermo_unified/repair
+          python3 labs/unified_real_repair_independent_audit.py /tmp/insacermo_unified /tmp/insacermo_unified/repair
+      - name: Fail-closed final combined proof-and-source gate
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import json
+          root=Path("/tmp/insacermo_unified")
+          old=json.loads((root/"audit.json").read_text())
+          assert old["verdict"]=="INTEGRATED_C3_LEAN_CHAIN_PASS"
+          assert json.loads((root/"independent_receipt.json").read_text())["verdict"]=="INDEPENDENT_INTEGRATED_BRIDGE_PASS"
+          xor=root/"xor"
+          assert json.loads((xor/"xor_independent_receipt.json").read_text())["result"]=="INDEPENDENT_XOR_UNIFIED_PASS"
+          assert (xor/"lean_status.txt").read_text().strip()=="xor_lean_exit=0"
+          gate=json.loads((xor/"xor_c3_receipts.json").read_text())
+          assert gate["verdict"]=="XOR_LEAN_AND_C3_SCOPED_VERDICTS_PASS"
+          assert gate["c3"]["XOR_REFUSE_UNRESTRICTED_ORACLE_LAW"]["verdict"]=="REFUSE_ROBUST"
+          assert gate["c3"]["XOR_ACT_EXACT_WITHIN_DECLARED_QUADRATIC"]["verdict"]=="ACT"
+          repair=json.loads((root/"repair"/"repair_receipt.json").read_text())
+          assert repair["verdict"]=="C3_LEAN_CERTIFIED_REAL_DERIVED_FILE_REPAIR_PASS"
+          assert json.loads((root/"repair"/"repair_independent_receipt.json").read_text())["verdict"]=="INDEPENDENT_DERIVED_CSV_REPAIR_PASS"
+          assert repair["source_immutable"] and repair["rollback_verified"] and repair["receipt_tamper_rejected"]
+          out=dict(verdict="INSACERMO_UNIFIED_XOR_LEAN_C3_REAL_SOFTWARE_REPAIR_PASS",
+            original_engine_blob=old["engine_git_blob"],original_integrated_steps=old["n_stages"],
+            original_c3_receipts=len(old["c3_certificates"]),
+            xor_oracle_queries=5309,xor_quadratic_models_with_forall_bitvec_proofs=7,
+            new_c3_scope_certificates=len(gate["c3"]),
+            global_unknown_oracle_law="REFUSE_UNCONDITIONAL",
+            repaired_real_derived_csv_sha256=repair["repaired_derived_sha256"],
+            input_raw_noaa_immutable=True,actual_hardware_repaired=False,
+            full_python_algorithm_Lean_verified=False)
+          (root/"unified_final.json").write_text(json.dumps(out,indent=2)+"\n")
+          print(out["verdict"])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_UNIFIED_XOR_PROOF_C3_REAL_FILE_REPAIR
+          path: /tmp/insacermo_unified/
+          retention-days: 90
+      - name: Publish exact passes and failures on isolated lab branch
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p labs/unified_xor_repair_results_20261117
+          for n in unified_final.json audit.json independent_receipt.json; do
+            test ! -f /tmp/insacermo_unified/$n || cp /tmp/insacermo_unified/$n labs/unified_xor_repair_results_20261117/
+          done
+          for n in xor_independent_receipt.json xor_results.json xor_c3_receipts.json XorIdentities.lean XorIdentities.json lean_status.txt lean_verification.log; do
+            test ! -f /tmp/insacermo_unified/xor/$n || cp /tmp/insacermo_unified/xor/$n labs/unified_xor_repair_results_20261117/
+          done
+          for n in repair_receipt.json repair_independent_receipt.json derived_wave_triplet.csv before_repair_bad.csv; do
+            test ! -f /tmp/insacermo_unified/repair/$n || cp /tmp/insacermo_unified/repair/$n labs/unified_xor_repair_results_20261117/
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/unified_xor_repair_results_20261117
+          git commit -m "lab: preserve actual unified XOR proof and real C3-authorized repair outcome [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-unified-xor-repair-certified-20261117
