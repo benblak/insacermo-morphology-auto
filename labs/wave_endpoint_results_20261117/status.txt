@@ -1,5 +1,5 @@
 program_exit=0
 program_sha256=b79a3984da8176bc6214a134c9f98ff533b2c29e53565c1e34d6c6f661ca1f3a  labs/inverse_wave_endpoint_certificates.py
 independent_exit=0
-lean_exit=1
-lean_source_sha256=2c3b4d3b9b4b010965ee4b5b1aa13600d90e3ec930665e1db90ce60b201db45a  labs/WaveEndpointObservability.lean
+lean_exit=0
+lean_source_sha256=d29786ff50cff1b6c8992b60f95f53fc2c31eca66057affbeb37db0b7da8da95  labs/WaveEndpointObservability.lean
