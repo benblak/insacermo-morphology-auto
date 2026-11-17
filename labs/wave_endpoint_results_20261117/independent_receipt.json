@@ -1,0 +1,40 @@
+{
+  "result": "INDEPENDENT_WAVE_ENDPOINTS_PASS",
+  "archives": 5,
+  "eligible_missing": 195,
+  "exact_measured_05_events": 8,
+  "independently_verified": [
+    {
+      "station": "41002",
+      "year": 2023,
+      "gaps": 50,
+      "measured_gap_variations_ge05": 2
+    },
+    {
+      "station": "42002",
+      "year": 2023,
+      "gaps": 32,
+      "measured_gap_variations_ge05": 1
+    },
+    {
+      "station": "46002",
+      "year": 2023,
+      "gaps": 32,
+      "measured_gap_variations_ge05": 2
+    },
+    {
+      "station": "41002",
+      "year": 2024,
+      "gaps": 40,
+      "measured_gap_variations_ge05": 1
+    },
+    {
+      "station": "42002",
+      "year": 2024,
+      "gaps": 41,
+      "measured_gap_variations_ge05": 2
+    }
+  ],
+  "verdict": "REFUSE_PHYSICAL_ASSOCIATION",
+  "midpoints_fabricated": 0
+}

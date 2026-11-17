@@ -1,0 +1,17 @@
+info: downloading https://releases.lean-lang.org/lean4/v4.33.1/lean-4.33.1-linux.tar.zst
+info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.33.1
+labs/WaveEndpointObservability.lean:5:22: error(lean.unknownIdentifier): Unknown constant `Nat.dist`
+labs/WaveEndpointObservability.lean:8:28: warning: Variable name `missingValue1` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _missingValue1
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+labs/WaveEndpointObservability.lean:8:42: warning: Variable name `missingValue2` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _missingValue2
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+labs/WaveEndpointObservability.lean:29:21: error(lean.unknownIdentifier): Unknown constant `Nat.dist`
+labs/WaveEndpointObservability.lean:31:8: warning: declaration uses `sorry`
