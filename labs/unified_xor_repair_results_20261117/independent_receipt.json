@@ -1,0 +1,30 @@
+{
+  "verdict": "INDEPENDENT_INTEGRATED_BRIDGE_PASS",
+  "checked_sources": [
+    "41002h2023.txt.gz",
+    "42002h2023.txt.gz",
+    "46002h2023.txt.gz"
+  ],
+  "train_wave_clock_phase_counts": [
+    [
+      17506,
+      0
+    ],
+    [
+      74,
+      17438
+    ],
+    [
+      17508,
+      0
+    ]
+  ],
+  "holdout_f1": 0.998282278843401,
+  "true_observed_endpoints_dm": [
+    74,
+    80
+  ],
+  "unobserved_midpoint": "UNKNOWN",
+  "c3_local_receipt_source_hashes_checked": 5,
+  "no_universal_discovery_claim": true
+}

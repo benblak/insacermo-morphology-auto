@@ -1,0 +1,46 @@
+{
+  "verdict": "XOR_RESEARCHER_COMPLETED_NEEDS_INDEPENDENT_AUDIT",
+  "models": 9,
+  "accepted": 7,
+  "queries": 5309,
+  "scores": [
+    {
+      "name": "target_0",
+      "n": 1024,
+      "errors": 0,
+      "point_hash": "932ea3dcaea761a4d96d05afd1334fcc3d97c5e41e5520f0c06626dc7a5e48b2"
+    },
+    {
+      "name": "target_1",
+      "n": 1024,
+      "errors": 0,
+      "point_hash": "93727505de1c9f89ce0b7155660d449a6e0fd0d1585849cf20b588f53f0ce48e"
+    },
+    {
+      "name": "target_2",
+      "n": 1024,
+      "errors": 0,
+      "point_hash": "eea7f31d3ca7a46623806846014075e1d693983de118c0aea93bc97a071e6400"
+    },
+    {
+      "name": "target_rare",
+      "n": 1024,
+      "errors": 0,
+      "point_hash": "334317e5f4b9fa3a88f622feb5ef06088ca5e49246215a198139d6d26ccb7585"
+    },
+    {
+      "name": "target_cubic",
+      "n": 1024,
+      "errors": null,
+      "point_hash": "51deb006211519b9e4c4e2bb2d09cb4b5d7cb39d0477da3fb04a1841b8bb68e2"
+    },
+    {
+      "name": "target_rank2",
+      "n": 1024,
+      "errors": null,
+      "point_hash": "d6bb00df541ad7d51a931ce98e5719bf09ab5fe1c94d6de3aa28e30fb691cee5"
+    }
+  ],
+  "seal_sha256": "92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d",
+  "global_claim": "REFUSE_UNCONDITIONAL"
+}

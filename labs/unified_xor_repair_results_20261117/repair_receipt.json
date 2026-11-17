@@ -1,0 +1,32 @@
+{
+  "verdict": "C3_LEAN_CERTIFIED_REAL_DERIVED_FILE_REPAIR_PASS",
+  "original_noaa_gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+  "source_immutable": true,
+  "source_observed_endpoint_decimeters": [
+    74,
+    80
+  ],
+  "observed_midpoint": null,
+  "faulty_derived_sha256": "adb64733f72c398f747a49d066298576505c9b11842d3af908fb8bc9c766fe86",
+  "repaired_derived_sha256": "c6a2b1b40e75d5c1645a6cacfea0397e362857bd42b71b5c57031fbc87b324b4",
+  "bad_source_row": {
+    "timestamp_utc": "2023-02-23T10:10:00+00:00",
+    "wave_height_m": "0.0",
+    "observed": "true",
+    "quality": "CALM_INFERRED_BAD",
+    "source_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04"
+  },
+  "good_source_row": {
+    "timestamp_utc": "2023-02-23T10:10:00+00:00",
+    "wave_height_m": "",
+    "observed": "false",
+    "quality": "MISSING_NOT_ZERO",
+    "source_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04"
+  },
+  "rollback_verified": true,
+  "atomic_rewrite": true,
+  "receipt_tamper_rejected": true,
+  "c3_receipt_sha256": "c6083bd6c07df9e729c724ea16105201a235c751e2e5873f935099db67924b83",
+  "c3_contract_sha256": "16fff60780c0f277c3ac3913fb5c3489318975da4a094ab3e6c72cdceb2be66f",
+  "scope": "ONE LOCAL DERIVED CSV. NOT PHYSICAL SENSOR OR NOAA SOURCE FILE MODIFICATION."
+}
