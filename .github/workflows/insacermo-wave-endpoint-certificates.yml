@@ -27,6 +27,30 @@ jobs:
           sha256sum labs/inverse_wave_endpoint_certificates.py | sed 's/^/program_sha256=/' >> /tmp/insacermo_wave_endpoint/status.txt
           cat /tmp/insacermo_wave_endpoint/execution.log
           exit 0
+      - name: Independent raw-archive endpoint audit
+        shell: bash
+        run: |
+          set +e
+          python labs/independent_wave_endpoint_audit.py /tmp/insacermo_wave_endpoint > /tmp/insacermo_wave_endpoint/independent.log 2>&1
+          rc=$?
+          echo "independent_exit=$rc" >> /tmp/insacermo_wave_endpoint/status.txt
+          cat /tmp/insacermo_wave_endpoint/independent.log
+          exit 0
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean independent epistemic midpoint theorem
+        shell: bash
+        run: |
+          set +e
+          lean labs/WaveEndpointObservability.lean > /tmp/insacermo_wave_endpoint/lean.log 2>&1
+          rc=$?
+          echo "lean_exit=$rc" >> /tmp/insacermo_wave_endpoint/status.txt
+          sha256sum labs/WaveEndpointObservability.lean | sed 's/^/lean_source_sha256=/' >> /tmp/insacermo_wave_endpoint/status.txt
+          cat /tmp/insacermo_wave_endpoint/lean.log
+          exit 0
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -37,7 +61,7 @@ jobs:
         if: always()
         run: |
           mkdir -p labs/wave_endpoint_results_20261117
-          for name in audit.json day_counts.json execution.log status.txt; do
+          for name in audit.json day_counts.json execution.log status.txt independent_receipt.json independent.log lean.log; do
             test ! -f /tmp/insacermo_wave_endpoint/$name || cp /tmp/insacermo_wave_endpoint/$name labs/wave_endpoint_results_20261117/
           done
           git config user.name "github-actions[bot]"
