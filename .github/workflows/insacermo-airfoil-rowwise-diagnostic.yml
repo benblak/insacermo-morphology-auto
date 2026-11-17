@@ -1,0 +1,65 @@
+name: INSACERMO Airfoil — Rowwise Lean Diagnostics
+on:
+  push:
+    branches:
+      - lab/c3-airfoil-rowwise-fixedpoint-lean-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare measurable verification
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Run generator and Lean, capture failure rather than hide it
+        shell: bash
+        run: |
+          mkdir -p /tmp/rowwise_diagnostic
+          set +e
+          python3 labs/airfoil_rowwise_lean_generator.py /tmp/rowwise_diagnostic > /tmp/rowwise_diagnostic/generator.log 2>&1
+          generate_status=$?
+          if [ "$generate_status" -eq 0 ]; then
+            timeout 360 lean -T 3000000 /tmp/rowwise_diagnostic/Airfoil281RowCertificate.lean > /tmp/rowwise_diagnostic/lean.log 2>&1
+            lean_status=$?
+          else
+            lean_status=99
+            printf 'Lean skipped: generator exit %s\n' "$generate_status" > /tmp/rowwise_diagnostic/lean.log
+          fi
+          echo "generator_exit=$generate_status" | tee /tmp/rowwise_diagnostic/status.txt
+          echo "lean_exit=$lean_status" | tee -a /tmp/rowwise_diagnostic/status.txt
+          if [ "$generate_status" -eq 0 ] && [ "$lean_status" -eq 0 ]; then
+            echo "result=PASS" | tee -a /tmp/rowwise_diagnostic/status.txt
+          else
+            echo "result=UNVERIFIED" | tee -a /tmp/rowwise_diagnostic/status.txt
+          fi
+          tail -n 30 /tmp/rowwise_diagnostic/generator.log || true
+          tail -n 30 /tmp/rowwise_diagnostic/lean.log || true
+          exit 0
+      - name: Upload diagnostics regardless of verification result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ROW_WISE_LEAN_DIAGNOSTIC
+          path: /tmp/rowwise_diagnostic
+          retention-days: 90
+      - name: Publish readable pass-or-failure outcome on LAB branch only
+        if: always()
+        shell: bash
+        run: |
+          test -f /tmp/rowwise_diagnostic/status.txt || exit 0
+          mkdir -p labs/airfoil_rowwise_diagnostics_20261117
+          cp /tmp/rowwise_diagnostic/status.txt labs/airfoil_rowwise_diagnostics_20261117/
+          cp /tmp/rowwise_diagnostic/generator.log labs/airfoil_rowwise_diagnostics_20261117/ || true
+          cp /tmp/rowwise_diagnostic/lean.log labs/airfoil_rowwise_diagnostics_20261117/ || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/airfoil_rowwise_diagnostics_20261117/
+          git commit -m "lab: archive rowwise Lean diagnostic outcome [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-airfoil-rowwise-fixedpoint-lean-20261117
