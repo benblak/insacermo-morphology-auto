@@ -114,7 +114,7 @@ def case(out,title,rows,th,kind,qs,depth,expected,chosen_q=None):
         allowed_probes=list(qs),depth=depth,independent_min_depth=(
           independent if math.isfinite(independent) else None),
         verdict=res["verdict"],chosen_global_probe=(
-           qs[res["plan"]["probe"]] if "probe" in res.get("plan",{}) else None),
+           qs[res["plan"]["probe"]] if isinstance(res.get("plan"),dict) and "probe" in res["plan"] else None),
         certificate_hash=res["receipt_sha256"])
 
 def select_contract_example(rows,th):
