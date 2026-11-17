@@ -1,0 +1,11 @@
+{
+  "verdict": "INDEPENDENT_SOURCE_AND_216_PROBES_AUDIT_PASS",
+  "policies": 9,
+  "probe_decisions_verified": 216,
+  "holdout_rv": 768,
+  "holdout_transit": 661,
+  "selected_target": "pl_orbsmax",
+  "origin_SHA256": "2d35f6c7b82e55957f33e64adf010e26f5131996460634774aeb82d0ab0f3252",
+  "study_verdict": "ACCEPT_CATALOGUE_INVARIANT_TRANSFER",
+  "warning": "NASA catalogue values may contain calculated orbital parameters, so does not prove a new physical law"
+}
