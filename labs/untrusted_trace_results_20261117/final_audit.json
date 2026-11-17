@@ -1,0 +1,14 @@
+{
+  "verdict": "UNTRUSTED_RESEARCHER_PROOF_CARRYING_EVIDENCE_PASS",
+  "original_engine_unchanged": true,
+  "independent_oracle_queries_checked": 5309,
+  "basis_labels_kernel_certified": 2107,
+  "polynomial_formulas_kernel_verified": 7,
+  "input_domain_for_conditional_formulas": 16777216,
+  "tampered_label_rejected": true,
+  "tampered_coordinate_rejected": true,
+  "global_unknown_oracle_truth": "REFUSE_UNCONDITIONAL",
+  "python_algorithm_formally_verified": false,
+  "source_seal_sha256": "92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d",
+  "lean_proof_sha256": "99b1204f8a93cd3879ba0b98c737206732fbfadf80f351402ff8bbc8364db99b"
+}

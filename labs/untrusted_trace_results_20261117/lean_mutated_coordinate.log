@@ -1,0 +1,2 @@
+/tmp/insacermo_untrusted/TraceCertificate_mutated_coordinate.lean:317:2: error: The prover found a counterexample, consider the following assignment:
+x = 370699#24

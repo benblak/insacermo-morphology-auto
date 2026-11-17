@@ -1,1 +1,3 @@
-lean_main_exit=1
+lean_main_exit=0
+lean_mutated_label_exit=1
+lean_mutated_coordinate_exit=1
