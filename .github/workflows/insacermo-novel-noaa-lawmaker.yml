@@ -1,0 +1,52 @@
+name: INSACERMO — No-target genuine NOAA physical-law challenge
+on:
+  push:
+    branches:
+      - lab/c3-novel-ocean-raw-observation-discovery-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  physical_hunt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - name: Assert historical engine frozen, compile script
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          test -s labs/OCEAN_PRIMARY_NEW_LAW_PREREG_20261117.md
+          python3 -m py_compile labs/real_ocean_no_target_law.py
+      - name: Install numerical runtime
+        run: python3 -m pip install --disable-pip-version-check numpy pandas
+      - name: Execute source-frozen discovery and genuinely untouched hard holdout
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_novel_ocean
+          set +e
+          OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python3 labs/real_ocean_no_target_law.py /tmp/insacermo_novel_ocean > /tmp/insacermo_novel_ocean/execution.log 2>&1
+          rc=$?
+          echo "exit_code=$rc" > /tmp/insacermo_novel_ocean/status.txt
+          test "$rc" -eq 0 && echo "result=EXECUTED_CHECK_VERDICT" >> /tmp/insacermo_novel_ocean/status.txt || echo "result=SCRIPT_CRASH" >> /tmp/insacermo_novel_ocean/status.txt
+          tail -c 14000 /tmp/insacermo_novel_ocean/execution.log
+          exit 0
+      - name: Upload complete reproducibility, raw NOAA source and ALL failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_PRIMARY_NOAA_CROSS_SITE_REAL_DISCOVERY
+          path: /tmp/insacermo_novel_ocean
+          retention-days: 90
+      - name: Commit outcome and sealed model on the isolated lab branch
+        if: always()
+        run: |
+          mkdir -p labs/real_ocean_results_20261117
+          cp /tmp/insacermo_novel_ocean/audit.json labs/real_ocean_results_20261117/ || true
+          cp /tmp/insacermo_novel_ocean/sealed_before_holdout.json labs/real_ocean_results_20261117/ || true
+          cp /tmp/insacermo_novel_ocean/status.txt labs/real_ocean_results_20261117/ || true
+          cp /tmp/insacermo_novel_ocean/execution.log labs/real_ocean_results_20261117/ || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/real_ocean_results_20261117
+          git commit -m "lab: publish NOAA true observation run or infeasibility [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-novel-ocean-raw-observation-discovery-20261117
