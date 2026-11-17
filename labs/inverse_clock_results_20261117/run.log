@@ -1,0 +1,6 @@
+SEALED_BEFORE_VALIDATION cd5a8d8f3a343ccc8606a0677208ddb831da9b74e437ea03572b864638f5fd95 {'WVHT': ('PERIODIC', 30), 'APD': ('PERIODIC', 30), 'WSPD': ('NULL', 10)}
+VALIDATE 42002 2023 WVHT_F1 0.99828 WVHT_BRIER_GAIN 0.99486
+VALIDATE 46002 2023 WVHT_F1 0.99812 WVHT_BRIER_GAIN 0.99438
+VALIDATE 41002 2024 WVHT_F1 0.99857 WVHT_BRIER_GAIN 0.99572
+VALIDATE 42002 2024 WVHT_F1 0.99818 WVHT_BRIER_GAIN 0.99456
+INVERSE_CLOCK_VERDICT INVERSE_OBSERVATION_CLOCK_PASS {"all_four_cross_station_brier_gain_40pct": true, "all_four_cross_station_f1_90pct": true, "same_period_wave_related": true, "wave_apd_presence_agreement_99pct": true, "wave_period_found": true, "wind_negative_control": true}

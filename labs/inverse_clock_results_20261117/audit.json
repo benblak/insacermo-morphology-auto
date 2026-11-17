@@ -1,0 +1,478 @@
+{
+  "all_sources": [
+    {
+      "decompressed_bytes": 4727518,
+      "decompressed_sha256": "9426a6ba74c225b2af3097b55ce03c61de84ca9bfffca15c017cead701c30454",
+      "filename": "41002h2023.txt.gz",
+      "gzip_sha256": "187185a0fc30bb0407760703239034427be331518051ca7e5192247138b04e8e",
+      "station": "41002",
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/41002h2023.txt.gz",
+      "year": 2023
+    },
+    {
+      "decompressed_bytes": 4717527,
+      "decompressed_sha256": "d020db8d59f8f90e64cd4b06b40d98b2a98318733b9e3d9a14a64f6f1ee5862f",
+      "filename": "42002h2023.txt.gz",
+      "gzip_sha256": "1b9906c76b1da6cb6abccf521db4e6e59d035cf341f86f2b3351507c9db54f0b",
+      "station": "42002",
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/42002h2023.txt.gz",
+      "year": 2023
+    },
+    {
+      "decompressed_bytes": 3447221,
+      "decompressed_sha256": "6c7f65083b199f48d02381e89ad78e4aeb3b96aaf903d77ea4d359505b0a495b",
+      "filename": "46002h2023.txt.gz",
+      "gzip_sha256": "93f488bdc6cc78a10469f20089eb337c8166f15845777de84a6c101fee7e8d04",
+      "station": "46002",
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/46002h2023.txt.gz",
+      "year": 2023
+    },
+    {
+      "decompressed_bytes": 4723943,
+      "decompressed_sha256": "1215e391a226bebd1da794732ef7622f2ab54770f7704617302b3e6a0bcd77e1",
+      "filename": "41002h2024.txt.gz",
+      "gzip_sha256": "ea3578e57bb19e68924cb543c3940c0a1bdd0bd46d76ff90a5b21c6856ac73d7",
+      "station": "41002",
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/41002h2024.txt.gz",
+      "year": 2024
+    },
+    {
+      "decompressed_bytes": 3639951,
+      "decompressed_sha256": "aea8a8531d10cef15438e5a16bdd9c81f0383e189b9b08637a4716a595b66bfa",
+      "filename": "42002h2024.txt.gz",
+      "gzip_sha256": "b6671bb26e0f1503d2af1a27af4d89c99f933c29dc1f3d752afef7030a1e947a",
+      "station": "42002",
+      "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/42002h2024.txt.gz",
+      "year": 2024
+    }
+  ],
+  "criteria": {
+    "all_four_cross_station_brier_gain_40pct": true,
+    "all_four_cross_station_f1_90pct": true,
+    "same_period_wave_related": true,
+    "wave_apd_presence_agreement_99pct": true,
+    "wave_period_found": true,
+    "wind_negative_control": true
+  },
+  "inferred_wave_period_minutes": 30,
+  "inferred_wave_phase_response_probabilities": [
+    5.711674663011195e-05,
+    0.9957177115450496,
+    5.711022272986865e-05
+  ],
+  "seal_sha256": "cd5a8d8f3a343ccc8606a0677208ddb831da9b74e437ea03572b864638f5fd95",
+  "statement": "A reproducible data-acquisition regularity, NOT a newly discovered natural physical law.",
+  "strict_model_freeze": true,
+  "train_source": [
+    "41002",
+    2023
+  ],
+  "validation": [
+    {
+      "channels": {
+        "APD": {
+          "actual_present": 17436,
+          "brier": 0.001140124555628578,
+          "brier_relative_gain": 0.9948617804174926,
+          "confusion": {
+            "fn": 1,
+            "fp": 59,
+            "tn": 34969,
+            "tp": 17435
+          },
+          "f1": 0.998282278843401,
+          "logloss": 0.007783100798409933,
+          "logloss_relative_gain": 0.98775905603658,
+          "null_brier": 0.22189097552585055,
+          "null_logloss": 0.6358252126362506,
+          "phase_counts": [
+            [
+              17482,
+              0
+            ],
+            [
+              59,
+              17435
+            ],
+            [
+              17487,
+              1
+            ]
+          ],
+          "precision": 0.9966274151137533,
+          "prevalence": 0.33234217749313816,
+          "recall": 0.9999426473961918,
+          "rows": 52464
+        },
+        "WSPD": {
+          "actual_present": 52447,
+          "brier": 0.0003240312059000704,
+          "brier_relative_gain": 0.0,
+          "confusion": {
+            "fn": 0,
+            "fp": 17,
+            "tn": 0,
+            "tp": 52447
+          },
+          "f1": 0.9998379578881147,
+          "logloss": 0.003026554612818509,
+          "logloss_relative_gain": 0.0,
+          "null_brier": 0.0003240312059000704,
+          "null_logloss": 0.003026554612818509,
+          "phase_counts": [
+            [
+              17,
+              52447
+            ]
+          ],
+          "precision": 0.9996759682830131,
+          "prevalence": 0.9996759682830131,
+          "recall": 1.0,
+          "rows": 52464
+        },
+        "WVHT": {
+          "actual_present": 17436,
+          "brier": 0.001140124555628578,
+          "brier_relative_gain": 0.9948617804174926,
+          "confusion": {
+            "fn": 1,
+            "fp": 59,
+            "tn": 34969,
+            "tp": 17435
+          },
+          "f1": 0.998282278843401,
+          "logloss": 0.007783100798409933,
+          "logloss_relative_gain": 0.98775905603658,
+          "null_brier": 0.22189097552585055,
+          "null_logloss": 0.6358252126362506,
+          "phase_counts": [
+            [
+              17482,
+              0
+            ],
+            [
+              59,
+              17435
+            ],
+            [
+              17487,
+              1
+            ]
+          ],
+          "precision": 0.9966274151137533,
+          "prevalence": 0.33234217749313816,
+          "recall": 0.9999426473961918,
+          "rows": 52464
+        }
+      },
+      "rows": 52464,
+      "station": "42002",
+      "year": 2023
+    },
+    {
+      "channels": {
+        "APD": {
+          "actual_present": 12735,
+          "brier": 0.001247415051646421,
+          "brier_relative_gain": 0.9943768455107895,
+          "confusion": {
+            "fn": 0,
+            "fp": 48,
+            "tn": 25555,
+            "tp": 12735
+          },
+          "f1": 0.9981189748412885,
+          "logloss": 0.008291211662786856,
+          "logloss_relative_gain": 0.9869575503044213,
+          "null_brier": 0.22183545802270058,
+          "null_logloss": 0.6357096907644243,
+          "phase_counts": [
+            [
+              12776,
+              0
+            ],
+            [
+              48,
+              12735
+            ],
+            [
+              12779,
+              0
+            ]
+          ],
+          "precision": 0.9962450129077681,
+          "prevalence": 0.3321769523710157,
+          "recall": 1.0,
+          "rows": 38338
+        },
+        "WSPD": {
+          "actual_present": 38317,
+          "brier": 0.0005474692659614084,
+          "brier_relative_gain": 0.0,
+          "confusion": {
+            "fn": 0,
+            "fp": 21,
+            "tn": 0,
+            "tp": 38317
+          },
+          "f1": 0.9997260452677581,
+          "logloss": 0.004669184233025508,
+          "logloss_relative_gain": 0.0,
+          "null_brier": 0.0005474692659614084,
+          "null_logloss": 0.004669184233025508,
+          "phase_counts": [
+            [
+              21,
+              38317
+            ]
+          ],
+          "precision": 0.9994522405967969,
+          "prevalence": 0.9994522405967969,
+          "recall": 1.0,
+          "rows": 38338
+        },
+        "WVHT": {
+          "actual_present": 12735,
+          "brier": 0.001247415051646421,
+          "brier_relative_gain": 0.9943768455107895,
+          "confusion": {
+            "fn": 0,
+            "fp": 48,
+            "tn": 25555,
+            "tp": 12735
+          },
+          "f1": 0.9981189748412885,
+          "logloss": 0.008291211662786856,
+          "logloss_relative_gain": 0.9869575503044213,
+          "null_brier": 0.22183545802270058,
+          "null_logloss": 0.6357096907644243,
+          "phase_counts": [
+            [
+              12776,
+              0
+            ],
+            [
+              48,
+              12735
+            ],
+            [
+              12779,
+              0
+            ]
+          ],
+          "precision": 0.9962450129077681,
+          "prevalence": 0.3321769523710157,
+          "recall": 1.0,
+          "rows": 38338
+        }
+      },
+      "rows": 38338,
+      "station": "46002",
+      "year": 2023
+    },
+    {
+      "channels": {
+        "APD": {
+          "actual_present": 17461,
+          "brier": 0.0009497278337443035,
+          "brier_relative_gain": 0.9957200588824529,
+          "confusion": {
+            "fn": 0,
+            "fp": 50,
+            "tn": 35023,
+            "tp": 17461
+          },
+          "f1": 0.998570284799268,
+          "logloss": 0.006654686986255343,
+          "logloss_relative_gain": 0.989534159641803,
+          "null_brier": 0.22190207941192294,
+          "null_logloss": 0.6358483178126518,
+          "phase_counts": [
+            [
+              17512,
+              0
+            ],
+            [
+              50,
+              17461
+            ],
+            [
+              17511,
+              0
+            ]
+          ],
+          "precision": 0.9971446519330707,
+          "prevalence": 0.3323752236646743,
+          "recall": 1.0,
+          "rows": 52534
+        },
+        "WSPD": {
+          "actual_present": 52502,
+          "brier": 0.0006087597422380419,
+          "brier_relative_gain": 0.0,
+          "confusion": {
+            "fn": 0,
+            "fp": 32,
+            "tn": 0,
+            "tp": 52502
+          },
+          "f1": 0.9996953425492212,
+          "logloss": 0.005119767950682897,
+          "logloss_relative_gain": 0.0,
+          "null_brier": 0.0006087597422380419,
+          "null_logloss": 0.005119767950682897,
+          "phase_counts": [
+            [
+              32,
+              52502
+            ]
+          ],
+          "precision": 0.99939087067423,
+          "prevalence": 0.99939087067423,
+          "recall": 1.0,
+          "rows": 52534
+        },
+        "WVHT": {
+          "actual_present": 17461,
+          "brier": 0.0009497278337443035,
+          "brier_relative_gain": 0.9957200588824529,
+          "confusion": {
+            "fn": 0,
+            "fp": 50,
+            "tn": 35023,
+            "tp": 17461
+          },
+          "f1": 0.998570284799268,
+          "logloss": 0.006654686986255343,
+          "logloss_relative_gain": 0.989534159641803,
+          "null_brier": 0.22190207941192294,
+          "null_logloss": 0.6358483178126518,
+          "phase_counts": [
+            [
+              17512,
+              0
+            ],
+            [
+              50,
+              17461
+            ],
+            [
+              17511,
+              0
+            ]
+          ],
+          "precision": 0.9971446519330707,
+          "prevalence": 0.3323752236646743,
+          "recall": 1.0,
+          "rows": 52534
+        }
+      },
+      "rows": 52534,
+      "station": "41002",
+      "year": 2024
+    },
+    {
+      "channels": {
+        "APD": {
+          "actual_present": 13435,
+          "brier": 0.0012070227973102607,
+          "brier_relative_gain": 0.994558407127986,
+          "confusion": {
+            "fn": 0,
+            "fp": 49,
+            "tn": 26969,
+            "tp": 13435
+          },
+          "f1": 0.99817972435826,
+          "logloss": 0.008068784511409232,
+          "logloss_relative_gain": 0.98730655674043,
+          "null_brier": 0.22181424184046827,
+          "null_logloss": 0.6356655437306885,
+          "phase_counts": [
+            [
+              13485,
+              0
+            ],
+            [
+              49,
+              13435
+            ],
+            [
+              13484,
+              0
+            ]
+          ],
+          "precision": 0.9963660634826461,
+          "prevalence": 0.3321138110894124,
+          "recall": 1.0,
+          "rows": 40453
+        },
+        "WSPD": {
+          "actual_present": 40446,
+          "brier": 0.00017323527287058015,
+          "brier_relative_gain": 0.0,
+          "confusion": {
+            "fn": 0,
+            "fp": 7,
+            "tn": 0,
+            "tp": 40446
+          },
+          "f1": 0.9999134723544172,
+          "logloss": 0.0019179616267668371,
+          "logloss_relative_gain": 0.0,
+          "null_brier": 0.00017323527287058015,
+          "null_logloss": 0.0019179616267668371,
+          "phase_counts": [
+            [
+              7,
+              40446
+            ]
+          ],
+          "precision": 0.9998269596816058,
+          "prevalence": 0.9998269596816058,
+          "recall": 1.0,
+          "rows": 40453
+        },
+        "WVHT": {
+          "actual_present": 13435,
+          "brier": 0.0012070227973102607,
+          "brier_relative_gain": 0.994558407127986,
+          "confusion": {
+            "fn": 0,
+            "fp": 49,
+            "tn": 26969,
+            "tp": 13435
+          },
+          "f1": 0.99817972435826,
+          "logloss": 0.008068784511409232,
+          "logloss_relative_gain": 0.98730655674043,
+          "null_brier": 0.22181424184046827,
+          "null_logloss": 0.6356655437306885,
+          "phase_counts": [
+            [
+              13485,
+              0
+            ],
+            [
+              49,
+              13435
+            ],
+            [
+              13484,
+              0
+            ]
+          ],
+          "precision": 0.9963660634826461,
+          "prevalence": 0.3321138110894124,
+          "recall": 1.0,
+          "rows": 40453
+        }
+      },
+      "rows": 40453,
+      "station": "42002",
+      "year": 2024
+    }
+  ],
+  "verdict": "INVERSE_OBSERVATION_CLOCK_PASS",
+  "wave_apd_training_agreement": 1.0
+}

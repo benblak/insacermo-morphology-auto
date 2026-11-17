@@ -1,0 +1,462 @@
+{
+  "models": {
+    "APD": {
+      "bic_advantage": 65786.20230706432,
+      "candidates": [
+        {
+          "bic": 66790.43070181506,
+          "period_minutes": 20
+        },
+        {
+          "bic": 993.3602574958918,
+          "period_minutes": 30
+        },
+        {
+          "bic": 66812.1673807947,
+          "period_minutes": 40
+        },
+        {
+          "bic": 66823.00578879374,
+          "period_minutes": 50
+        },
+        {
+          "bic": 1029.9509012837877,
+          "period_minutes": 60
+        },
+        {
+          "bic": 66844.65009647675,
+          "period_minutes": 70
+        },
+        {
+          "bic": 66855.63318096189,
+          "period_minutes": 80
+        },
+        {
+          "bic": 1061.4615393444342,
+          "period_minutes": 90
+        },
+        {
+          "bic": 66877.34449030437,
+          "period_minutes": 100
+        },
+        {
+          "bic": 66888.21113681777,
+          "period_minutes": 110
+        },
+        {
+          "bic": 1103.3148478198768,
+          "period_minutes": 120
+        },
+        {
+          "bic": 66909.94273488912,
+          "period_minutes": 130
+        },
+        {
+          "bic": 66920.68844970515,
+          "period_minutes": 140
+        },
+        {
+          "bic": 1135.0382673193558,
+          "period_minutes": 150
+        },
+        {
+          "bic": 66942.56482902609,
+          "period_minutes": 160
+        },
+        {
+          "bic": 66953.4103309302,
+          "period_minutes": 170
+        },
+        {
+          "bic": 1170.4095861425903,
+          "period_minutes": 180
+        }
+      ],
+      "model": {
+        "bic": 993.3602574958918,
+        "period_slots": 3,
+        "phase_counts": [
+          [
+            17506,
+            0
+          ],
+          [
+            74,
+            17438
+          ],
+          [
+            17508,
+            0
+          ]
+        ],
+        "phase_probability": [
+          5.711674663011195e-05,
+          0.9957177115450496,
+          5.711022272986865e-05
+        ],
+        "train_loglik": -480.37653340181834
+      },
+      "null": {
+        "bic": 66779.56256456021,
+        "period_slots": 1,
+        "phase_counts": [
+          [
+            35088,
+            17438
+          ]
+        ],
+        "phase_probability": [
+          0.33199436491014317
+        ],
+        "train_loglik": -33384.346750498065
+      },
+      "status": "PERIODIC",
+      "train_rate": 0.33198796786353424,
+      "train_size": 52526
+    },
+    "WSPD": {
+      "bic_advantage": 0.0,
+      "candidates": [
+        {
+          "bic": 572.9308549310327,
+          "period_minutes": 20
+        },
+        {
+          "bic": 581.6419621569481,
+          "period_minutes": 30
+        },
+        {
+          "bic": 594.7393515420644,
+          "period_minutes": 40
+        },
+        {
+          "bic": 601.07199953407,
+          "period_minutes": 50
+        },
+        {
+          "bic": 613.2181254065638,
+          "period_minutes": 60
+        },
+        {
+          "bic": 627.0521003875085,
+          "period_minutes": 70
+        },
+        {
+          "bic": 635.3164272985811,
+          "period_minutes": 80
+        },
+        {
+          "bic": 641.3088636024238,
+          "period_minutes": 90
+        },
+        {
+          "bic": 645.7641808157908,
+          "period_minutes": 100
+        },
+        {
+          "bic": 666.0198283970162,
+          "period_minutes": 110
+        },
+        {
+          "bic": 678.2281143152924,
+          "period_minutes": 120
+        },
+        {
+          "bic": 687.4490786574795,
+          "period_minutes": 130
+        },
+        {
+          "bic": 702.6115825269401,
+          "period_minutes": 140
+        },
+        {
+          "bic": 706.6285947384342,
+          "period_minutes": 150
+        },
+        {
+          "bic": 722.4914768094521,
+          "period_minutes": 160
+        },
+        {
+          "bic": 730.9224939595509,
+          "period_minutes": 170
+        },
+        {
+          "bic": 736.1852220048579,
+          "period_minutes": 180
+        }
+      ],
+      "model": {
+        "bic": 563.466670135359,
+        "period_slots": 1,
+        "phase_counts": [
+          [
+            33,
+            52493
+          ]
+        ],
+        "phase_probability": [
+          0.9993527261650929
+        ],
+        "train_loglik": -276.29880328563695
+      },
+      "null": {
+        "bic": 563.466670135359,
+        "period_slots": 1,
+        "phase_counts": [
+          [
+            33,
+            52493
+          ]
+        ],
+        "phase_probability": [
+          0.9993527261650929
+        ],
+        "train_loglik": -276.29880328563695
+      },
+      "status": "NULL",
+      "train_rate": 0.9993717397098579,
+      "train_size": 52526
+    },
+    "WVHT": {
+      "bic_advantage": 65786.20230706432,
+      "candidates": [
+        {
+          "bic": 66790.43070181506,
+          "period_minutes": 20
+        },
+        {
+          "bic": 993.3602574958918,
+          "period_minutes": 30
+        },
+        {
+          "bic": 66812.1673807947,
+          "period_minutes": 40
+        },
+        {
+          "bic": 66823.00578879374,
+          "period_minutes": 50
+        },
+        {
+          "bic": 1029.9509012837877,
+          "period_minutes": 60
+        },
+        {
+          "bic": 66844.65009647675,
+          "period_minutes": 70
+        },
+        {
+          "bic": 66855.63318096189,
+          "period_minutes": 80
+        },
+        {
+          "bic": 1061.4615393444342,
+          "period_minutes": 90
+        },
+        {
+          "bic": 66877.34449030437,
+          "period_minutes": 100
+        },
+        {
+          "bic": 66888.21113681777,
+          "period_minutes": 110
+        },
+        {
+          "bic": 1103.3148478198768,
+          "period_minutes": 120
+        },
+        {
+          "bic": 66909.94273488912,
+          "period_minutes": 130
+        },
+        {
+          "bic": 66920.68844970515,
+          "period_minutes": 140
+        },
+        {
+          "bic": 1135.0382673193558,
+          "period_minutes": 150
+        },
+        {
+          "bic": 66942.56482902609,
+          "period_minutes": 160
+        },
+        {
+          "bic": 66953.4103309302,
+          "period_minutes": 170
+        },
+        {
+          "bic": 1170.4095861425903,
+          "period_minutes": 180
+        }
+      ],
+      "model": {
+        "bic": 993.3602574958918,
+        "period_slots": 3,
+        "phase_counts": [
+          [
+            17506,
+            0
+          ],
+          [
+            74,
+            17438
+          ],
+          [
+            17508,
+            0
+          ]
+        ],
+        "phase_probability": [
+          5.711674663011195e-05,
+          0.9957177115450496,
+          5.711022272986865e-05
+        ],
+        "train_loglik": -480.37653340181834
+      },
+      "null": {
+        "bic": 66779.56256456021,
+        "period_slots": 1,
+        "phase_counts": [
+          [
+            35088,
+            17438
+          ]
+        ],
+        "phase_probability": [
+          0.33199436491014317
+        ],
+        "train_loglik": -33384.346750498065
+      },
+      "status": "PERIODIC",
+      "train_rate": 0.33198796786353424,
+      "train_size": 52526
+    }
+  },
+  "prereg_commit": "5f9e4e1daf21d801d08538b459608140ac06e1ad",
+  "train_checks": {
+    "APD": {
+      "actual_present": 17438,
+      "brier": 0.0014028761086075725,
+      "brier_relative_gain": 0.9936742403008791,
+      "confusion": {
+        "fn": 0,
+        "fp": 74,
+        "tn": 35014,
+        "tp": 17438
+      },
+      "f1": 0.9978826895565093,
+      "logloss": 0.009145500007649894,
+      "logloss_relative_gain": 0.985610725380012,
+      "null_brier": 0.22177195709829745,
+      "null_logloss": 0.6355775568384813,
+      "phase_counts": [
+        [
+          17506,
+          0
+        ],
+        [
+          74,
+          17438
+        ],
+        [
+          17508,
+          0
+        ]
+      ],
+      "precision": 0.9957743261763362,
+      "prevalence": 0.33198796786353424,
+      "recall": 1.0,
+      "rows": 52526
+    },
+    "WSPD": {
+      "actual_present": 52493,
+      "brier": 0.0006278659406647401,
+      "brier_relative_gain": 0.0,
+      "confusion": {
+        "fn": 0,
+        "fp": 33,
+        "tn": 0,
+        "tp": 52493
+      },
+      "f1": 0.9996857711461735,
+      "logloss": 0.005260229282367531,
+      "logloss_relative_gain": 0.0,
+      "null_brier": 0.0006278659406647401,
+      "null_logloss": 0.005260229282367531,
+      "phase_counts": [
+        [
+          33,
+          52493
+        ]
+      ],
+      "precision": 0.9993717397098579,
+      "prevalence": 0.9993717397098579,
+      "recall": 1.0,
+      "rows": 52526
+    },
+    "WVHT": {
+      "actual_present": 17438,
+      "brier": 0.0014028761086075725,
+      "brier_relative_gain": 0.9936742403008791,
+      "confusion": {
+        "fn": 0,
+        "fp": 74,
+        "tn": 35014,
+        "tp": 17438
+      },
+      "f1": 0.9978826895565093,
+      "logloss": 0.009145500007649894,
+      "logloss_relative_gain": 0.985610725380012,
+      "null_brier": 0.22177195709829745,
+      "null_logloss": 0.6355775568384813,
+      "phase_counts": [
+        [
+          17506,
+          0
+        ],
+        [
+          74,
+          17438
+        ],
+        [
+          17508,
+          0
+        ]
+      ],
+      "precision": 0.9957743261763362,
+      "prevalence": 0.33198796786353424,
+      "recall": 1.0,
+      "rows": 52526
+    }
+  },
+  "train_provenance": {
+    "decompressed_bytes": 4727518,
+    "decompressed_sha256": "9426a6ba74c225b2af3097b55ce03c61de84ca9bfffca15c017cead701c30454",
+    "filename": "41002h2023.txt.gz",
+    "gzip_sha256": "187185a0fc30bb0407760703239034427be331518051ca7e5192247138b04e8e",
+    "station": "41002",
+    "url": "https://www.ndbc.noaa.gov/data/historical/stdmet/41002h2023.txt.gz",
+    "year": 2023
+  },
+  "train_station": "41002",
+  "train_year": 2023,
+  "validation": [
+    [
+      "42002",
+      2023
+    ],
+    [
+      "46002",
+      2023
+    ],
+    [
+      "41002",
+      2024
+    ],
+    [
+      "42002",
+      2024
+    ]
+  ]
+}
