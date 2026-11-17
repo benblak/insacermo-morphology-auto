@@ -1,0 +1,2 @@
+exit_code=0
+result=EXECUTED_CHECK_VERDICT
