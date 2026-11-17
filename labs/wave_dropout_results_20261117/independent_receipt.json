@@ -1,0 +1,88 @@
+{
+  "verdict": "INDEPENDENT_WAVE_DROPOUT_AUDIT_PASS",
+  "archives": 5,
+  "real_scheduled_transitions": 78711,
+  "checks": [
+    {
+      "station": "41002",
+      "year": 2023,
+      "n": 17490,
+      "dropouts": 63,
+      "table": [
+        [
+          17367,
+          53
+        ],
+        [
+          60,
+          10
+        ]
+      ]
+    },
+    {
+      "station": "42002",
+      "year": 2023,
+      "n": 17480,
+      "dropouts": 55,
+      "table": [
+        [
+          17383,
+          42
+        ],
+        [
+          42,
+          13
+        ]
+      ]
+    },
+    {
+      "station": "46002",
+      "year": 2023,
+      "n": 12764,
+      "dropouts": 39,
+      "table": [
+        [
+          12687,
+          32
+        ],
+        [
+          38,
+          7
+        ]
+      ]
+    },
+    {
+      "station": "41002",
+      "year": 2024,
+      "n": 17496,
+      "dropouts": 38,
+      "table": [
+        [
+          17413,
+          33
+        ],
+        [
+          45,
+          5
+        ]
+      ]
+    },
+    {
+      "station": "42002",
+      "year": 2024,
+      "n": 13481,
+      "dropouts": 49,
+      "table": [
+        [
+          13387,
+          45
+        ],
+        [
+          45,
+          4
+        ]
+      ]
+    }
+  ],
+  "model_sha256": "6a43db4c88213cba6d71ca1d7aeb52f5704a1084804e2a10a19b1c0c2dbc8455"
+}

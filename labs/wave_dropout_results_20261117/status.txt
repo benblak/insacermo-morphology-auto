@@ -1,2 +1,7 @@
 exit_code=0
 source_sha256=3ec341ab37f00e548fa9219de8bac1b734deb3c872d96023287d09f40fbb30b9  labs/inverse_wave_dropout_mechanism.py
+independent_exit=0
+independent_result=PASS
+lean_exit=0
+lean_source_sha256=cdb15dd62e09c170a4d1943225e2c843d56a779a6f6191ec82e09ab8c7846d56
+lean_result=PASS
