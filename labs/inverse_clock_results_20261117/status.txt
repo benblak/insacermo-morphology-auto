@@ -1,2 +1,7 @@
 program_exit=0
 source_sha256=142778f13573291e7ac7f075d6f77145f4c98f5dd18e81ad355f1e00376447dc  labs/inverse_noaa_clock.py
+independent_exit=0
+independent_result=PASS
+lean_exit=0
+lean_source_sha256=16760e950d905c088f1b8379c6e740c1bc0a8240bfeaa08d079395044f9d0e51
+lean_result=PASS

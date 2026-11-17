@@ -1,0 +1,9 @@
+info: downloading https://releases.lean-lang.org/lean4/v4.33.1/lean-4.33.1-linux.tar.zst
+info: installing /home/runner/.elan/toolchains/leanprover--lean4---v4.33.1
+labs/InverseNoaaClock.lean:13:22: warning: This simp argument is unused:
+  Nat.add_mod
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [waveObserved]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
