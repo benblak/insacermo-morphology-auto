@@ -1,0 +1,47 @@
+name: INSACERMO — Reverse physical endpoint certificate from NOAA missing waves
+on:
+  push:
+    branches:
+      - lab/c3-inverse-wave-reality-interval-certificates-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original kernel frozen
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python -m py_compile labs/inverse_wave_endpoint_certificates.py
+      - name: Retrieve pinned real measurements and evaluate first pass
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_wave_endpoint
+          set +e
+          python labs/inverse_wave_endpoint_certificates.py /tmp/insacermo_wave_endpoint > /tmp/insacermo_wave_endpoint/execution.log 2>&1
+          rc=$?
+          echo "program_exit=$rc" > /tmp/insacermo_wave_endpoint/status.txt
+          sha256sum labs/inverse_wave_endpoint_certificates.py | sed 's/^/program_sha256=/' >> /tmp/insacermo_wave_endpoint/status.txt
+          cat /tmp/insacermo_wave_endpoint/execution.log
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_NOAA_WAVE_ENDPOINTS_RAW_CERTIFICATES
+          path: /tmp/insacermo_wave_endpoint
+          retention-days: 90
+      - name: Publish accepted or refused results as committed files
+        if: always()
+        run: |
+          mkdir -p labs/wave_endpoint_results_20261117
+          for name in audit.json day_counts.json execution.log status.txt; do
+            test ! -f /tmp/insacermo_wave_endpoint/$name || cp /tmp/insacermo_wave_endpoint/$name labs/wave_endpoint_results_20261117/
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/wave_endpoint_results_20261117
+          git commit -m "lab: publish real NOAA interval observation verdict [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-inverse-wave-reality-interval-certificates-20261117
