@@ -1,0 +1,52 @@
+{
+  "study": "INSACERMO_AIRFOIL_ROW_WISE_FIXEDPOINT_LEAN",
+  "source_sha256": "10ee06e6cfb27dae6b44213d421d217012fb1f9b697592e73a4e4016b52d425f",
+  "source_git_blob": "9f6fdafab6a323514c2a0407dea680fcb23d6795",
+  "preregistration_commit": "08efec5710224a45069da2ee1375e750142bf52b",
+  "holdout_records": 281,
+  "model_terms": [
+    "frequency:hinge-0.5",
+    "displacement_thickness:log",
+    "wind_speed",
+    "chord",
+    "frequency*displacement_thickness",
+    "displacement_thickness:square",
+    "frequency*chord"
+  ],
+  "model_coefficients_millionths": [
+    115742421,
+    -5526890,
+    -2452228,
+    1380737,
+    -1511424,
+    -2911058,
+    -876292,
+    -1295208
+  ],
+  "baseline_coefficients_millionths": [
+    124884845,
+    -3867145,
+    -2682519,
+    -3469342,
+    1540607,
+    -1928321
+  ],
+  "actual_model_rmse_dB": 4.118804258716297,
+  "actual_baseline_rmse_dB": 4.719901068625216,
+  "max_fixedpoint_prediction_deviation_dB": 6.7656168027951935e-06,
+  "per_row_absolute_prediction_bridge_limit_dB": 0.001,
+  "outward_residual_slack_millidB": 2,
+  "model_sse_upper_millidB2": 4771789349,
+  "baseline_sse_lower_millidB2": 6254654607,
+  "mathematical_5db_test": true,
+  "mathematical_10pct_test": true,
+  "worst_case_improvement_percent": 12.654815679699205,
+  "proof_source_sha256": "afa165fa44c362182c1da96dc2200da62ee00ad176e0d99e909291e462a46fd2",
+  "trust_boundary": [
+    "Lean proves exact integer predictions and residual bounds from 281 encoded rows, basis coefficients, and fixed-point features.",
+    "The mapping of feature vectors and acoustic labels to the original archived CSV is checked externally by Python and pinned SHA256.",
+    "Transcendental log feature extraction and real-valued coefficients are not formally certified by Lean.",
+    "The pre-registered empirical validation is on one unseen condition, not a universally proven physical law.",
+    "The frozen historical INSACERMO C3 kernel remains completely untouched."
+  ]
+}
