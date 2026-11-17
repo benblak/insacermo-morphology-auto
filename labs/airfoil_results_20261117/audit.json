@@ -1,0 +1,49 @@
+{
+  "data_records": 1503,
+  "train_known_speeds": [
+    39.6,
+    55.5,
+    71.3
+  ],
+  "holdout_speed": 31.7,
+  "holdout_records": 281,
+  "discovery_records": 733,
+  "challenge_pool_records": 489,
+  "challenge_queries": 40,
+  "selected_terms": [
+    "frequency:hinge-0.5",
+    "displacement_thickness:log",
+    "wind_speed",
+    "chord",
+    "frequency*displacement_thickness",
+    "displacement_thickness:square",
+    "frequency*chord"
+  ],
+  "coefficients": [
+    115.74242136050958,
+    -5.526890178814587,
+    -2.452228268940283,
+    1.3807374505801946,
+    -1.5114235561445255,
+    -2.9110578870145774,
+    -0.8762919349320382,
+    -1.2952077519682808
+  ],
+  "holdout_rmse_dB": 4.1188042587163,
+  "holdout_mae_dB": 3.3804741005229086,
+  "linear_rmse_dB": 4.719901068625223,
+  "constant_rmse_dB": 6.629523427176653,
+  "improvement_vs_linear_pct": 12.735368838652505,
+  "transfer_accepted": true,
+  "verdict": "ACCEPT_EMPIRICAL_TRANSFER",
+  "historical_kernel_modified": false,
+  "Lean_certification_of_law": false,
+  "sealed_model_file": "sealed_model_before_holdout.json",
+  "source_sha256": "10ee06e6cfb27dae6b44213d421d217012fb1f9b697592e73a4e4016b52d425f",
+  "caveats": [
+    "Synthetic query budget on archived responses; not new wind tunnel experiments",
+    "Restricted programmer-defined basis grammar, not unconstrained discovery",
+    "No Lean verification of learned aerodynamic model",
+    "Absolute errors and predictive transfer are empirical, not mathematical proofs"
+  ]
+}
