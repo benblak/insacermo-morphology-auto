@@ -1,8 +1,11 @@
 namespace InsacermoWaveIntervals
 
 /-- Decimeter wave heights actually observed at the two endpoints. -/
+def measuredNetDistance (left right : Nat) : Nat :=
+  if left ≤ right then right - left else left - right
+
 def observedNetChangeAtLeast (threshold left right : Nat) : Bool :=
-  decide (threshold ≤ Nat.dist left right)
+  decide (threshold ≤ measuredNetDistance left right)
 
 theorem net_change_does_not_need_midpoint
     (threshold before after missingValue1 missingValue2 : Nat) :
@@ -26,7 +29,7 @@ theorem unidentifiable_midpoint_for_any_endpoints
 
 theorem endpoint_change_is_observable
     (threshold before after : Nat)
-    (h : threshold ≤ Nat.dist before after) :
+    (h : threshold ≤ measuredNetDistance before after) :
     observedNetChangeAtLeast threshold before after = true := by
   simp [observedNetChangeAtLeast, h]
 
