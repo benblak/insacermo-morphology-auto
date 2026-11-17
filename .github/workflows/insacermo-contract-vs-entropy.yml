@@ -1,0 +1,58 @@
+name: INSACERMO Frozen C3 Contract vs Entropy Lean
+on:
+  push:
+    branches:
+      - lab/c3-contract-vs-information-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original historical C3 remains unchanged
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/contract_vs_entropy_c3.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 kernel
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Compare two experimental probes over three different contracts
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: |
+          python3 labs/contract_vs_entropy_c3.py /tmp/insacermo_contract_entropy
+      - name: Independently inspect all verdicts
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/insacermo_contract_entropy")
+          j=json.loads((p/"audit.json").read_text())
+          assert j["verified_lean_receipts"]==9
+          assert len(list(p.rglob("receipt.json")))==9
+          cases={(x["task"],tuple(x["probes"])):x for x in j["tests"]}
+          assert cases["anomaly",("A","B")]["chosen_probe"]=="B"
+          assert cases["cohort",("B","A")]["chosen_probe"]=="A"
+          assert cases["identity",("A","B")]["verdict"]=="REFUSE_ROBUST"
+          assert j["information_bits"]["A_balanced_4_4"]>j["information_bits"]["B_unbalanced_7_1"]
+          print("CONTRACT_VS_INFORMATION_INDEPENDENT_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_CONTRACT_VS_ENTROPY_9_LEAN_CERTIFICATES
+          path: /tmp/insacermo_contract_entropy/
+          retention-days: 90
