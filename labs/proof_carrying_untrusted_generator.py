@@ -56,9 +56,7 @@ def generate(seal_path,proof_path,attack="none"):
           f"def {name}_quadratic (x : BitVec 24) : Bool := {polynomial(rec)}",
           f"def {name}_transported (x : BitVec 24) : Bool := {transported(rec)}",
           f"theorem {name}_reported_size : {name}_reported.size = 301 := by decide",
-          f"theorem {name}_labels_match_fitted_quadratic :",
-          f"  (List.range 301).all (fun k =>",
-          f"    ({name}_quadratic (BitVec.ofNat 24 (basis.getD k 0))) == ({name}_reported.getD k false)) = true := by decide",
+          *[f"theorem {name}_label_{i:03d} : {name}_quadratic (BitVec.ofNat 24 {BASIS[i]}) = {str(bool(labels[i])).lower()} := by decide" for i in range(301)],
           f"theorem {name}_xor_coordinates_equal_quadratic_for_all_x (x : BitVec 24) :",
           f"  {name}_quadratic x = {name}_transported x := by bv_decide"
         ]
