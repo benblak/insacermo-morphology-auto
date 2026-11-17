@@ -153,7 +153,10 @@ def run(folder):
     with np.errstate(over="ignore",invalid="ignore"):
         pred=np.exp(np.clip(predict(V["rv_test"],active["model"]["sources"],active["coef"]),-700,700))
     actual=np.exp(V["rv_test"][:,j]);observed=float(np.median(np.abs(pred-actual)/actual))
-    null=[float(np.median(np.abs(pred-actual[rng.permutation(len(actual))])/actual[rng.permutation(len(actual))])) for _ in range(100)]
+    null=[]
+    for _ in range(100):
+        permuted=actual[rng.permutation(len(actual))]
+        null.append(float(np.median(np.abs(pred-permuted)/permuted)))
     report={"verdict":results[0]["verdict"],"relation":{
         "target":COLS[j],"predictors":[COLS[i] for i in active["model"]["sources"]],
         "exponents":active["coef"][1:],"multiplier":math.exp(active["coef"][0])},
