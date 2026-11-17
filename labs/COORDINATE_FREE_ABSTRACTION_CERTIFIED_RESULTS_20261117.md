@@ -16,12 +16,12 @@
 - Further independent non-vectorized group enumeration: **16** exact automorphisms preserve the same canonical 5-bit truth table and **480** distinct equivalent 5-bit truth tables are produced by 7,680 allowed transformations. This means even FULL observation of the reduced function does not uniquely recover an orientation. The scientifically identifiable object is the **equivalence class of descriptions**, not an arbitrarily privileged formula.
 
 ## Lean 4.33.1 *compilation PASS tied to exact proof bytes*
-- `labs/OrbitCert.lean`: generic reversible transform theorem and generic transfer theorem between two invertible encodings; finite three-source 32-point orbit-equivalence certificates; four target quotient 64/128-point equality certificates; a mathematical witness showing the *same complete* 5-bit truth table has multiple distinct coordinate descriptions.
-- GitHub Actions diagnostic at `labs/core_orbit_lean_results_20261117/status.txt`: **lean_exit=0, result=PASS**, source `proof_source_sha256=0cb0359551ea1b6dfde9e022c00a7829453fc4fc63e3c16f85cfb90bf6af7ef6`. No `sorry` or `admit` in source.
+- `labs/OrbitCert.lean`: generic reversible transform theorem and generic transfer theorem between two invertible encodings; **a new theorem showing that no decoder can uniquely recover two distinct but observationally identical parameterizations, even from the complete observation function**; finite three-source 32-point orbit-equivalence certificates; four target quotient 64/128-point equality certificates; a mathematical witness showing the *same complete* 5-bit truth table has multiple distinct coordinate descriptions.
+- GitHub Actions diagnostic at `labs/core_orbit_lean_results_20261117/status.txt`: **lean_exit=0, result=PASS**, source `proof_source_sha256=ec4200065b820e4b332dffae9fa9293926af838c75816573e02b7a07a47d6eef`. No `sorry` or `admit` in source.
 - This compiles exact FINITE statements and formal reversibility/transfer properties. Lean does **not** prove the empirical oracle source, full learner algorithm correctness, universal causal law, discovery of new physics or uniqueness of a hidden representation.
 
 ## Source archive
-Reproducible complete conversation artifact `INSACERMO_CORE_ISOMORPHIC_ABSTRACTION_20261117.zip`, SHA256 `465cb576387b17b2eadf61d3825dbb6b5e94aaeb1defcff72b00acb790a62497`. It contains `PREREG.md`, oracle process, target-blind `learner.py`, sealed JSON, separate Python auditer and receipt, independent symmetry enumerator + receipt, exact updated `OrbitCert.lean`, README and explicit limitations. `python learner.py && python independent_audit.py && python symmetry_audit.py`. Requires Python 3 and NumPy.
+Reproducible complete conversation artifact `INSACERMO_CORE_ISOMORPHIC_ABSTRACTION_20261117.zip`, SHA256 `c0d67a21d5181220e07b36c517c1472d326ea0a1f06e53fe0cc2f132023a041c`. It contains `PREREG.md`, oracle process, target-blind `learner.py`, sealed JSON, separate Python auditer and receipt, independent symmetry enumerator + receipt, exact updated `OrbitCert.lean`, README and explicit limitations. `python learner.py && python independent_audit.py && python symmetry_audit.py`. Requires Python 3 and NumPy.
 
 ## Essential scientific limits and next ONLY test
 - SYNTHETIC generator intentionally shares common 5-bit concept; no discovery of an unknown physical law.
@@ -29,3 +29,7 @@ Reproducible complete conversation artifact `INSACERMO_CORE_ISOMORPHIC_ABSTRACTI
 - Every projected table is exhaustively queried; **no sample/query savings demonstrated** in this experiment.
 - The omitted 17–18 bits can contain invisible exceptions; global refusal is necessary. The 16 automorphisms are a FINITE enumeration of this one function, not 16 different natural laws.
 - Next frontier: discover which transformation family to apply, including transformations not supplied in advance, by self-generated counterexamples; otherwise REFUSE. Do NOT return to Wine/WDBC/Kepler or redesign historic kernel.
+## Stronger final verification
+- Latest Lean **source-bound** PASS verified for full extended proof SHA256 `ec4200065b820e4b332dffae9fa9293926af838c75816573e02b7a07a47d6eef`, including `no_uniform_unique_parameter_decoder`.
+- The complete learner and separate independent auditors were executed in a CLEAN SECOND DIRECTORY: byte-for-byte identical SHA256s for `sealed_before_holdout.json`, `results.json`, `independent_receipt.json` and `symmetry_receipt.json`.
+- Final reproducible ZIP SHA256 `c0d67a21d5181220e07b36c517c1472d326ea0a1f06e53fe0cc2f132023a041c`.
