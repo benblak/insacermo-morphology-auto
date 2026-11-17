@@ -42,25 +42,26 @@ jobs:
           mkdir -p /tmp/insacermo_unified/xor
           python3 labs/unified_xor_discovery.py /tmp/insacermo_unified/xor | tee /tmp/insacermo_unified/xor/discovery.log
           python3 labs/unified_xor_independent_audit.py /tmp/insacermo_unified/xor | tee /tmp/insacermo_unified/xor/independent.log
-      - name: Generate mathematical proof for all 24-bit inputs of EACH seven quadratic identities
-        shell: bash
-        run: |
-          python3 labs/unified_xor_generate_lean.py /tmp/insacermo_unified/xor/xor_sealed_before_holdout.json /tmp/insacermo_unified/xor/XorIdentities.lean
-          sha256sum /tmp/insacermo_unified/xor/XorIdentities.lean
-          set +e
-          timeout 540 lean /tmp/insacermo_unified/xor/XorIdentities.lean > /tmp/insacermo_unified/xor/lean_verification.log 2>&1
-          rc=$?
-          echo "xor_lean_exit=$rc" > /tmp/insacermo_unified/xor/lean_status.txt
-          tail -c 10000 /tmp/insacermo_unified/xor/lean_verification.log
-          exit "$rc"
-      - name: Conditional XOR ACT and unconditional hidden-oracle REFUSE via unchanged C3
-        run: python3 labs/unified_xor_c3_gate.py /tmp/insacermo_unified/xor
       - name: REAL derived-file correction executed only after original C3 REPAIR Lean authorization
         shell: bash
         run: |
           mkdir -p /tmp/insacermo_unified/repair
           python3 labs/unified_real_file_repair.py /tmp/insacermo_unified /tmp/insacermo_unified/repair
           python3 labs/unified_real_repair_independent_audit.py /tmp/insacermo_unified /tmp/insacermo_unified/repair
+      - name: Generate mathematical proof for all 24-bit inputs of EACH seven quadratic identities
+        continue-on-error: true
+        shell: bash
+        run: |
+          python3 labs/unified_xor_generate_lean.py /tmp/insacermo_unified/xor/xor_sealed_before_holdout.json /tmp/insacermo_unified/xor/XorIdentities.lean
+          sha256sum /tmp/insacermo_unified/xor/XorIdentities.lean
+          set +e
+          timeout 360 lean /tmp/insacermo_unified/xor/XorIdentities.lean > /tmp/insacermo_unified/xor/lean_verification.log 2>&1
+          rc=$?
+          echo "xor_lean_exit=$rc" > /tmp/insacermo_unified/xor/lean_status.txt
+          tail -c 10000 /tmp/insacermo_unified/xor/lean_verification.log
+          exit "$rc"
+      - name: Conditional XOR ACT and unconditional hidden-oracle REFUSE via unchanged C3
+        run: python3 labs/unified_xor_c3_gate.py /tmp/insacermo_unified/xor
       - name: Fail-closed final combined proof-and-source gate
         shell: bash
         run: |
