@@ -1,0 +1,60 @@
+name: INSACERMO Airfoil — Independent Lean Arithmetic Audit
+on:
+  push:
+    branches:
+      - lab/c3-airfoil-lean-arithmetic-certificate-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  formal-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Freeze historical C3 and pin original results
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/airfoil_independent_lean_arithmetic.py
+          test -s labs/airfoil_results_20261117/sealed_model_before_holdout.json
+      - name: Install requirements and Lean 4.33.1
+        run: |
+          python3 -m pip install --disable-pip-version-check numpy
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Recompute held-out model and baseline without importing learner
+        run: python3 labs/airfoil_independent_lean_arithmetic.py /tmp/insacermo_airfoil_formal
+      - name: Check generated integer claims with Lean kernel
+        run: |
+          lean --version
+          lean /tmp/insacermo_airfoil_formal/AirfoilArithmeticCertificate.lean
+      - name: Validate generated audit and independence
+        run: |
+          python3 - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('/tmp/insacermo_airfoil_formal/numerical_receipt.json')
+          x=json.loads(p.read_text())
+          assert x['rows']==281
+          assert x['integer_ten_percent_test']
+          assert x['integer_five_dB_test']
+          assert x['conservative_rounding_acceptance']
+          assert abs(x['model_rmse_recomputed']-4.1188042587163)<1e-6
+          print('AIRFOIL_ARITHMETIC_CERTIFICATE_LEAN_PASS')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_AIRFOIL_LEAN_EXACT_ARITHMETIC_281
+          path: /tmp/insacermo_airfoil_formal
+          retention-days: 90
+      - name: Publish formal audit only on isolated branch
+        if: success()
+        run: |
+          mkdir -p labs/airfoil_formal_receipts_20261117
+          cp /tmp/insacermo_airfoil_formal/numerical_receipt.json labs/airfoil_formal_receipts_20261117/numerical_receipt.json
+          cp /tmp/insacermo_airfoil_formal/AirfoilArithmeticCertificate.lean labs/airfoil_formal_receipts_20261117/AirfoilArithmeticCertificate.lean
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/airfoil_formal_receipts_20261117
+          git commit -m "lab: archive Lean kernel-checked airfoil arithmetic receipt [skip ci]"
+          git push origin HEAD:lab/c3-airfoil-lean-arithmetic-certificate-20261117
