@@ -1,0 +1,17 @@
+INTEGRATED_STAGE 0 OBSERVE_REAL_NOAA
+INTEGRATED_STAGE 1 DISCOVER_UNKNOWN_CLOCK
+INTEGRATED_STAGE 2 FALSIFY_ON_OTHER_REAL_STATION
+INTEGRATED_CHAIN_FAILED AssertionError()
+Traceback (most recent call last):
+  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/labs/integrated_proof_carrying_runtime.py", line 288, in <module>
+    try:execute(root)
+        ~~~~~~~^^^^^^
+  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/labs/integrated_proof_carrying_runtime.py", line 161, in execute
+    act_model=model([[True],[True]])
+  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/labs/integrated_proof_carrying_runtime.py", line 41, in model
+    validate(obj);return obj
+    ~~~~~~~~^^^^^
+  File "/home/runner/work/insacermo-morphology-auto/insacermo-morphology-auto/insacermo_one_engine.py", line 19, in validate
+    assert type(W)==int and 1<=W<=8 and type(A)==int and 1<=A<=12 and type(Q)==int and 1<=Q<=8
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
