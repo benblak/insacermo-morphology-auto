@@ -1,0 +1,98 @@
+name: INSACERMO — Single integrated proof-carrying runtime (NOAA + C3 + Lean)
+on:
+  push:
+    branches:
+      - lab/c3-integrated-proof-carrying-discovery-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  unified:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check historical engine exact blob and syntax of independent pipeline
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          test -s labs/INTEGRATED_PROOF_CARRYING_RUNTIME_PROTOCOL_20261117.md
+          python3 -m py_compile labs/integrated_proof_carrying_runtime.py labs/independent_integrated_proof_audit.py
+      - name: Install Lean 4.33.1 (actual kernel)
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile exact historic portable C3 verifier, soundness and search
+        shell: bash
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run all physical/synthetic discovery and certified decisions in ONE process
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: ".:labs"
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_unified
+          set +e
+          python3 labs/integrated_proof_carrying_runtime.py /tmp/insacermo_unified > /tmp/insacermo_unified/run.log 2>&1
+          rc=$?
+          echo "runtime_exit=$rc" > /tmp/insacermo_unified/status.txt
+          sha256sum labs/integrated_proof_carrying_runtime.py | cut -d' ' -f1 | sed 's/^/runtime_source_sha256=/' >> /tmp/insacermo_unified/status.txt
+          tail -c 28000 /tmp/insacermo_unified/run.log
+          exit 0
+      - name: Run independent original-byte and C3-source audit
+        shell: bash
+        run: |
+          set +e
+          python3 labs/independent_integrated_proof_audit.py /tmp/insacermo_unified > /tmp/insacermo_unified/independent.log 2>&1
+          rc=$?
+          echo "independent_exit=$rc" >> /tmp/insacermo_unified/status.txt
+          cat /tmp/insacermo_unified/independent.log
+          exit 0
+      - name: Final fail-closed gate and identity of source
+        shell: bash
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: ".:labs"
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("/tmp/insacermo_unified")
+          status=(p/"status.txt").read_text()
+          a=json.loads((p/"audit.json").read_text())
+          rec=json.loads((p/"independent_receipt.json").read_text())
+          assert "runtime_exit=0" in status and "independent_exit=0" in status
+          assert a["verdict"]=="INTEGRATED_C3_LEAN_CHAIN_PASS"
+          assert rec["verdict"]=="INDEPENDENT_INTEGRATED_BRIDGE_PASS"
+          assert a["n_stages"]>=12 and len(a["c3_certificates"])==5
+          assert a["global_law_claim"]=="REFUSE_UNCONDITIONAL"
+          assert a["engine_git_blob"]=="bd5310b3692bcbad4e874005b7dd8eda90616f74"
+          print("INTEGRATED_RUNTIME_AND_FIVE_C3_LEAN_PROOFS_AND_REAL_NOAA_BRIDGE_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_SINGLE_INTEGRATED_RUNTIME_NOAA_C3_LEAN
+          path: /tmp/insacermo_unified/
+          retention-days: 90
+      - name: Publish honest PASS or FAIL with source-pinned evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p labs/integrated_runtime_results_20261117
+          for name in audit.json failure.json independent_receipt.json run.log independent.log status.txt stage_manifest.json NoaaEvidence.lean direct_lean.log; do
+            if [ -f "/tmp/insacermo_unified/$name" ]; then
+              cp "/tmp/insacermo_unified/$name" labs/integrated_runtime_results_20261117/
+            fi
+          done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/integrated_runtime_results_20261117
+          git commit -m "lab: publish integrated run source-bound evidence and failures [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-integrated-proof-carrying-discovery-20261117
