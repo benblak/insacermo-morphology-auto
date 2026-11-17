@@ -14,6 +14,7 @@ def main(out):
     external=json.loads((out/"xor_independent_receipt.json").read_text())
     identity=json.loads((out/"XorIdentities.json").read_text())
     assert external["result"]=="INDEPENDENT_XOR_UNIFIED_PASS"
+    assert (out/"lean_status.txt").read_text().strip()=="xor_lean_exit=0", "NO_LEAN_UNIVERSAL_POLYNOMIAL_CERTIFICATE"
     assert len(identity["verified_models"])==7
     assert external["hidden_counterexample"]==978436
     models={
