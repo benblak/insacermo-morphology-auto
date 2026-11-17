@@ -1,0 +1,14 @@
+# INSACERMO UNIFICATION — XOR researcher + formal scope + ACTUAL reversible data repair
+2026-11-17 — isolated lab, after integrated NOAA→C3/Lean PASS. Historical engine blob bd5310b3692bcbad4e874005b7dd8eda90616f74 FROZEN.
+
+No new kernel, no new MAX TOTAL layer. Focused compatibility and certification experiment.
+
+1. XOR researcher: port previously executed full 24-bit blind XOR-oracle experiment (seed 73913, 3 sources and 6 targets, 301 polynomial coefficients plus 64 challenge points and 1024 sealed holdouts per target, symplectic rank-4 reconstruction). Integrate within the SAME GitHub workflow as previously working labs/integrated_proof_carrying_runtime.py. Distinguish any port from byte-identical original. Original local source SHA256: oracle 1db09c9f18b4722b5998724768ae3389d1c019703373c6ebd2a162e23772e745; learner b11c78cd8f4aa4560c15f3ec19b8da937f3f1b3e87ca358774229c6b800b5e8a; independent audit 8ed07215afab8ffa604fcc0f7a1e276b14b2f3445f5f3d702cb963c5b03f5665. These exact originals were freshly reexecuted and independently audited in a separate local working directory before this protocol. All oracle law extrapolations remain REFUSE_UNCONDITIONAL.
+
+2. Formal scope stronger than previous: generate Lean theorem(s) proving exact equality of the reconstructed XOR coordinate polynomial and its inferred quadratic ANF for ALL 24-bit inputs, conditional on the declared quadratic model. If this ambitious full theorem does not compile, clearly mark it as a FAIL, do not call it a proof. Lean cannot prove that arbitrary real oracles are quadratic from 301 observations. Independent auditor checks all 301 coefficients, 1024 heldouts and rare-needle counterexample; C3 decision certificates can authorize polynomial-conditional claims only.
+
+3. Actual software repair: Original NOAA 46002 2023 has an actually unobserved wave-height at 2023-02-23T10:10Z bracketed by 7.4m and 8.0m observations. Demonstrate bug by creating a deliberately faulty DERIVED CSV row that wrongly puts 0.0m for the absent center and labels it calm. After an original-C3 certified REPAIR, perform a REAL atomic file transformation to corrected CSV with wave_height_m=null and observed=false, preserving raw gzip, provenance, original valid endpoints and recording before/after SHA256 and rollback verification. This is actual data processing, NOT physical sensor actuation, and cannot be described as commanding a buoy.
+
+4. Same GitHub workflow must recompile actual historical C3 Lean kernel, perform original integrated NOAA research and real evidence, newly integrated XOR researcher and audited file REPAIR, reject corrupt receipt, run independent data and model audit, preserve errors. No original kernel modification.
+
+No new physical law found; no claim of universal certification for Python programs.
