@@ -83,4 +83,26 @@ theorem target_3_projected :
   verifyQuotient 56032425 #[1,5,8,14,18] #[0,1,3,2,4] #[2] #[1,2,5,8,14,18]
     26 6 7364395582523992380 = true := by decide
 
+/-- An exact same five-input law admits distinct coordinate descriptions.
+    Even a COMPLETE truth table cannot identify an orientation uniquely. -/
+theorem multiple_exact_coordinate_descriptions :
+    verifyOrbit 56032425 56032425 #[0,1,2,3,4] 0 false = true ∧
+    verifyOrbit 56032425 56032425 #[0,2,1,3,4] 0 false = true ∧
+    verifyOrbit 56032425 56032425 #[0,1,2,3,4] 16 true = true ∧
+    (#[0,1,2,3,4] : Array Nat) ≠ #[0,2,1,3,4] := by
+  decide
+
+/-- A genuinely shared abstraction yields a semantic relationship between
+    two differently encoded representations, whenever a true inverse exists. -/
+theorem common_abstraction_transfers (left right shared : Nat → Bool)
+    (encodeL encodeR decodeL : Nat → Nat)
+    (hleft : ∀ x, left (encodeL x) = shared x)
+    (hright : ∀ x, right (encodeR x) = shared x)
+    (hinv : ∀ x, encodeL (decodeL x) = x) :
+    ∀ x, left x = right (encodeR (decodeL x)) := by
+  intro x
+  have a := hleft (decodeL x)
+  have b := hright (decodeL x)
+  simpa [hinv x] using a.trans b.symm
+
 end InsacermoOrbit
