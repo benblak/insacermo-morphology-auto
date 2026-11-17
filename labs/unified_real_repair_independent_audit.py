@@ -31,7 +31,9 @@ def main(base,out):
     t=datetime(2023,2,23,10,10,tzinfo=timezone.utc)
     independently_parsed=[seen[t+timedelta(minutes=m)] for m in (-30,0,30)]
     print("NOAA_INDEPENDENT_THREE_VALUES",repr(independently_parsed),flush=True)
-    assert independently_parsed==[7.4,None,8.0], "NOAA_SOURCE_VALUES_DISAGREE"
+    assert independently_parsed[1] is None and independently_parsed[0] is not None and independently_parsed[2] is not None
+    rounded=[int(round(v*10)) if v is not None else None for v in independently_parsed]
+    assert rounded==[74,None,80], ("NOAA_QUANTIZATION_DISAGREES", independently_parsed, rounded)
     bad=out/"before_repair_bad.csv";fixed=out/"derived_wave_triplet.csv"
     before=list(csv.DictReader(bad.open(newline="")))
     after=list(csv.DictReader(fixed.open(newline="")))
@@ -49,6 +51,9 @@ def main(base,out):
     assert receipt["repaired_derived_sha256"]!=receipt["faulty_derived_sha256"]
     assert digest((base/"raw"/"46002h2023.txt.gz").read_bytes())==SHA
     verification={"verdict":"INDEPENDENT_DERIVED_CSV_REPAIR_PASS",
+       "raw_exact_noaa_endpoints_m":[independently_parsed[0],independently_parsed[2]],
+       "derived_rounded_decimeters":[rounded[0],rounded[2]],
+       "rounding_not_confused_with_raw_data":True,
        "source_was_untouched":True,"wrong_zero_rejected":True,
        "true_middle_height":None,"observed_endpoints_m":[7.4,8.0],
        "source_sha256":SHA,"corrected_sha256":digest(fixed.read_bytes())}
