@@ -1,0 +1,58 @@
+name: INSACERMO Real NOx Actionability Versus Identification
+on:
+  push:
+    branches:
+      - lab/c3-actionability-vs-law-industrial-20261117
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify historical frozen C3 source
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          python3 -m py_compile labs/industrial_nox_actionability_c3.py
+      - name: Install historical Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile frozen portable C3
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Test real UCI NOx contract versus identification and temporal transfer
+        env:
+          LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
+        run: python3 labs/industrial_nox_actionability_c3.py /tmp/insacermo_actionability_industry
+      - name: Independently verify summary claims
+        run: |
+          python3 - <<'PY'
+          import json,math
+          from pathlib import Path
+          p=Path("/tmp/insacermo_actionability_industry")
+          r=json.loads((p/"audit.json").read_text())
+          assert r["profiles_2011"]==148
+          assert r["mixed_profiles_2011"]==77
+          assert r["pure_profiles_2011"]==71
+          assert r["finite_example"]["min_decision_queries"]==1
+          assert r["finite_example"]["min_identity_queries"]>=3
+          assert r["transfer_2015"]["acted"]==1058
+          assert r["transfer_2015"]["wrong"]==240
+          assert r["Lean_replayed"]==9
+          assert len(list(p.rglob("receipt.json")))==9
+          print("INDUSTRIAL_CONTRACT_VS_IDENTIFICATION_AUDIT_PASS")
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_INDUSTRIAL_ACTIONABILITY_9_LEAN_CERTS
+          path: /tmp/insacermo_actionability_industry/
+          retention-days: 90
