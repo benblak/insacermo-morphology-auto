@@ -1,0 +1,53 @@
+name: INSACERMO — Unqueried law nonidentifiability Lean
+on:
+  push:
+    branches:
+      - lab/c3-self-inferred-premises-refusal-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  prove:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check frozen historical engine
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify proof and publish diagnostics
+        shell: bash
+        run: |
+          mkdir -p /tmp/insacermo_indistinguishable
+          set +e
+          lean labs/IndistinguishableCompletions.lean > /tmp/insacermo_indistinguishable/lean.log 2>&1
+          rc=$?
+          printf 'lean_exit=%s\n' "$rc" > /tmp/insacermo_indistinguishable/status.txt
+          if [ "$rc" -eq 0 ]; then
+            echo "result=PASS" >> /tmp/insacermo_indistinguishable/status.txt
+          else
+            echo "result=FAIL" >> /tmp/insacermo_indistinguishable/status.txt
+          fi
+          cat /tmp/insacermo_indistinguishable/lean.log
+          exit 0
+      - name: Upload complete audit even if proof fails
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_UNKNOWN_LAW_LEAN_PROOF_DIAGNOSTIC
+          path: /tmp/insacermo_indistinguishable
+          retention-days: 90
+      - name: Publish readable Lean verdict on lab branch
+        shell: bash
+        run: |
+          mkdir -p labs/unknown_law_lean_results_20261117
+          cp /tmp/insacermo_indistinguishable/* labs/unknown_law_lean_results_20261117/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/unknown_law_lean_results_20261117
+          git commit -m "lab: archive unqueried-law Lean result [skip ci]" || exit 0
+          git push origin HEAD:lab/c3-self-inferred-premises-refusal-20261117
