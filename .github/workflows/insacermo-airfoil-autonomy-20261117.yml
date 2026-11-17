@@ -1,0 +1,58 @@
+name: INSACERMO Airfoil — Autonomous Blind Physical Transfer
+on:
+  push:
+    branches:
+      - lab/c3-airfoil-blind-grammar-transfer-20261117
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Frozen C3 and preregistration check
+        run: |
+          git hash-object insacermo_one_engine.py | grep -Fx bd5310b3692bcbad4e874005b7dd8eda90616f74
+          test -s labs/AIRFOIL_AUTONOMOUS_GRAMMAR_PREREG_20261117.md
+          python3 -m py_compile labs/airfoil_auto_grammar.py
+      - name: Install numerical computation dependencies
+        run: python3 -m pip install --disable-pip-version-check numpy
+      - name: Discover and score held-out unseen physical speed
+        run: python3 labs/airfoil_auto_grammar.py /tmp/airfoil_autonomy
+      - name: Independent arithmetic assertions
+        run: |
+          python3 - <<'PY'
+          import json,math,pathlib
+          d=json.loads(pathlib.Path('/tmp/airfoil_autonomy/audit.json').read_text())
+          assert d['data_records']==1503
+          assert d['challenge_queries']==40
+          assert d['holdout_records']>0
+          assert d['holdout_speed']==31.7
+          assert d['historical_kernel_modified'] is False
+          assert math.isfinite(d['holdout_rmse_dB']) and math.isfinite(d['linear_rmse_dB'])
+          assert math.isclose(d['improvement_vs_linear_pct'],100*(1-d['holdout_rmse_dB']/d['linear_rmse_dB']))
+          assert d['transfer_accepted'] == (d['holdout_rmse_dB']<=5 and d['improvement_vs_linear_pct']>=10)
+          sealed=json.loads(pathlib.Path('/tmp/airfoil_autonomy/sealed_model_before_holdout.json').read_text())
+          assert len(sealed['challenge_indices'])==40
+          assert len(set(sealed['challenge_indices']))==40
+          assert not set(sealed['challenge_indices']).intersection(sealed['holdout_row_ids'])
+          print('AIRFOIL_INDEPENDENT_RECEIPT_PASS',d['verdict'])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_AIRFOIL_AUTO_GRAMMAR_REAL_HOLDOUT
+          path: /tmp/airfoil_autonomy
+          retention-days: 90
+      - name: Publish immutable audit on isolated branch
+        if: success()
+        run: |
+          mkdir -p labs/airfoil_results_20261117
+          cp /tmp/airfoil_autonomy/audit.json labs/airfoil_results_20261117/audit.json
+          cp /tmp/airfoil_autonomy/sealed_model_before_holdout.json labs/airfoil_results_20261117/sealed_model_before_holdout.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/airfoil_results_20261117
+          git commit -m "lab: preserve scored airfoil blind transfer outcome [skip ci]"
+          git push origin HEAD:lab/c3-airfoil-blind-grammar-transfer-20261117
