@@ -5,7 +5,7 @@ on:
       - lab/c3-third-domain-appliances-preregistered-20261117
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   experiment:
     runs-on: ubuntu-latest
@@ -59,3 +59,13 @@ jobs:
           name: INSACERMO_THIRD_DOMAIN_APPLIANCES_PREREG_TRANSFER
           path: /tmp/insacermo_third_domain
           retention-days: 90
+      - name: Commit auditable result back to isolated laboratory branch
+        if: success()
+        run: |
+          mkdir -p labs/third_domain_results_20261117
+          cp /tmp/insacermo_third_domain/audit.json labs/third_domain_results_20261117/audit.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add labs/third_domain_results_20261117/audit.json
+          git commit -m "lab: record third-domain frozen-policy outcome [skip ci]"
+          git push origin HEAD:lab/c3-third-domain-appliances-preregistered-20261117
