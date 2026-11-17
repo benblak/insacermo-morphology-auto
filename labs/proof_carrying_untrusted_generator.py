@@ -58,7 +58,9 @@ def generate(seal_path,proof_path,attack="none"):
           f"theorem {name}_reported_size : {name}_reported.size = 301 := by decide",
           *[f"theorem {name}_label_{i:03d} : {name}_quadratic (BitVec.ofNat 24 {BASIS[i]}) = {str(bool(labels[i])).lower()} := by decide" for i in range(301)],
           f"theorem {name}_xor_coordinates_equal_quadratic_for_all_x (x : BitVec 24) :",
-          f"  {name}_quadratic x = {name}_transported x := by bv_decide"
+          f"  {name}_quadratic x = {name}_transported x := by",
+          f"  unfold {name}_quadratic {name}_transported",
+          "  bv_decide"
         ]
     lines.extend([
       "/-- Finite observations cannot rule out a point exception outside their domain. -/",
