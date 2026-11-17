@@ -1,0 +1,20 @@
+# INSACERMO MAX — UNTRUSTED RESEARCHER, FORMALLY VERIFIED EVIDENCE (2026-11-17)
+
+**Frozen priority:** make it unnecessary to trust the Python researcher for *accepted* conclusions. Preserve MAX TOTAL, C3, original Lean kernel, site and prior ZIPs **unchanged**. This is one isolated laboratory, not a new engine layer.
+
+## Actual evidence available BEFORE experiment
+- Original previously GitHub-verified ZIP hash: SHA256 `495c21d4e43ab011a31bc596f997dc7fc08a7349041bc6716c0ac820d222b0bc`.
+- Prior sealed 24-bit query-only XOR run has 9 independent synthetic oracles, 7 candidate degree≤2 models, two negative controls, 5309 recorded oracle responses, 1024 heldouts per target, and a precommitted undetected one-point exception. Archived sealed model SHA256 `92ef984d87640c1dd107318c1ba51b55fbe21f07e0f3a36ea548eebf5d50876d`.
+- Before this GitHub integration, a *new* truly independent transcript checker examined **301 × 7 = 2107** actual zero-, singleton- and pair-support labels with the seven candidate quadratic ANFs and the seven XOR-transported formulas, and separately rejected one flipped source-0 label and one altered source-0 XOR input-coordinate mask. These were Python empirical audits, NOT prior Lean proofs.
+- The existing seven `XorIdentities.lean` already prove every transported Boolean polynomial equals its fitted ANF on ALL **2^24** inputs, but do NOT certify that the model fits the oracle training labels. That is the precise new gap.
+
+## New proof-carrying contract and tests, frozen before new CI outcome
+1. Reuse exact prior nine synthetic oracle source and blind search code, with no access to oracle's private masks inside learner. Independently reconstruct 2107 label-to-quadratic fit checks and print SHA256 of those basis labels and model/transcript source.
+2. From the same sealed transcript, generate **an exact Lean 4.33.1 file** containing each candidate quadratic polynomial, transported five XOR coordinates, all **301 recorded basis labels** from THAT original oracle transcript, seven checked `List.range 301` basis-consistency theorems, and seven `bv_decide` theorems valid for every 24-bit input (conditional on quadratic class). Include generic no-unobserved-exception theorem. An untrusted Python generator may propose, but Lean must independently compile the evidence.
+3. Negative mutation gates: flip ONE actual recorded oracle label and one XOR mask in a duplicate certificate. Both mutant Lean files MUST FAIL compilation, or whole result FAIL. Tamper attacks must not alter the genuine model or its transcript.
+4. Independent observer recomputes all 2107 labels using a separate implementation from the sealed transcript, and independently replays hidden oracle's original source only AFTER sealing, including a demonstrated rare unobserved exception. The formal certificate should bind SHA256 of exact inputs and source. Any error / timeout / missing Lean binary => no ACT.
+5. Optional finite-domain experiment: demonstrate the **only** assumption-free way to certify an arbitrary function at all inputs is full coverage of that finite domain. For arbitrary 24-bit oracles, even all 5309 samples cannot logically exclude an unseen one-point exception. All unconditional truth claims must REFUSE.
+
+**Acceptance:** GitHub CI source-bound positive Lean PASS for 7 basis labels + 7 all-input identities + epistemic theorem, independent label audit PASS, both malformed Lean files rejected, original C3 stays untouched. Otherwise honestly preserve FAIL. No false statement that Python source was universally verified: result is **soundness of accepted certificates**, under explicitly scoped assumptions and authenticity of sample replies, even if Python proposer is faulty. Does not establish a world-first physical law.
+
+All earlier artifacts untouched; all outputs to this single isolated lab branch.
