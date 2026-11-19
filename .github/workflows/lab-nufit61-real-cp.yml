@@ -4,6 +4,7 @@ on:
     branches: ['lab/antimatter-two-published-models-20261119']
     paths:
       - 'labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py'
+      - 'labs/leptogenesis_real_discrimination_20261119/generate_nufit61_grid_lean.py'
       - '.github/workflows/lab-nufit61-real-cp.yml'
   workflow_dispatch:
 permissions:
