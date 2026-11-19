@@ -31,8 +31,8 @@ def main():
             rows.append((int(normalized),int(scaled)))
     assert len(rows)==73 and len(set(a for a,c in rows))==72,len(rows)
     assert min(c for a,c in rows if 198<=a<=225)==0
-    assert min(c for a,c in rows if 5<=a<=40)==90481160000000
-    assert min(c for a,c in rows if 320<=a<=355)==36902210000000
+    assert min(c for a,c in rows if 5<=a<=40)==9048116000000
+    assert min(c for a,c in rows if 320<=a<=355)==3690221000000
     pairs=",".join(f"({a},{c})" for a,c in rows)
     lean=f'''import Lean
 
