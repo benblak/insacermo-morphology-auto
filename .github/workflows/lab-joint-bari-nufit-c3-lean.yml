@@ -1,0 +1,84 @@
+name: INSACERMO LAB Bari NuFIT joint robust C3 Lean
+on:
+  push:
+    branches: ['lab/antimatter-two-published-models-20261119']
+    paths:
+      - 'labs/leptogenesis_real_discrimination_20261119/JointBariNuFITRobust.lean'
+      - 'labs/leptogenesis_real_discrimination_20261119/audit_joint_robust_c3.py'
+      - '.github/workflows/lab-joint-bari-nufit-c3-lean.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit_joint:
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: '.'
+      JOINT_OUT: /tmp/insacermo-joint-bari-nufit
+      INSACERMO_NUFIT_OUT: /tmp/insacermo-joint-bari-nufit
+      LEAN_PATH: '.:lean:/tmp/insacermo-joint-bari-nufit'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check original C3 Git blob
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          b=Path("insacermo_one_engine.py").read_bytes()
+          got=hashlib.sha1(b"blob "+str(len(b)).encode()+b"\0"+b).hexdigest()
+          assert got=="bd5310b3692bcbad4e874005b7dd8eda90616f74",got
+          print("ORIGINAL_C3_FROZEN")
+          PY
+      - name: Retrieve unverified TLS NuFIT source with SHA requirement
+        run: |
+          mkdir -p "$INSACERMO_NUFIT_OUT"
+          curl --fail --location --show-error --silent --insecure --max-time 120 \
+            https://www.nu-fit.org/sites/default/files/v61.release-TByes-NO.txt.xz \
+            --output "$INSACERMO_NUFIT_OUT/v61.release-TByes-NO.txt.xz"
+          echo "CAUTION: HTTPS certificate NOT VERIFIED on NuFIT download"
+          printf '%s  %s\n' 'c74bd6df84297a8429cd3b9e1239751cd0762756f1ec0c2a31248d78570b26e4' "$INSACERMO_NUFIT_OUT/v61.release-TByes-NO.txt.xz" | sha256sum -c -
+      - name: Audit 73 data rows and construct source-derived grid
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py
+          python3 labs/leptogenesis_real_discrimination_20261119/generate_nufit61_grid_lean.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Verify original portable C3 modules
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Compile exact NuFIT data grid and joint Bari NuFIT lemmas
+        run: |
+          lean -o "$INSACERMO_NUFIT_OUT/NuFIT61GridCertification.olean" "$INSACERMO_NUFIT_OUT/NuFIT61GridCertification.lean"
+          lean labs/leptogenesis_real_discrimination_20261119/BariPublishedIntervalBridge.lean
+          lean labs/leptogenesis_real_discrimination_20261119/JointBariNuFITRobust.lean
+      - name: No proof holes in new Lean
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re,os
+          paths=[
+            Path(os.environ['INSACERMO_NUFIT_OUT'])/"NuFIT61GridCertification.lean",
+            Path("labs/leptogenesis_real_discrimination_20261119/JointBariNuFITRobust.lean")]
+          for f in paths:
+            s=f.read_text()
+            s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+            s=re.sub(r'--[^\n]*','',s)
+            assert not re.search(r'\b(sorry|admit|axiom)\b',s),f
+          print("NO_PROOF_HOLES")
+          PY
+      - name: Original C3 classify and Lean replay four joint cases
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/audit_joint_robust_c3.py
+      - name: Archive receipts and source audit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_JOINT_BARI_NUFIT_C3_LEAN
+          path: /tmp/insacermo-joint-bari-nufit/
+          if-no-files-found: ignore
+          retention-days: 30
