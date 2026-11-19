@@ -1,0 +1,39 @@
+name: INSACERMO LAB NuFIT61 REAL CP PROFILE
+on:
+  push:
+    branches: ['lab/antimatter-two-published-models-20261119']
+    paths:
+      - 'labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py'
+      - '.github/workflows/lab-nufit61-real-cp.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real_nufit_profile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Protect historical engine and check Python
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          s=Path('insacermo_one_engine.py').read_bytes()
+          h=hashlib.sha1(b'blob '+str(len(s)).encode()+b'\0'+s).hexdigest()
+          assert h=='bd5310b3692bcbad4e874005b7dd8eda90616f74', h
+          print('FROZEN_C3_BLOB_OK')
+          PY
+          python3 -m py_compile labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py
+      - name: Download and audit original NuFIT 6.1 1D CP profile
+        env:
+          INSACERMO_NUFIT_OUT: /tmp/insacermo-nufit61
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py
+      - name: Archive exact source and report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_NUFIT61_RAW_CP_PROFILE_AUDIT
+          path: /tmp/insacermo-nufit61/
+          if-no-files-found: ignore
+          retention-days: 30
