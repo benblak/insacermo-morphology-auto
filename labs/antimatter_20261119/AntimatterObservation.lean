@@ -70,7 +70,18 @@ def policyFive (z : (Bool × Bool × Bool × Bool) × Bool) : Fin 5 :=
 theorem idealized_fifth_probe_allows_identification :
     Safe correct observedFive := by
   refine ⟨policyFive, ?_⟩
-  decide
+  intro w
+  rcases w with ⟨n, hn⟩
+  have hcases : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 ∨
+                n = 4 ∨ n = 5 ∨ n = 6 := by omega
+  rcases hcases with h0 | h1 | h2 | h3 | h4 | h5 | h6
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
+  · subst n; simp [correct, family, policyFive, observedFive, observedFour, hypotheticalExtra]
 
 /-- No observation is needed to execute an action equally safe in every
     declared world: mechanism identification is a strictly stronger contract. -/
