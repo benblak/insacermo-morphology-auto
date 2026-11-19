@@ -27,14 +27,12 @@ def ReportedKnots (p : List (Int × Int)) : Prop :=
 
 theorem both_witnesses_match_reported_knots :
     ReportedKnots profile5 ∧ ReportedKnots profile8 := by
-  unfold ReportedKnots profile5 profile8
-  decide
+  simp [ReportedKnots, profile5, profile8]
 
 theorem values_at_B_high_start_are_distinct :
     (3200,5) ∈ profile5 ∧ (3200,8) ∈ profile8 ∧
     (3200,8) ∉ profile5 ∧ (3200,5) ∉ profile8 := by
-  unfold profile5 profile8
-  decide
+  simp [profile5, profile8]
 
 theorem both_candidates_inside_same_published_bracket :
     4 < (5 : Int) ∧ (5 : Int) < 9 ∧
