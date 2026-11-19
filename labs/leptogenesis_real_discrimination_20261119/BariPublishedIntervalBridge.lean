@@ -17,24 +17,36 @@ namespace INSACERMO.Bari2026a
 
 def Overlap (l u a b : Int) : Prop := l ≤ b ∧ a ≤ u
 
-theorem one_sigma_A : Overlap 1890 2412 1980 2250 := by decide
+theorem one_sigma_A : Overlap 1890 2412 1980 2250 := by
+  unfold Overlap
+  decide
 
 theorem one_sigma_no_B :
     ¬ Overlap 1890 2412 50 400 ∧
-    ¬ Overlap 1890 2412 3200 3550 := by decide
+    ¬ Overlap 1890 2412 3200 3550 := by
+  unfold Overlap
+  decide
 
-theorem two_sigma_A : Overlap 1656 2970 1980 2250 := by decide
+theorem two_sigma_A : Overlap 1656 2970 1980 2250 := by
+  unfold Overlap
+  decide
 
 theorem two_sigma_no_B :
     ¬ Overlap 1656 2970 50 400 ∧
-    ¬ Overlap 1656 2970 3200 3550 := by decide
+    ¬ Overlap 1656 2970 3200 3550 := by
+  unfold Overlap
+  decide
 
 theorem three_sigma_A_and_B_high :
     Overlap 1422 3510 1980 2250 ∧
-    Overlap 1422 3510 3200 3550 := by decide
+    Overlap 1422 3510 3200 3550 := by
+  unfold Overlap
+  decide
 
 theorem three_sigma_no_B_low :
-    ¬ Overlap 1422 3510 50 400 := by decide
+    ¬ Overlap 1422 3510 50 400 := by
+  unfold Overlap
+  decide
 
 theorem B_high_witness :
     (3200 : Int) ≥ 1422 ∧ 3200 ≤ 3510 ∧ 3200 ≥ 3200 ∧ 3200 ≤ 3550 := by decide
