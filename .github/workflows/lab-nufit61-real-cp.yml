@@ -38,6 +38,31 @@ jobs:
           INSACERMO_NUFIT_OUT: /tmp/insacermo-nufit61
         run: |
           python3 labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py
+      - name: Generate exact Lean verification file from pinned NuFIT source
+        env:
+          INSACERMO_NUFIT_OUT: /tmp/insacermo-nufit61
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/generate_nufit61_grid_lean.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile all seven data-driven NuFIT grid theorems in Lean
+        run: |
+          lean --version
+          lean /tmp/insacermo-nufit61/NuFIT61GridCertification.lean
+      - name: Refuse proof placeholders in generated Lean
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('/tmp/insacermo-nufit61/NuFIT61GridCertification.lean').read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print('NO_LEAN_PROOF_PLACEHOLDERS')
+          PY
       - name: Archive exact source and report
         if: always()
         uses: actions/upload-artifact@v4
