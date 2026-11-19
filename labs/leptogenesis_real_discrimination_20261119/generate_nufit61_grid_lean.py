@@ -26,13 +26,13 @@ def main():
             normalized=((angle % D(360))+D(360))%D(360)
             assert normalized==normalized.to_integral_value(),("noninteger angle",angle)
             assert chi>=0
-            scaled=chi*1_000_000
-            assert scaled==scaled.to_integral_value(),("precision more than six decimals",chi)
+            scaled=chi*1_000_000_000_000
+            assert scaled==scaled.to_integral_value(),("precision more than twelve decimals",chi)
             rows.append((int(normalized),int(scaled)))
     assert len(rows)==73 and len(set(a for a,c in rows))==72,len(rows)
     assert min(c for a,c in rows if 198<=a<=225)==0
-    assert min(c for a,c in rows if 5<=a<=40)==9048116
-    assert min(c for a,c in rows if 320<=a<=355)==3690221
+    assert min(c for a,c in rows if 5<=a<=40)==90481160000000
+    assert min(c for a,c in rows if 320<=a<=355)==36902210000000
     pairs=",".join(f"({a},{c})" for a,c in rows)
     lean=f'''import Lean
 
@@ -46,6 +46,8 @@ A = [198°,225°], B-low=[5°,40°], B-high=[320°,355°].
 Theorems are conditional on supplied source bytes, DO NOT certify provenance,
 continuous interpolation, likelihood coverage, or theory truth.
 -/
+set_option maxHeartbeats 20000000
+set_option maxRecDepth 8192
 namespace INSACERMO.NuFIT61RealGrid
 
 def grid : List (Int × Nat) := [{pairs}]
@@ -58,21 +60,21 @@ theorem lower_bound_A :
   decide +kernel
 
 theorem witnessed_B_low :
-    (5,9048116) ∈ grid := by decide +kernel
+    (5,9048116000000) ∈ grid := by decide +kernel
 
 theorem lower_bound_B_low :
-    grid.all (fun p => decide (5 ≤ p.1 ∧ p.1 ≤ 40 → (9048116 : Nat) ≤ p.2)) = true := by
+    grid.all (fun p => decide (5 ≤ p.1 ∧ p.1 ≤ 40 → (9048116000000 : Nat) ≤ p.2)) = true := by
   decide +kernel
 
 theorem witnessed_B_high :
-    (320,3690221) ∈ grid := by decide +kernel
+    (320,3690221000000) ∈ grid := by decide +kernel
 
 theorem lower_bound_B_high :
-    grid.all (fun p => decide (320 ≤ p.1 ∧ p.1 ≤ 355 → (3690221 : Nat) ≤ p.2)) = true := by
+    grid.all (fun p => decide (320 ≤ p.1 ∧ p.1 ≤ 355 → (3690221000000 : Nat) ≤ p.2)) = true := by
   decide +kernel
 
 theorem different_B_branch_minima :
-    (3690221 : Nat) < 9048116 := by omega
+    (3690221000000 : Nat) < 9048116000000 := by omega
 
 end INSACERMO.NuFIT61RealGrid
 '''
