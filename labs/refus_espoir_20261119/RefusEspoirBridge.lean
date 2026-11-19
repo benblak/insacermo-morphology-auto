@@ -83,16 +83,14 @@ theorem perfect_information_refusal_iff_missing_capacity
   classical
   constructor
   · intro h
-    by_contra hn
-    apply h
-    apply (full_information_criterion R).2
-    intro w
-    by_contra hw
-    apply hn
-    refine ⟨w, ?_⟩
-    intro a ha
-    apply hw
-    exact ⟨a, ha⟩
+    by_cases hx : ∃ w : W, ∀ a : A, ¬ R w a
+    · exact hx
+    · have hall : ∀ w : W, ∃ a : A, R w a := by
+        intro w
+        by_cases ha : ∃ a : A, R w a
+        · exact ha
+        · exact False.elim (hx ⟨w, fun a hwa => ha ⟨a, hwa⟩⟩)
+      exact False.elim (h ((full_information_criterion R).2 hall))
   · intro h
     exact impossible_world_forces_refusal R (fun w => w) h
 
@@ -103,12 +101,22 @@ def sensorParity (w : Fin 4) : Bool := decide (w.val % 2 = 1)
 theorem first_sensor_refused : ¬ Safe exampleGood sensorBlock := by
   apply collision_forces_refusal exampleGood sensorBlock (0 : Fin 4) (1 : Fin 4)
   · decide
-  · decide
+  · intro a h
+    have h0 : (0 : Nat) = a.val := by simpa [exampleGood] using h.1
+    have h1 : (1 : Nat) = a.val := by simpa [exampleGood] using h.2
+    exact Nat.zero_ne_one (h0.trans h1.symm)
 
 theorem second_sensor_lifts_refusal :
     Safe exampleGood (fun w => (sensorBlock w, sensorParity w)) := by
   refine ⟨fun z => if z.2 then (1 : Fin 3) else (0 : Fin 3), ?_⟩
-  decide
+  intro w
+  rcases w with ⟨n, hn⟩
+  have hcases : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 := by omega
+  rcases hcases with h0 | h1 | h2 | h3
+  · subst n; decide
+  · subst n; decide
+  · subst n; decide
+  · subst n; decide
 
 def impossibleGood (w : Fin 4) (a : Fin 3) : Prop :=
   w.val ≠ 1 ∧ w.val % 3 = a.val
@@ -117,6 +125,7 @@ theorem no_sensor_can_fix_missing_action {O : Type o}
     (obs : Fin 4 → O) : ¬ Safe impossibleGood obs := by
   apply impossible_world_forces_refusal impossibleGood obs
   refine ⟨(1 : Fin 4), ?_⟩
-  decide
+  intro a h
+  exact h.1 rfl
 
 end INSACERMO.RefusEspoir
