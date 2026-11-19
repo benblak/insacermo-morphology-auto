@@ -20,12 +20,13 @@ def model(goods,probes=(),budget=0,lower=None,repair=False):
     if repair:
         assert goods==[1,0] and W==2
         probes=('r',)
+    if not probes: probes=('d',)  # C3 historically requires at least one probe; dummy costs 1, budget 0
     senses=[]; nf=[]; nt=[]; kinds=[]
     for q in probes:
         if q=='r':
             senses.append([3,3]);nf.append([0,0]);nt.append([0,0]);kinds.append('REPAIR')
         else:
-            bits=PATTERNS[q]
+            bits=('0'*W if q=='d' else PATTERNS[q])
             senses.append([1 if x=='0' else 2 for x in bits])
             nf.append(list(range(W)));nt.append(list(range(W)));kinds.append('PROBE')
     return dict(worldCount=W,actionCount=A,probeCount=len(probes),
