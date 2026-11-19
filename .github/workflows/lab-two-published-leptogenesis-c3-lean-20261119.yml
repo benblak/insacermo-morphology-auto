@@ -1,0 +1,58 @@
+name: INSACERMO LAB TWO PUBLISHED LEPTOGENESIS MODELS
+on:
+  push:
+    branches: [lab/antimatter-two-published-models-20261119]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python syntax checks
+        run: |
+          python3 -m py_compile labs/leptogenesis_real_discrimination_20261119/audit_published_phase.py insacermo_one_engine.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original C3 modules and published angular interval theorem
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+          lean -o labs/refus_espoir_20261119/RefusEspoirBridge.olean labs/refus_espoir_20261119/RefusEspoirBridge.lean
+          lean labs/leptogenesis_real_discrimination_20261119/PublishedPhaseSeparation.lean
+      - name: Refuse proof placeholders or new axioms
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          for filename in ["labs/leptogenesis_real_discrimination_20261119/PublishedPhaseSeparation.lean","labs/refus_espoir_20261119/RefusEspoirBridge.lean"]:
+              s=Path(filename).read_text()
+              s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+              s=re.sub(r'--[^\n]*','',s)
+              assert not re.findall(r'\b(sorry|admit|axiom)\b',s),filename
+          print("NO_PROOF_PLACEHOLDERS")
+          PY
+      - name: Independent 360-degree oracle plus original C3 Lean receipts
+        env:
+          PYTHONPATH: "."
+          LEAN_PATH: ".:lean"
+          LEP_DISCRIMINATION_OUT: /tmp/insacermo-two-published-lep
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/audit_published_phase.py
+      - name: Archive audited results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_TWO_PUBLISHED_LEPTOGENESIS_LEAN
+          path: /tmp/insacermo-two-published-lep/
+          if-no-files-found: ignore
+          retention-days: 60
