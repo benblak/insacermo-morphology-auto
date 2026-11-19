@@ -59,8 +59,10 @@ def region(a, parts):
 def calc(rows):
     # Tabulated points only; the NuFIT grid is not continuous. Preserve source's
     # printed chi2 and relative normalization separately.
-    norm=[(norm_deg(a),chi,a) for a,chi in rows]
+    invalid=[(str(a),str(chi)) for a,chi in rows if not (a.is_finite() and chi.is_finite())]
+    norm=[(norm_deg(a),chi,a) for a,chi in rows if a.is_finite() and chi.is_finite()]
     assert all(0<=a<D(360) and v.is_finite() for a,v,orig in norm)
+    print('NONFINITE_GRID_ENTRIES',len(invalid),'EXAMPLES',invalid[:8])
     assert len({a for a,_,_ in norm})>25
     globalmin=min(v for a,v,orig in norm)
     A=[(a,chi,orig) for a,chi,orig in norm if region(a,[(198,225)])]
@@ -76,7 +78,7 @@ def calc(rows):
     r=dict(
       scope="NuFIT v6.1, TB yes, NORMAL ORDERING, November 2025. Independent comparison, NOT Bari 2026.a.",
       source_url=URL, section="# DCP",
-      n_tabulated_points=len(rows), unique_angles=len({a for a,_,_ in norm}),
+      n_tabulated_points=len(rows), n_nonfinite_skipped=len(invalid), n_finite=len(norm), unique_angles=len({a for a,_,_ in norm}),
       global_curve_min_as_published=str(globalmin),
       A_198_225=best(A),B_low_5_40=best(Blow),B_high_320_355=best(Bhigh),
       low_B_disfavored_vs_A=str(best(Blow)["delta_chi2_relative_to_curve_min"]),
