@@ -48,7 +48,7 @@ theorem forty_seven_degree_bound_separates
 theorem forty_eight_degree_counterexample :
     PredictA 225 ∧ PredictB 320 ∧
     CircularError 225 272 48 ∧ CircularError 320 272 48 := by
-  decide
+  simp [PredictA, PredictB, CircularError]
 
 /-- The closest points between A and B in the published intervals
     have circular angular distance 95 degrees. -/
@@ -63,7 +63,7 @@ theorem minimal_circular_gap_ge_95
 /-- A limiting pair attains the 95 degree separation. -/
 theorem minimal_gap_attained :
     PredictA 225 ∧ PredictB 320 ∧ (320:Int)-225=95 := by
-  decide
+  simp [PredictA, PredictB]
 
 /-- If the true physical mechanism is outside the two published
     models, discriminating A from B alone DOES NOT identify it. -/
