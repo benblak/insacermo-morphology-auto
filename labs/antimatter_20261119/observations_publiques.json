@@ -1,0 +1,22 @@
+{
+  "scope": "SCIENTIFIC OBSERVATIONS, not actual predictions for the toy baryogenesis benchmarks",
+  "eta10_CMB": {
+    "mean": 6.12,
+    "reported_uncertainty": 0.04,
+    "unit": "10^-10 baryons/photons",
+    "reference": "https://pdg.lbl.gov/2025/reviews/rpp2025-rev-bbang-cosmology.pdf",
+    "policy": "illustrative ± one reported uncertainty; not a hard physical boundary"
+  },
+  "electron_edm": {
+    "upper_abs": 4.1,
+    "unit": "10^-30 e.cm",
+    "confidence": "90% C.L.",
+    "reference": "https://www.colorado.edu/jila/cornell-group-edm-hff-gen-i-ii",
+    "policy": "confidence limit, not a logical impossibility"
+  },
+  "EWBG_context": {
+    "reference": "https://cerncourier.com/a/electroweak-baryogenesis/",
+    "scope": "conventional electroweak baryogenesis fails in minimal Standard Model; not all mechanisms using SM CP are excluded"
+  },
+  "warning": "Only the eta and electron-EDM constraints are observations. All mechanism-specific future outcomes below are invented fixtures."
+}
