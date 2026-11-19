@@ -1,0 +1,61 @@
+name: INSACERMO LAB REAL BARYOGENESIS PHYSICS LEAN
+on:
+  push:
+    branches: [lab/antimatter-real-constraints-20261119]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical C3 remains unchanged
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          from pathlib import Path
+          p=Path('insacermo_one_engine.py').read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(p)).encode()+b'\0'+p).hexdigest() == 'bd5310b3692bcbad4e874005b7dd8eda90616f74'
+          print('HISTORICAL_C3_UNCHANGED')
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile unchanged C3 and formal conditional results
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+          lean -o labs/refus_espoir_20261119/RefusEspoirBridge.olean labs/refus_espoir_20261119/RefusEspoirBridge.lean
+          lean labs/antimatter_real_20261119/PublishedConstraints.lean
+      - name: No proof placeholders or new axioms
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          for p in ['labs/antimatter_real_20261119/PublishedConstraints.lean','labs/refus_espoir_20261119/RefusEspoirBridge.lean']:
+            s=Path(p).read_text()
+            s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+            s=re.sub(r'--[^\n]*','',s)
+            assert not re.findall(r'\b(sorry|admit|axiom)\b',s)
+          print('NO_PLACEHOLDERS')
+          PY
+      - name: Independent published arithmetic audit
+        env:
+          REAL_BARYON_OUT: /tmp/insacermo-real-baryon
+        run: |
+          python3 labs/antimatter_real_20261119/audit_published_constraints.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: INSACERMO_REAL_BARYOGENESIS_LEAN_CONDITIONAL_AUDIT
+          path: /tmp/insacermo-real-baryon/
+          if-no-files-found: ignore
+          retention-days: 30
