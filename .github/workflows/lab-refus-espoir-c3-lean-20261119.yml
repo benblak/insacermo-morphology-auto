@@ -51,6 +51,7 @@ jobs:
       - name: Original C3 vs independent static oracle and Lean certificates
         env:
           LEAN_PATH: ".:lean"
+          PYTHONPATH: "."
           REFUS_ESPOIR_OUT: /tmp/insacermo-refus-espoir
         run: |
           python3 labs/refus_espoir_20261119/audit_c3_refus_espoir.py
