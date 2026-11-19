@@ -1,0 +1,69 @@
+name: INSACERMO LAB Bari 2026a profile nonidentifiability
+on:
+  push:
+    branches: ['lab/antimatter-two-published-models-20261119']
+    paths:
+      - 'labs/leptogenesis_real_discrimination_20261119/BariProfileUnderdetermination.lean'
+      - 'labs/leptogenesis_real_discrimination_20261119/audit_bari_nonidentifiability.py'
+      - 'labs/leptogenesis_real_discrimination_20261119/audit_bari_profile_c3.py'
+      - '.github/workflows/lab-bari-nonidentifiability.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      LEAN_PATH: '.:lean'
+      PYTHONPATH: '.'
+      BARI_NONID_OUT: /tmp/insacermo-bari-nonid
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact rational profiles at 3600 angles
+        run: python3 labs/leptogenesis_real_discrimination_20261119/audit_bari_nonidentifiability.py
+      - name: Preserve historical C3 blob
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('insacermo_one_engine.py').read_bytes()
+          h=hashlib.sha1(b'blob '+str(len(p)).encode()+b'\0'+p).hexdigest()
+          assert h=='bd5310b3692bcbad4e874005b7dd8eda90616f74',h
+          print('ORIGINAL_C3_KERNEL_UNCHANGED')
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile new countermodel Lean witness
+        run: |
+          lean --version
+          lean labs/leptogenesis_real_discrimination_20261119/BariProfileUnderdetermination.lean
+      - name: No sorry admit or axiom in new Lean
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          s=Path('labs/leptogenesis_real_discrimination_20261119/BariProfileUnderdetermination.lean').read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print('NO_PROOF_PLACEHOLDERS')
+          PY
+      - name: Compile portable historic C3 modules
+        run: |
+          set -euo pipefail
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Run original C3 and Lean replay on information deficit
+        run: python3 labs/leptogenesis_real_discrimination_20261119/audit_bari_profile_c3.py
+      - name: Archive receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_BARI_NONIDENTIFIABILITY_C3_LEAN
+          path: /tmp/insacermo-bari-nonid/
+          if-no-files-found: ignore
+          retention-days: 60
