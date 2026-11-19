@@ -23,7 +23,7 @@ OLD_BLOB="bd5310b3692bcbad4e874005b7dd8eda90616f74"
 
 def git_blob(path):
     raw=Path(path).read_bytes()
-    return hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\\0"+raw).hexdigest()
+    return hashlib.sha1(b"blob "+str(len(raw)).encode()+b"\0"+raw).hexdigest()
 
 def verify_input_separation():
     assert "SYNTHETIC" in B["declaration"]
@@ -192,7 +192,7 @@ def main():
       "oracle_C3_crosschecks":check_oracle_vs_c3(),
       "C3_lean_replay_receipts":certify(),
     }
-    (OUT/"RESULTS.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\\n")
+    (OUT/"RESULTS.json").write_text(json.dumps(report,indent=2,ensure_ascii=False)+"\n")
     print(json.dumps({k:v for k,v in report.items() if k not in ("public_measurement_anchors",)},
                      indent=2,ensure_ascii=False))
     print("ANTIMATTER_C3_LEAN_LAB_SUCCESS")
