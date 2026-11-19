@@ -45,6 +45,7 @@ def c3_contract(with_rival=False,budget=1):
     good=[[True,False],[False,True],[False,True]]
     sense=[[2,1,1]]
     if with_rival:
+        good=[row+[False] for row in good]
         good.append([False,False,True])
         sense=[[2,1,1,2]]
     n=len(good);actions=len(good[0])
