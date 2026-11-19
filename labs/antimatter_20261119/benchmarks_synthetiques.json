@@ -1,0 +1,153 @@
+{
+  "declaration": "ALL mechanism-specific observables and predictions below are SYNTHETIC, NOT physics predictions. Designed exclusively to stress-test C3 and Lean.",
+  "probes": [
+    {
+      "id": "eEDM_binary_future",
+      "info": "future improved eEDM observation, illustrative cut only"
+    },
+    {
+      "id": "neutrino_CP_future",
+      "info": "toy CP detection, NOT proof of leptogenesis"
+    },
+    {
+      "id": "EWPT_proxy_future",
+      "info": "model-dependent collider proxy, NOT direct historic thermal observation"
+    },
+    {
+      "id": "rare_baryon_process_future",
+      "info": "model-dependent baryon-number-violation signature"
+    },
+    {
+      "id": "unknown_ideal_probe",
+      "info": "purely idealized extra observable; not a proposed practical experiment"
+    }
+  ],
+  "benchmarks": [
+    {
+      "id": "EWBG_toy_A",
+      "family": "EWBG_toy",
+      "eta10": 6.11,
+      "eEDM_abs_units_1e30": 1,
+      "outcomes": [
+        1,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "EWBG_toy_B",
+      "family": "EWBG_toy",
+      "eta10": 6.13,
+      "eEDM_abs_units_1e30": 3,
+      "outcomes": [
+        1,
+        1,
+        1,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "LEP_toy_A",
+      "family": "LEP_toy",
+      "eta10": 6.12,
+      "eEDM_abs_units_1e30": 0,
+      "outcomes": [
+        0,
+        1,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "LEP_toy_B",
+      "family": "LEP_toy",
+      "eta10": 6.14,
+      "eEDM_abs_units_1e30": 0.8,
+      "outcomes": [
+        1,
+        1,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "MES_toy_A",
+      "family": "MES_toy",
+      "eta10": 6.1,
+      "eEDM_abs_units_1e30": 0.1,
+      "outcomes": [
+        0,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    {
+      "id": "AFF_toy_A",
+      "family": "AFF_toy",
+      "eta10": 6.12,
+      "eEDM_abs_units_1e30": 0,
+      "outcomes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "RIVAL_MIMIC",
+      "family": "RIVAL_toy",
+      "eta10": 6.11,
+      "eEDM_abs_units_1e30": 1,
+      "outcomes": [
+        1,
+        0,
+        1,
+        0,
+        1
+      ]
+    },
+    {
+      "id": "EDM_EXCLUDED_DEMO",
+      "family": "EXCLUDED_toy",
+      "eta10": 6.12,
+      "eEDM_abs_units_1e30": 7,
+      "outcomes": [
+        1,
+        1,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  "closed_panel": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "adversarial_panel": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "screening_excluded": [
+    7
+  ],
+  "screening_note": "Toy screening at η10∈[6.08,6.16] and |eEDM|<4.1 in units 10^-30 is a classification conditional on observational 1sigma vs 90pct CL cuts, NOT logical exclusion of physical theories.",
+  "scope_note": "RIVAL_MIMIC has identical 4-probe signature to EWBG_toy_A but a different mechanism label. The fifth 'ideal probe' is hypothetical and not available as an actual experiment."
+}
