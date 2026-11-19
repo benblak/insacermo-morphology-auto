@@ -53,7 +53,7 @@ jobs:
           lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
       - name: Compile exact NuFIT data grid and joint Bari NuFIT lemmas
         run: |
-          lean -o "$INSACERMO_NUFIT_OUT/NuFIT61GridCertification.olean" "$INSACERMO_NUFIT_OUT/NuFIT61GridCertification.lean"
+          (cd "$INSACERMO_NUFIT_OUT" && lean -o NuFIT61GridCertification.olean NuFIT61GridCertification.lean)
           lean labs/leptogenesis_real_discrimination_20261119/BariPublishedIntervalBridge.lean
           lean labs/leptogenesis_real_discrimination_20261119/JointBariNuFITRobust.lean
       - name: No proof holes in new Lean
