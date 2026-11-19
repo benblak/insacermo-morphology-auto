@@ -33,7 +33,7 @@ theorem independent_scales_arithmetically_feasible :
 theorem cp_phase_best_fit_in_predicted_interval :
     (1980 ≤ 2142 ∧ 2142 ≤ 2250) := by decide
 
-/-- A purely hypothetical future 240 +/- 5 degree tight result
+/-- A purely hypothetical future 240 plus or minus 5 degree tight result
     would be disjoint from this particular 198-225 degree prediction.
     No such future measurement is being claimed. -/
 theorem hypothetical_phase_disjoint (p : Nat)
