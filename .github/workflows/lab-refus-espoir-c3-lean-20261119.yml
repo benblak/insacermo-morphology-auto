@@ -1,0 +1,64 @@
+name: INSACERMO LAB Refus Espoir C3 and Lean 20261119
+on:
+  push:
+    branches: [lab/refus-espoir-c3-lean-20261119]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Historical C3 fingerprint and Python syntax
+        run: |
+          python3 -m py_compile insacermo_one_engine.py labs/refus_espoir_20261119/audit_c3_refus_espoir.py
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          p=Path('insacermo_one_engine.py').read_bytes()
+          blob=hashlib.sha1(b'blob '+str(len(p)).encode()+b'\0'+p).hexdigest()
+          assert blob=='bd5310b3692bcbad4e874005b7dd8eda90616f74',blob
+          print('ORIGINAL_C3_UNCHANGED:',blob)
+          PY
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile historical C3 kernel and independent theorem
+        env:
+          LEAN_PATH: ".:lean"
+        run: |
+          set -euo pipefail
+          lean --version
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+          lean labs/refus_espoir_20261119/RefusEspoirBridge.lean
+      - name: No placeholder admits or new axioms
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          p=Path('labs/refus_espoir_20261119/RefusEspoirBridge.lean')
+          s=p.read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.findall(r'\b(sorry|admit|axiom)\b',s)
+          print('LEAN_NO_PLACEHOLDERS')
+          PY
+      - name: Original C3 vs independent static oracle and Lean certificates
+        env:
+          LEAN_PATH: ".:lean"
+          REFUS_ESPOIR_OUT: /tmp/insacermo-refus-espoir
+        run: |
+          python3 labs/refus_espoir_20261119/audit_c3_refus_espoir.py
+      - name: Attach independent lab output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_REFUS_ESPOIR_C3_LEAN_LAB
+          path: /tmp/insacermo-refus-espoir/
+          if-no-files-found: ignore
+          retention-days: 30
