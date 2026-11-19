@@ -53,7 +53,8 @@ def dcp_lines(raw):
     return rows,tags
 
 def norm_deg(a):
-    return a % D(360)
+    # Decimal remainder keeps the dividend's sign, unlike Python integer %.
+    return ((a % D(360)) + D(360)) % D(360)
 def region(a, parts):
     return any(D(lo)<=a<=D(hi) for lo,hi in parts)
 def calc(rows):
