@@ -113,10 +113,10 @@ theorem second_sensor_lifts_refusal :
   rcases w with ⟨n, hn⟩
   have hcases : n = 0 ∨ n = 1 ∨ n = 2 ∨ n = 3 := by omega
   rcases hcases with h0 | h1 | h2 | h3
-  · subst n; decide
-  · subst n; decide
-  · subst n; decide
-  · subst n; decide
+  · subst n; decide +revert
+  · subst n; decide +revert
+  · subst n; decide +revert
+  · subst n; decide +revert
 
 def impossibleGood (w : Fin 4) (a : Fin 3) : Prop :=
   w.val ≠ 1 ∧ w.val % 3 = a.val
