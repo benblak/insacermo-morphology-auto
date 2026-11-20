@@ -129,7 +129,7 @@ def fixedOK (f : Option Bool) (x : Nat) : Prop :=
 
 def slack (c : Int) (K : Nat) (f : Option Bool) : Int :=
   match f with
-  | none => max 0 (c - (K : Int))
+  | none => if (K : Int) ≤ c then c - (K : Int) else 0
   | some false => 0
   | some true => c - (K : Int)
 
@@ -151,13 +151,9 @@ theorem point_upper (c : Int) (K x : Nat) (hx : x ≤ 1)
     have h01 : x = 0 ∨ x = 1 := by omega
     rcases h01 with hz | ho
     · subst x
-      have hmax : (0 : Int) ≤ max 0 (c - (K : Int)) := le_max_left _ _
-      simp only [Nat.cast_zero, mul_zero, add_zero, slack]
-      exact hmax
+      by_cases hc : (K : Int) ≤ c <;> simp [slack, hc] <;> omega
     · subst x
-      have hmax : c - (K : Int) ≤ max 0 (c - (K : Int)) := le_max_right _ _
-      simp only [Nat.cast_one, mul_one, slack]
-      omega
+      by_cases hc : (K : Int) ≤ c <;> simp [slack, hc] <;> omega
   | some b =>
     cases b with
     | false =>
