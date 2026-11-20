@@ -1,0 +1,22 @@
+name: INSACERMO Lean arithmetic API probe
+on:
+  push:
+    branches: ['lab/erdos302-737-one-proof-20261120']
+    paths:
+      - 'labs/erdos302_736_full_lean/LeanCheckAPI.lean'
+      - '.github/workflows/lab-erdos736-lean-api.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Lean declarations
+        run: lean labs/erdos302_736_full_lean/LeanCheckAPI.lean
