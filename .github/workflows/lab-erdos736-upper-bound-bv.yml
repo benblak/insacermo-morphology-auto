@@ -1,0 +1,50 @@
+name: INSACERMO attempt full Lean 736 upper bound SAT certificate
+on:
+  push:
+    branches: ['lab/erdos302-737-one-proof-20261120']
+    paths:
+      - 'labs/erdos302_736_full_lean/**'
+      - '.github/workflows/lab-erdos736-upper-bound-bv.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  exact_proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ERDOS736_OUT: /tmp/erdos736-full-lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate explicit finite 736-bit forbidden-triple theorem
+        run: |
+          python3 labs/erdos302_736_full_lean/compile_bitvec_proof.py
+          wc -c "$ERDOS736_OUT/Erdos736SAT.lean"
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Check proposed global 736 SAT theorem with Lean's proof-producing bv_decide
+        run: |
+          lean --version
+          (cd "$ERDOS736_OUT" && lean Erdos736SAT.lean)
+      - name: Refuse Lean proof holes
+        run: |
+          python3 - <<'PY'
+          import re,os
+          from pathlib import Path
+          s=(Path(os.environ['ERDOS736_OUT'])/'Erdos736SAT.lean').read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print("NO_PROOF_HOLES")
+          PY
+      - name: Archive attempt and logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ERDOS736_FULL_LEAN_SAT_ATTEMPT
+          path: /tmp/erdos736-full-lean/
+          retention-days: 30
+          if-no-files-found: ignore
