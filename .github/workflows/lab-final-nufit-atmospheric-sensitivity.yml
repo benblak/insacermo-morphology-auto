@@ -1,0 +1,75 @@
+name: INSACERMO FINAL NuFIT61 NO atmospheric sensitivity C3 Lean
+on:
+  push:
+    branches: ['lab/antimatter-two-published-models-20261119']
+    paths:
+      - 'labs/leptogenesis_real_discrimination_20261119/final_crossfit_no.py'
+      - '.github/workflows/lab-final-nufit-atmospheric-sensitivity.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    env:
+      LEAN_PATH: '.:lean:/tmp/insacermo-final-crossfit-no'
+      PYTHONPATH: '.'
+      FINAL_NUFIT_OUT: '/tmp/insacermo-final-crossfit-no'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check original C3 is frozen
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          b=Path('insacermo_one_engine.py').read_bytes()
+          assert hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()=='bd5310b3692bcbad4e874005b7dd8eda90616f74'
+          print('FROZEN_C3_UNCHANGED')
+          PY
+      - name: Download two original NuFIT6.1 NO sources, track TLS caveat
+        run: |
+          set -euo pipefail
+          mkdir -p "$FINAL_NUFIT_OUT"
+          for file in v61.release-TByes-NO.txt.xz v61.release-TBno-NO.txt.xz; do
+            curl --fail --location --silent --show-error --insecure --max-time 100 \
+              "https://www.nu-fit.org/sites/default/files/$file" \
+              -o "$FINAL_NUFIT_OUT/$file"
+            file "$FINAL_NUFIT_OUT/$file"
+            sha256sum "$FINAL_NUFIT_OUT/$file"
+          done
+          echo 'NOTE: NuFIT HTTPS certificate was NOT authenticated; pinned-with source plus raw-hash log only.'
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile frozen C3 Lean modules
+        run: |
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Audit two real input grids and replay original C3
+        env:
+          FINAL_RUN_C3: '1'
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/final_crossfit_no.py
+      - name: Compile generated Lean data-theorems
+        run: |
+          (cd "$FINAL_NUFIT_OUT" && lean FinalNuFITTwoAtmosphere.lean)
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,re
+          s=(Path(os.environ['FINAL_NUFIT_OUT'])/'FinalNuFITTwoAtmosphere.lean').read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print('LEAN_PROOFS_HOLE_FREE')
+          PY
+      - name: Archive final experimental comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_FINAL_NUFIT61_ATMOSPHERIC_COMPARISON
+          path: /tmp/insacermo-final-crossfit-no/
+          if-no-files-found: ignore
+          retention-days: 60
