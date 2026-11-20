@@ -73,14 +73,14 @@ theorem eval_combined (n : Nat) (rs : List Row) (x : Nat → Int) :
       (rs.map (fun r => (r.weight : Int) * eval n r.coeff x)).sum := by
   induction rs with
   | nil =>
-    simp only [combined, List.map_nil, List.sum_nil]
-    unfold eval
-    have z : ∀ l : List Nat, sumOn l (fun _ => (0 : Int)) = 0 := by
-      intro l
+    have z (l : List Nat) : sumOn l (fun _ => (0 : Int)) = 0 := by
       induction l with
-      | nil => simp [sumOn]
-      | cons a t ih => simp [sumOn, ih]
-    exact z (List.range n)
+      | nil => rfl
+      | cons a t ih =>
+        change (0 : Int) + sumOn t (fun _ => (0 : Int)) = 0
+        omega
+    change sumOn (List.range n) (fun i => (0 : Int) * x i) = 0
+    simpa using (z (List.range n))
   | cons r rs ih =>
     have hfun : combined (r :: rs) =
         (fun i => (r.weight : Int) * r.coeff i + combined rs i) := by
@@ -106,7 +106,9 @@ theorem weighted_sound (n : Nat) (rs : List Row) (x : Nat → Int)
       induction r.weight with
       | zero => simp
       | succ k ihw =>
-        simp only [Nat.cast_succ, Int.add_mul]
+        have cast_eq : ((Nat.succ k : Nat) : Int) = ((k : Int) + 1) := by omega
+        rw [cast_eq, Int.add_mul, Int.add_mul]
+        simp only [Int.one_mul]
         omega
     have rest := ih ht
     simp only [rhs, List.map_cons, List.sum_cons] at *
