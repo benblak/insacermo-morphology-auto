@@ -114,4 +114,94 @@ theorem weighted_sound (n : Nat) (rs : List Row) (x : Nat → Int)
     simp only [rhs, List.map_cons, List.sum_cons] at *
     omega
 
+
+/-!
+The integer slack term is exact, including *negative* slack on branch
+vertices fixed to 1. This is why the arithmetic checker can certify
+a global lower bound using small 57-leaf Farkas dual certificates.
+-/
+
+def fixedOK (f : Option Bool) (x : Nat) : Prop :=
+  match f with
+  | none => True
+  | some false => x = 0
+  | some true => x = 1
+
+def slack (c : Int) (K : Nat) (f : Option Bool) : Int :=
+  match f with
+  | none => max 0 (c - (K : Int))
+  | some false => 0
+  | some true => c - (K : Int)
+
+theorem integer_weight_le (k : Nat) (a b : Int) (hab : a ≤ b) :
+    (k : Int) * a ≤ (k : Int) * b := by
+  induction k with
+  | zero => simp
+  | succ k ih =>
+    have cast_eq : ((Nat.succ k : Nat) : Int) = ((k : Int) + 1) := by omega
+    rw [cast_eq, Int.add_mul, Int.add_mul]
+    simp only [Int.one_mul]
+    omega
+
+theorem point_upper (c : Int) (K x : Nat) (hx : x ≤ 1)
+    (f : Option Bool) (hf : fixedOK f x) :
+    c * (x : Int) ≤ (K : Int) * (x : Int) + slack c K f := by
+  cases f with
+  | none =>
+    have h01 : x = 0 ∨ x = 1 := by omega
+    rcases h01 with hz | ho
+    · subst x
+      have hmax : (0 : Int) ≤ max 0 (c - (K : Int)) := le_max_left _ _
+      simp only [Nat.cast_zero, mul_zero, add_zero, slack]
+      exact hmax
+    · subst x
+      have hmax : c - (K : Int) ≤ max 0 (c - (K : Int)) := le_max_right _ _
+      simp only [Nat.cast_one, mul_one, slack]
+      omega
+  | some b =>
+    cases b with
+    | false =>
+      have hz : x = 0 := hf
+      subst x
+      simp [slack]
+    | true =>
+      have ho : x = 1 := hf
+      subst x
+      simp [slack] <;> omega
+
+def xInt (x : Nat → Nat) (i : Nat) : Int := (x i : Int)
+
+theorem eval_upper (n : Nat) (c : Nat → Int) (x : Nat → Nat)
+    (K : Nat) (fixes : Nat → Option Bool)
+    (hx : ∀ i < n, x i ≤ 1)
+    (hf : ∀ i < n, fixedOK (fixes i) (x i)) :
+    eval n c (xInt x) ≤
+      (K : Int) * sumOn (List.range n) (xInt x) +
+        sumOn (List.range n) (fun i => slack (c i) K (fixes i)) := by
+  have h := sumOn_mono (List.range n)
+    (fun i => c i * xInt x i)
+    (fun i => (K : Int) * xInt x i + slack (c i) K (fixes i))
+    (by
+      intro i hi
+      have hv : i < n := List.mem_range.mp hi
+      exact point_upper (c i) K (x i) (hx i hv) (fixes i) (hf i hv))
+  rw [sumOn_add, sumOn_mul] at h
+  exact h
+
+theorem leaf_sound (n K B : Nat)
+    (rs : List Row) (x : Nat → Nat) (fixes : Nat → Option Bool)
+    (hx : ∀ i < n, x i ≤ 1)
+    (hf : ∀ i < n, fixedOK (fixes i) (x i))
+    (hrows : ∀ r ∈ rs, r.minimum ≤ eval n r.coeff (xInt x))
+    (hbudget : sumOn (List.range n) (xInt x) ≤ (B : Int))
+    (hcertificate :
+      (K : Int) * (B : Int) +
+        sumOn (List.range n) (fun i => slack (combined rs i) K (fixes i))
+          < rhs rs) : False := by
+  have hlower := weighted_sound n rs (xInt x) hrows
+  have hupper := eval_upper n (combined rs) x K fixes hx hf
+  have hmul := integer_weight_le K
+    (sumOn (List.range n) (xInt x)) (B : Int) hbudget
+  omega
+
 end INSACERMO.Proof736
