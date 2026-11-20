@@ -1,0 +1,50 @@
+name: INSACERMO full Erdős736 bound via nineteen components
+on:
+  push:
+    branches: ['lab/erdos302-737-one-proof-20261120']
+    paths:
+      - 'labs/erdos302_736_full_lean/generate_component_proof.py'
+      - '.github/workflows/lab-erdos736-components-full.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  components:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ERDOS_COMPONENT_OUT: /tmp/erdos736-components
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate 19-component complete formal statement
+        run: |
+          python3 labs/erdos302_736_full_lean/generate_component_proof.py
+          wc -c "$ERDOS_COMPONENT_OUT/Erdos736Components.lean"
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile all Lean component bounds and global 736 theorem
+        run: |
+          lean --version
+          (cd "$ERDOS_COMPONENT_OUT" && lean Erdos736Components.lean)
+      - name: Refuse Lean proof holes
+        run: |
+          python3 - <<'PY'
+          import re,os
+          from pathlib import Path
+          s=(Path(os.environ['ERDOS_COMPONENT_OUT'])/'Erdos736Components.lean').read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print("NO_PROOF_HOLES")
+          PY
+      - name: Archive generated checkable source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ERDOS736_FULL_COMPONENT_PROOF
+          path: /tmp/erdos736-components/
+          retention-days: 60
+          if-no-files-found: ignore
