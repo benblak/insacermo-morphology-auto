@@ -14,6 +14,7 @@ triples=[(a,b,c) for c in range(2,N+1) for b in range(1,c)
 assert len(triples)==742
 active=sorted({v for t in triples for v in t})
 assert len(active)==416
+set_option_note='Global 736-bit bound; solver time explicitly raised to 600 seconds'
 header='''import Lean
 
 /-!
@@ -27,6 +28,7 @@ No C3 engine modifications. No assumption on OEIS f(731).
 -/
 set_option maxRecDepth 131072
 set_option maxHeartbeats 2000000000
+set_option sat.timeout 600
 namespace INSACERMO.Erdos736Full
 
 '''
