@@ -25,7 +25,7 @@ theorem sumOn_mul (l : List Nat) (k : Int) (f : Nat → Int) :
   | nil => simp [sumOn]
   | cons a t ih =>
     simp only [sumOn, List.map_cons, List.sum_cons] at ih ⊢
-    rw [ih, mul_add]
+    rw [ih, Int.mul_add]
 
 theorem sumOn_mono (l : List Nat) (f g : Nat → Int)
     (h : ∀ i ∈ l, f i ≤ g i) :
@@ -37,7 +37,9 @@ theorem sumOn_mono (l : List Nat) (f g : Nat → Int)
     have ht : ∀ i ∈ t, f i ≤ g i := by
       intro i hi
       exact h i (by simp [hi])
-    simp only [sumOn, List.map_cons, List.sum_cons] at *
+    have hs := ih ht
+    simp only [sumOn] at hs
+    simp only [sumOn, List.map_cons, List.sum_cons]
     omega
 
 def eval (n : Nat) (c x : Nat → Int) : Int :=
@@ -46,13 +48,13 @@ def eval (n : Nat) (c x : Nat → Int) : Int :=
 theorem eval_add (n : Nat) (c d x : Nat → Int) :
     eval n (fun i => c i + d i) x = eval n c x + eval n d x := by
   unfold eval
-  simp only [add_mul]
+  simp only [Int.add_mul]
   exact sumOn_add (List.range n) (fun i => c i * x i) (fun i => d i * x i)
 
 theorem eval_mul (n : Nat) (k : Int) (c x : Nat → Int) :
     eval n (fun i => k * c i) x = k * eval n c x := by
   unfold eval
-  simp only [mul_assoc]
+  simp only [Int.mul_assoc]
   exact sumOn_mul (List.range n) k (fun i => c i * x i)
 
 structure Row where
@@ -70,7 +72,15 @@ theorem eval_combined (n : Nat) (rs : List Row) (x : Nat → Int) :
     eval n (combined rs) x =
       (rs.map (fun r => (r.weight : Int) * eval n r.coeff x)).sum := by
   induction rs with
-  | nil => simp [eval, combined, sumOn]
+  | nil =>
+    simp only [combined, List.map_nil, List.sum_nil]
+    unfold eval
+    have z : ∀ l : List Nat, sumOn l (fun _ => (0 : Int)) = 0 := by
+      intro l
+      induction l with
+      | nil => simp [sumOn]
+      | cons a t ih => simp [sumOn, ih]
+    exact z (List.range n)
   | cons r rs ih =>
     have hfun : combined (r :: rs) =
         (fun i => (r.weight : Int) * r.coeff i + combined rs i) := by
@@ -91,7 +101,13 @@ theorem weighted_sound (n : Nat) (rs : List Row) (x : Nat → Int)
     have ht : ∀ s ∈ rs, s.minimum ≤ eval n s.coeff x := by
       intro s hs
       exact h s (by simp [hs])
-    have hw := mul_le_mul_of_nonneg_left hr (Int.ofNat_nonneg r.weight)
+    have hw : (r.weight : Int) * r.minimum ≤
+        (r.weight : Int) * eval n r.coeff x := by
+      induction r.weight with
+      | zero => simp
+      | succ k ihw =>
+        simp only [Nat.cast_succ, Int.add_mul]
+        omega
     have rest := ih ht
     simp only [rhs, List.map_cons, List.sum_cons] at *
     omega
