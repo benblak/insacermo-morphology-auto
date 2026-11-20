@@ -30,7 +30,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$FINAL_NUFIT_OUT"
-          for file in v61.release-TByes-NO.txt.xz v61.release-TBno-NO.txt.xz; do
+          for file in v61.release-TByes-NO.txt.xz v61.release-TBoff-NO.txt.xz; do
             curl --fail --location --silent --show-error --insecure --max-time 100 \
               "https://www.nu-fit.org/sites/default/files/$file" \
               -o "$FINAL_NUFIT_OUT/$file"
