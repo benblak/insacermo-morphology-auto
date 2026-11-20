@@ -1,0 +1,83 @@
+name: INSACERMO LAB exact joint CP sensitivity C3 Lean
+on:
+  push:
+    branches: ['lab/antimatter-two-published-models-20261119']
+    paths:
+      - 'labs/leptogenesis_real_discrimination_20261119/JointSensitivityMargins.lean'
+      - 'labs/leptogenesis_real_discrimination_20261119/audit_joint_sensitivity_c3.py'
+      - '.github/workflows/lab-joint-sensitivity-c3-lean.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    env:
+      LEAN_PATH: '.:lean:/tmp/insacermo-joint-margins'
+      PYTHONPATH: '.'
+      INSACERMO_NUFIT_OUT: /tmp/insacermo-joint-margins
+      SENSITIVITY_C3_OUT: /tmp/insacermo-joint-margins
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original C3 unchanged
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          x=Path('insacermo_one_engine.py').read_bytes()
+          h=hashlib.sha1(b'blob '+str(len(x)).encode()+b'\0'+x).hexdigest()
+          assert h=='bd5310b3692bcbad4e874005b7dd8eda90616f74',h
+          print('ORIGINAL_C3_FROZEN')
+          PY
+      - name: Retrieve pinned NuFIT source with explicit TLS caveat
+        run: |
+          mkdir -p "$INSACERMO_NUFIT_OUT"
+          curl --fail --location --show-error --silent --insecure --max-time 120 \
+             https://www.nu-fit.org/sites/default/files/v61.release-TByes-NO.txt.xz \
+             --output "$INSACERMO_NUFIT_OUT/v61.release-TByes-NO.txt.xz"
+          echo "CAUTION: certificate NOT verified, SHA is pinned but not externally authenticated"
+          printf '%s  %s\n' 'c74bd6df84297a8429cd3b9e1239751cd0762756f1ec0c2a31248d78570b26e4' "$INSACERMO_NUFIT_OUT/v61.release-TByes-NO.txt.xz" | sha256sum -c -
+      - name: Audit source grid and generate Lean file
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/audit_nufit61_real_profile.py
+          python3 labs/leptogenesis_real_discrimination_20261119/generate_nufit61_grid_lean.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile original portable C3
+        run: |
+          set -euo pipefail
+          lean -o C3/PortableFiniteVerifierV1.olean C3/PortableFiniteVerifierV1.lean
+          lean -o C3/PortableVerifierSoundnessV1.olean C3/PortableVerifierSoundnessV1.lean
+          lean -o C3/PortableExactSearchV1.olean C3/PortableExactSearchV1.lean
+      - name: Compile source-derived grid and exact shift margin theorems
+        run: |
+          set -euo pipefail
+          (cd "$INSACERMO_NUFIT_OUT" && lean -o NuFIT61GridCertification.olean NuFIT61GridCertification.lean)
+          lean labs/leptogenesis_real_discrimination_20261119/JointSensitivityMargins.lean
+      - name: Refuse new Lean proof holes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import os,re
+          for f in (Path('labs/leptogenesis_real_discrimination_20261119/JointSensitivityMargins.lean'),
+                    Path(os.environ['INSACERMO_NUFIT_OUT'])/'NuFIT61GridCertification.lean'):
+              s=f.read_text()
+              s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+              s=re.sub(r'--[^\n]*','',s)
+              assert not re.search(r'\b(sorry|admit|axiom)\b',s),f
+          print('NO_PROOF_HOLES')
+          PY
+      - name: Replay original C3 decision certificates through Lean
+        run: |
+          python3 labs/leptogenesis_real_discrimination_20261119/audit_joint_sensitivity_c3.py
+      - name: Archive reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_JOINT_SENSITIVITY_MARGIN_C3_LEAN
+          path: /tmp/insacermo-joint-margins/
+          if-no-files-found: ignore
+          retention-days: 30
