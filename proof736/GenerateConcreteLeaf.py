@@ -47,7 +47,7 @@ def row_expr(vs,m,w):
   return f"{{ coeff := fun i => if {condition} then 1 else 0, minimum := {m}, weight := {w} }}"
 out=pathlib.Path(os.environ.get("ERDOS_DATA_OUT","/tmp/proof736/ConcreteLeaf.lean"))
 out.parent.mkdir(parents=True,exist_ok=True)
-s=["import CertificateKernel","open INSACERMO.Proof736","namespace INSACERMO.ConcreteLeaf",
+s=["import CertificateKernel","set_option maxRecDepth 32768","set_option maxHeartbeats 1200000000","open INSACERMO.Proof736","namespace INSACERMO.ConcreteLeaf",
    "def cert0 : List Row := [", ",\n".join(row_expr(*r) for r in rows),"]"]
 s.append("def fixed0 (i : Nat) : Option Bool :=")
 for i,v in fixes.items():
