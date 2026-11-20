@@ -1,0 +1,40 @@
+name: INSACERMO Lean concrete Farkas data check 736
+on:
+  push:
+    branches: ['lab/erdos302-737-one-proof-20261120']
+    paths:
+      - 'proof736/GenerateConcreteLeaf.py'
+      - '.github/workflows/lab-erdos736-concrete-certificate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recompute proposed integer weights (untrusted)
+        run: |
+          python3 -m pip install --disable-pip-version-check scipy numpy
+          python3 proof736/GenerateConcreteLeaf.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile general Farkas soundness lemma
+        run: |
+          LEAN_PATH=/tmp/proof736 lean -o /tmp/proof736/CertificateKernel.olean proof736/CertificateKernel.lean
+      - name: Check concrete branch arithmetic in Lean kernel
+        run: |
+          LEAN_PATH=/tmp/proof736 lean /tmp/proof736/ConcreteLeaf.lean
+      - name: Archive numerical data and kernel source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_736_ONE_CONCRETE_FARKAS_LEAF
+          path: |
+            /tmp/proof736/ConcreteLeaf.lean
+            proof736/CertificateKernel.lean
+          if-no-files-found: ignore
