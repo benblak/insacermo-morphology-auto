@@ -3,7 +3,7 @@
 
 NuFIT 6.1 November 2025 NORMAL ORDERING:
 v61.release-TByes-NO.txt.xz WITH tabulated SK/IC atmospheric chi2
-v61.release-TBno-NO.txt.xz WITHOUT those atmospheric chi2
+v61.release-TBoff-NO.txt.xz WITHOUT those atmospheric chi2
 Source of file conventions: NuFIT 6.1 official release notes.
 No fit combination, invented physics, Gaussian approximation or new engine.
 Raw HTTPS unverified on runner due NuFIT certificate: explicit provenance caveat.
@@ -21,7 +21,7 @@ OUT.mkdir(exist_ok=True,parents=True)
 URL_PREFIX="https://www.nu-fit.org/sites/default/files/"
 FILES={
  "with_atmospheric":"v61.release-TByes-NO.txt.xz",
- "without_atmospheric":"v61.release-TBno-NO.txt.xz",
+ "without_atmospheric":"v61.release-TBoff-NO.txt.xz",
 }
 PINNED_WITH_SHA256="c74bd6df84297a8429cd3b9e1239751cd0762756f1ec0c2a31248d78570b26e4"
 FROZEN_C3="bd5310b3692bcbad4e874005b7dd8eda90616f74"
