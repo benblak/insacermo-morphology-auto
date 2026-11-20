@@ -1,0 +1,38 @@
+name: INSACERMO FINAL one theorem Erdős 302 N737
+on:
+  push:
+    branches: ['lab/erdos302-737-one-proof-20261120']
+    paths:
+      - 'labs/erdos302_737_20261120/**'
+      - '.github/workflows/lab-erdos302-737-one-theorem.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact independent arithmetic check
+        run: python3 labs/erdos302_737_20261120/audit_737.py
+      - name: Install Lean 4.33.1
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Compile two exact Lean 737 lemmas
+        run: |
+          lean --version
+          lean labs/erdos302_737_20261120/Erdos302_737.lean
+      - name: Refuse proof holes
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          p=Path('labs/erdos302_737_20261120/Erdos302_737.lean')
+          s=p.read_text()
+          s=re.sub(r'/\-.*?\-/','',s,flags=re.S)
+          s=re.sub(r'--[^\n]*','',s)
+          assert not re.search(r'\b(sorry|admit|axiom)\b',s)
+          print('NO_LEAN_PROOF_HOLES')
+          PY
