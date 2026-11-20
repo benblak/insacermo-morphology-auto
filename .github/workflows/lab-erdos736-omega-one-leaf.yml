@@ -1,0 +1,34 @@
+name: INSACERMO Lean omega one Farkas branch arithmetic
+on:
+  push:
+    branches: ['lab/erdos302-737-one-proof-20261120']
+    paths:
+      - 'labs/erdos302_736_full_lean/omega_one_leaf_from_LP.py'
+      - '.github/workflows/lab-erdos736-omega-one-leaf.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  leaf:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Python numeric proof *discovery* only
+        run: |
+          python3 -m pip install --disable-pip-version-check scipy numpy
+          python3 labs/erdos302_736_full_lean/omega_one_leaf_from_LP.py
+      - name: Install Lean
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -o /tmp/elan-init.sh
+          sh /tmp/elan-init.sh -y --default-toolchain leanprover/lean4:v4.33.1
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - name: Kernel-check exact integer weighted inequality of one leaf
+        run: lean /tmp/erdos736-omega-one-leaf.lean
+      - name: Archive source
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: INSACERMO_ERDOS736_OMEGA_ONE_LEAF
+          path: /tmp/erdos736-omega-one-leaf.lean
+          if-no-files-found: ignore
