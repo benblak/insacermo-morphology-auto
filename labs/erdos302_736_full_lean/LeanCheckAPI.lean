@@ -1,0 +1,12 @@
+import Lean
+#check Finset.sum
+#check Finset.sum_comm
+#check Finset.sum_add_distrib
+#check Finset.mul_sum
+#check Finset.sum_le_sum
+#check List.sum
+#check List.sum_cons
+#check List.sum_map_add
+#check Nat.mul_le_mul_left
+#check List.mem_cons
+#check List.mem_singleton
