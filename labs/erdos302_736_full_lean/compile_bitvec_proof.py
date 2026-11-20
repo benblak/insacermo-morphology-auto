@@ -28,7 +28,7 @@ No C3 engine modifications. No assumption on OEIS f(731).
 -/
 set_option maxRecDepth 131072
 set_option maxHeartbeats 2000000000
-set_option sat.timeout 600
+
 namespace INSACERMO.Erdos736Full
 
 '''
@@ -40,7 +40,7 @@ body+="def covered (x : BitVec 736) : Bool :=\n  " + "\n  && ".join(conds) + "\n
 body+="def excludedActive (x : BitVec 736) : BitVec 10 :=\n  "+ "\n  + ".join(["(0 : BitVec 10)"]+adds)+"\n\n"
 body+="theorem cannot_cover_with_only_126_exclusions (x : BitVec 736) :\n"
 body+="    covered x = true → ((excludedActive x) < (127 : BitVec 10)) = false := by\n"
-body+="  intro h\n  unfold covered at h\n  unfold excludedActive\n  bv_decide\n\nend INSACERMO.Erdos736Full\n"
+body+="  intro h\n  unfold covered at h\n  unfold excludedActive\n  bv_decide (config := { timeout := 600 })\n\nend INSACERMO.Erdos736Full\n"
 path=OUT/"Erdos736SAT.lean"
 path.write_text(body)
 print('LEAN_SOURCE',path,'bytes',path.stat().st_size,'triples',len(triples),'active',len(active))
